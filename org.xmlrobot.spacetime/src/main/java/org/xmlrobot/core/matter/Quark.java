@@ -7,7 +7,7 @@ import org.xmlrobot.core.antimatter.Hyperlepton;
 import org.xmlrobot.core.antimatter.Hyperquark;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.positron.Antiproton;
 import org.xmlrobot.spacetime.Columbia;
 import org.xmlrobot.spacetime.Fornax;
@@ -76,7 +76,7 @@ public class Quark
 	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Takion)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		super.mass(sender, event);
 		switch (event.getCommand()) {
 		case ORDER:
@@ -96,7 +96,7 @@ public class Quark
 				}
 			}
 			break;
-		case PUSH:
+		case SEND:
 			if(event.getSource() instanceof Hyperlepton) {
 				// declare stem
 				Mass<Fornax,Columbia> future;
@@ -155,18 +155,10 @@ public class Quark
 	 * @see org.xmlrobot.positron.Proton#putValue(java.lang.Object, java.lang.Object)
 	 */
 	public Fornax put(Columbia key, Fornax value) {
-		// declare child
-		Mass<Columbia,Fornax> child;
-		// declare old value
-		Fornax oldValue;
-		// if update unsuccessful
-		if ((oldValue = (child = getChild()) != null ? 
-				child.putValue(key, value) : null) == null) {
-			// create child
-			Lepton pair = new Lepton(Hyperlepton.class, key, value, this);
-			// push child
-			pair.push(Command.PUSH);
-		}
-		return oldValue;
+		// create child
+		Lepton pair = new Lepton(Hyperlepton.class, key, value, this);
+		// push child
+		pair.push(Command.SEND);
+		return null;
 	}
 }

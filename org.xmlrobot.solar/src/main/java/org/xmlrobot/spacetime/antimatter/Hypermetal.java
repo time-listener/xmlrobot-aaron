@@ -25,6 +25,14 @@ public class Hypermetal
 	private static final long serialVersionUID = -2195434403508136782L;
 	
 	/* (non-Javadoc)
+	 * @see org.xmlrobot.hyperspace.Abstraction#getName()
+	 */
+	@Override
+	public String getName() {
+
+		return getKey().getName();
+	}
+	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Space#getKey()
 	 */
 	@Override
@@ -111,14 +119,6 @@ public class Hypermetal
 		super(Hypermetal.class, antitype, key, value, parent);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Antineutron#name()
-	 */
-	@Override
-	public String getName() {
-
-		return getKey().getName();
-	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.positron.Positron#compare(org.xmlrobot.genesis.Mass, org.xmlrobot.genesis.Mass)
 	 */

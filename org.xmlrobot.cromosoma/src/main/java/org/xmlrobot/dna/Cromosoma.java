@@ -8,15 +8,16 @@ import org.osgi.framework.ServiceReference;
 import org.xmlrobot.dna.Genomap;
 import org.xmlrobot.dna.Haploid;
 import org.xmlrobot.dna.antimatter.Hyperphenotype;
-import org.xmlrobot.dna.event.Transduction;
+import org.xmlrobot.dna.event.Synapsis;
 import org.xmlrobot.dna.event.Translocation;
 import org.xmlrobot.dna.matter.Phenotype;
 import org.xmlrobot.genesis.MassListener;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.TimeListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Child;
 import org.xmlrobot.util.Command;
+import org.xmlrobot.util.Parity;
 
 /**
  * The cromosoma implementation class. It is a map of {@link Genomap}.
@@ -69,29 +70,29 @@ public class Cromosoma
 	 */
 	@Override
 	@XmlElement(type=Hyperphenotype.class)
-	public Mass<Genomap,Haploid> getReplicator() {
-		return super.getReplicator();
+	public Mass<Genomap,Haploid> getPlasma() {
+		return super.getPlasma();
 	}
 	
 	/**
 	 * {@link Cromosoma} default class constructor.
 	 */
 	public Cromosoma() {
-		super(Hyperphenotype.class, Phenotype.class, Cromosoma.class);
+		super(Hyperphenotype.class, Phenotype.class, Cromosoma.class, Parity.XY);
 	}
 	/**
 	 * {@link Cromosoma} class constructor.
 	 * @param antitype the inherited antitype
 	 */
 	public Cromosoma(Class<Diploid> antitype) {
-		super(Hyperphenotype.class, Phenotype.class, Cromosoma.class, antitype);
+		super(Cromosoma.class, antitype, Parity.XY);
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Takion)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		// call supermethod
 		super.mass(sender, event);
 		// commute order
@@ -113,7 +114,7 @@ public class Cromosoma
 				}
 			}
 			break;
-		case PUSH:
+		case SEND:
 			if(event.getSource() instanceof Allele) {
 				// get antimatter
 				Mass<Haploid,Genomap> key;
@@ -130,12 +131,12 @@ public class Cromosoma
 				}
 			}
 			break;
-		case LISTEN:
+		case PUSH:
 			if(event.getSource() instanceof Genomap) {
 				// cast source
 				Genomap key = (Genomap) event.getSource();
 				// send pulse to child's value
-				getValue().pulse(this, new Transduction(key));
+				getValue().pulse(this, new Synapsis(key));
 			}
 			else if(event.getSource() instanceof Allele) {
 				// cast source
@@ -188,7 +189,9 @@ public class Cromosoma
 				// cast source
 				Allele entity = (Allele) event.getSource();
 				// transfer message contents
-				get().putValue(entity.getKey(), entity.getValue());
+				put(entity.getValue(), entity.getKey());
+				// rip
+				entity.stop(getContext());
 			}
 			break;
 		default:
@@ -203,11 +206,11 @@ public class Cromosoma
 		// create child
 		BasePair pair = new BasePair(Allele.class, key, value, this);
 		// push child
-		pair.push(Command.PUSH);
+		pair.push(Command.SEND);
 		return null;
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.hyperspace.Abstraction#serviceChanged(org.osgi.framework.ServiceEvent)
+	 * @see org.xmlrobot.inheritance.Child#serviceChanged(org.osgi.framework.ServiceEvent)
 	 */
 	@Override
 	public void serviceChanged(ServiceEvent event) {
@@ -218,16 +221,32 @@ public class Cromosoma
 		// assign and check
 		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
 				child instanceof BasePair : false) {
+			// declare plasma
+			Mass<Genomap,Haploid> plasma;
 			// cast source
 			BasePair pair = (BasePair) child;
 			// commute command
-			if(event.getType() == ServiceEvent.REGISTERED) {
-				// replicate mass
-				getReplicator().putValue(pair.getKey(), pair.getValue());
+			if (event.getType() == ServiceEvent.REGISTERED) {
+				// assign and check it's contained
+				if((plasma = getPlasma()) != null ?
+						!plasma.isEmpty() ?
+								!plasma.containsValue(pair.getValue())
+								: true
+						: false) {
+					// replicate mass
+					plasma.putKey(pair.getValue(), pair.getKey());
+				}
 			}
-			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// release replication
-				getReplicator().removeByKey(pair.getKey());
+			else if (event.getType() == ServiceEvent.UNREGISTERING) {
+				// check if empty and chained
+				if((plasma = getPlasma()) != null ? 
+						!plasma.isEmpty() ? 
+								plasma.containsKey(pair.getKey()) 
+								: false
+						: false) {
+					// release child
+					plasma.removeByValue(pair.getValue());
+				}
 			}
 		}
 	}

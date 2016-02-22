@@ -11,7 +11,7 @@ import org.osgi.framework.ServiceReference;
 import org.xmlrobot.genesis.MassListener;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.TimeListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Child;
 import org.xmlrobot.spacetime.Jupiter;
 import org.xmlrobot.spacetime.Saturn;
@@ -20,6 +20,7 @@ import org.xmlrobot.spacetime.event.Attraction;
 import org.xmlrobot.spacetime.event.Collision;
 import org.xmlrobot.spacetime.matter.Photon;
 import org.xmlrobot.util.Command;
+import org.xmlrobot.util.Parity;
 
 /**
  * Sun implementation class.
@@ -37,7 +38,7 @@ public class Sun
 	private static final long serialVersionUID = 2938099720879190128L;
 
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#getKey()
+	 * @see org.xmlrobot.inheritance.Child#getKey()
 	 */
 	@Override
 	@XmlElement
@@ -45,14 +46,14 @@ public class Sun
 		return super.getKey();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#setKey(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Child#setKey(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Jupiter setKey(Jupiter key) {
 		return super.setKey(key);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#getValue()
+	 * @see org.xmlrobot.inheritance.Child#getValue()
 	 */
 	@Override
 	@XmlElement
@@ -60,40 +61,40 @@ public class Sun
 		return super.getValue();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#setValue(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Child#setValue(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Saturn setValue(Saturn value) {
 		return super.setValue(value);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#getReplicator()
+	 * @see org.xmlrobot.inheritance.Parent#getPlasma()
 	 */
 	@Override
 	@XmlElement(type=Hyperphoton.class)
-	public Mass<Jupiter,Saturn> getReplicator() {
-		return super.getReplicator();
+	public Mass<Jupiter,Saturn> getPlasma() {
+		return super.getPlasma();
 	}
 	
 	/**
 	 * {@link Sun} default class constructor.
 	 */
 	public Sun() {
-		super(Hyperphoton.class, Photon.class, Sun.class);
+		super(Hyperphoton.class, Photon.class, Sun.class, Parity.XY);
 	}
 	/**
 	 * {@link Sun} class constructor.
 	 * @param antitype the inherited antitype
 	 */
 	public Sun(Class<AlphaCentauri> antitype) {
-		super(Hyperphoton.class, Photon.class, Sun.class, antitype);
+		super(Sun.class, antitype, Parity.XY);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.gravity.Recurrence#mass(org.xmlrobot.genesis.Entity, org.xmlrobot.horizon.Darkmass)
+	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Tachyon)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		super.mass(sender, event);
 		// commute command
 		switch (event.getCommand()) {
@@ -114,7 +115,7 @@ public class Sun
 				}
 			}
 			break;
-		case PUSH:
+		case SEND:
 			if(event.getSource() instanceof Vega) {
 				// get antimatter
 				Mass<Saturn,Jupiter> key;
@@ -131,7 +132,7 @@ public class Sun
 				}
 			}
 			break;
-		case LISTEN:
+		case PUSH:
 			if(event.getSource() instanceof Jupiter) {
 				// cast source
 				Jupiter key = (Jupiter) event.getSource();
@@ -189,7 +190,7 @@ public class Sun
 				// cast source
 				Vega entity = (Vega) event.getSource();
 				// transfer message contents
-				get().putValue(entity.getKey(), entity.getValue());
+				put(entity.getValue(), entity.getKey());
 			}
 			break;
 		default:
@@ -197,26 +198,18 @@ public class Sun
 		}
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#put(org.xmlrobot.genesis.Mass, org.xmlrobot.genesis.Mass)
+	 * @see org.xmlrobot.inheritance.Child#put(org.xmlrobot.genesis.TimeListener, org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Saturn put(Jupiter key, Saturn value) {
-		// declare child
-		Mass<Jupiter,Saturn> child;
-		// declare old value
-		Saturn oldValue;
-		// if update unsuccessful
-		if ((oldValue = (child = getChild()) != null ? 
-				child.putValue(key,	value) : null) == null) {
-			// create child
-			Pegasi pair = new Pegasi(Vega.class, key, value, this);
-			// push child
-			pair.push(Command.PUSH);
-		}
-		return oldValue;
+		// create child
+		Pegasi pair = new Pegasi(Vega.class, key, value, this);
+		// push child
+		pair.push(Command.SEND);
+		return null;
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.hyperspace.Abstraction#serviceChanged(org.osgi.framework.ServiceEvent)
+	 * @see org.xmlrobot.inheritance.Child#serviceChanged(org.osgi.framework.ServiceEvent)
 	 */
 	@Override
 	public void serviceChanged(ServiceEvent event) {
@@ -227,16 +220,32 @@ public class Sun
 		// assign and check
 		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
 				child instanceof Pegasi : false) {
+			// declare plasma
+			Mass<Jupiter,Saturn> plasma;
 			// cast source
 			Pegasi pair = (Pegasi) child;
 			// commute command
 			if(event.getType() == ServiceEvent.REGISTERED) {
-				// replicate mass
-				getReplicator().putValue(pair.getKey(), pair.getValue());
+				// assign and check it's contained
+				if((plasma = getPlasma()) != null ?
+						!plasma.isEmpty() ?
+								!plasma.containsKey(pair.getKey())
+								: true
+						: false) {
+					// replicate mass
+					plasma.putValue(pair.getKey(), pair.getValue());
+				}
 			}
 			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// release replication
-				getReplicator().removeByKey(pair.getKey());
+				// check if empty and chained
+				if((plasma = getPlasma()) != null ? 
+						!plasma.isEmpty() ? 
+								plasma.containsValue(pair.getValue()) 
+								: false
+						: false) {
+					// release child
+					plasma.removeByKey(pair.getKey());
+				}
 			}
 		}
 	}

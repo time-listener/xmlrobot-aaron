@@ -11,7 +11,7 @@ import org.osgi.framework.ServiceReference;
 import org.xmlrobot.genesis.MassListener;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.TimeListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Child;
 import org.xmlrobot.spacetime.Jupiter;
 import org.xmlrobot.spacetime.Saturn;
@@ -20,6 +20,7 @@ import org.xmlrobot.spacetime.event.Impact;
 import org.xmlrobot.spacetime.event.Repulsion;
 import org.xmlrobot.spacetime.matter.Photon;
 import org.xmlrobot.util.Command;
+import org.xmlrobot.util.Parity;
 
 /**
  * Alpha Centauri implementation class.
@@ -37,7 +38,7 @@ public class AlphaCentauri
 	private static final long serialVersionUID = -6537944481620207658L;
 
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewNut#getKey()
+	 * @see org.xmlrobot.inheritance.Child#getKey()
 	 */
 	@Override
 	@XmlElement
@@ -45,14 +46,14 @@ public class AlphaCentauri
 		return super.getKey();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewNut#setKey(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Child#setKey(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Saturn setKey(Saturn key) {
 		return super.setKey(key);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewNut#getValue()
+	 * @see org.xmlrobot.inheritance.Child#getValue()
 	 */
 	@Override
 	@XmlElement
@@ -60,40 +61,40 @@ public class AlphaCentauri
 		return super.getValue();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewNut#setValue(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Child#setValue(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Jupiter setValue(Jupiter value) {
 		return super.setValue(value);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#getReplicator()
+	 * @see org.xmlrobot.inheritance.Parent#getPlasma()
 	 */
 	@Override
 	@XmlElement(type=Photon.class)
-	public Mass<Saturn,Jupiter> getReplicator() {
-		return super.getReplicator();
+	public Mass<Saturn,Jupiter> getPlasma() {
+		return super.getPlasma();
 	}
 	
 	/**
 	 * {@link AlphaCentauri} default class constructor.
 	 */
 	public AlphaCentauri() {
-		super(Photon.class, Hyperphoton.class, AlphaCentauri.class);
+		super(Photon.class, Hyperphoton.class, AlphaCentauri.class, Parity.XX);
 	}
 	/**
 	 * {@link AlphaCentauri} class constructor.
 	 * @param antitype the inherited antitype
 	 */
 	public AlphaCentauri(Class<Sun> antitype) {
-		super(Photon.class, Hyperphoton.class, AlphaCentauri.class, antitype);
+		super(AlphaCentauri.class, antitype, Parity.XX);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.gravity.Recurrence#mass(org.xmlrobot.genesis.Entity, org.xmlrobot.horizon.Darkmass)
+	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Tachyon)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		super.mass(sender, event);
 		// commute command
 		switch (event.getCommand()) {
@@ -114,7 +115,7 @@ public class AlphaCentauri
 				}
 			}
 			break;
-		case PUSH:
+		case SEND:
 			if(event.getSource() instanceof Pegasi) {
 				// get antimatter
 				Mass<Jupiter,Saturn> key;
@@ -131,7 +132,7 @@ public class AlphaCentauri
 				}
 			}
 			break;
-		case LISTEN:
+		case PUSH:
 			if(event.getSource() instanceof Saturn) {
 				// cast source
 				Saturn key = (Saturn) event.getSource();
@@ -189,7 +190,7 @@ public class AlphaCentauri
 				// cast source
 				Pegasi entity = (Pegasi) event.getSource();
 				// transfer message contents
-				get().putValue(entity.getKey(), entity.getValue());
+				put(entity.getValue(), entity.getKey());
 			}
 			break;
 		default:
@@ -197,23 +198,15 @@ public class AlphaCentauri
 		}
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.space.Contraction#putValue(java.lang.Object, java.lang.Object)
+	 * @see org.xmlrobot.inheritance.Child#put(org.xmlrobot.genesis.TimeListener, org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Jupiter put(Saturn key, Jupiter value) {
-		// declare child
-		Mass<Saturn,Jupiter> child;
-		// declare old value
-		Jupiter oldValue;
-		// if update unsuccessful
-		if ((oldValue = (child = getChild()) != null ? 
-				child.putValue(key,	value) : null) == null) {
-			// create child
-			Vega pair = new Vega(Pegasi.class, key, value, this);
-			// push child
-			pair.push(Command.PUSH);
-		}
-		return oldValue;
+		// create child
+		Vega pair = new Vega(Pegasi.class, key, value, this);
+		// push child
+		pair.push(Command.SEND);
+		return null;
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.hyperspace.Abstraction#serviceChanged(org.osgi.framework.ServiceEvent)
@@ -227,16 +220,32 @@ public class AlphaCentauri
 		// assign and check
 		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
 				child instanceof Vega : false) {
+			// declare plasma
+			Mass<Saturn, Jupiter> plasma;
 			// cast source
 			Vega pair = (Vega) child;
 			// commute command
 			if(event.getType() == ServiceEvent.REGISTERED) {
-				// replicate mass
-				getReplicator().putValue(pair.getKey(), pair.getValue());
+				// assign and check it's contained
+				if((plasma = getPlasma()) != null ?
+						!plasma.isEmpty() ?
+								!plasma.containsValue(pair.getValue())
+								: true
+						: false) {
+					// replicate mass
+					plasma.putKey(pair.getValue(), pair.getKey());
+				}
 			}
 			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// release replication
-				getReplicator().removeByKey(pair.getKey());
+				// check if empty and chained
+				if((plasma = getPlasma()) != null ? 
+						!plasma.isEmpty() ? 
+								plasma.containsKey(pair.getKey()) 
+								: false
+						: false) {
+					// release child
+					plasma.removeByValue(pair.getValue());
+				}
 			}
 		}
 	}

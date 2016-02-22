@@ -1,4 +1,6 @@
 package org.xmlrobot.genomap;
+
+import org.xmlrobot.dna.Gamete;
 import org.xmlrobot.dna.Genomap;
 import org.xmlrobot.dna.Haploid;
 import org.xmlrobot.subspace.Hyperchain;
@@ -17,7 +19,6 @@ public class Test {
 
 		String[] message = new String[] {
 				"H", "A", "N", "O", "C" };
-		
 		// instance hypercube
 		Hypercube cube = new Hypercube(Hyperchain.class);
 		// for each word in original message
@@ -28,22 +29,11 @@ public class Test {
 				Character key = new Character(letter);
 				Integer value = new Integer((int) letter);
 				// store key-value pair
-				cube.put(key, value);
+				cube.putValue(key, value);
 			}
 		}
-		
-//		cube.setGen(Parity.YY);
-//		cube.get().setGen(Parity.YY);
-//		cube.spin();
-//		cube.get().spin();
-//		cube.setGen(Parity.XY);
-//		cube.get().setGen(Parity.XX);
-		
-		System.out.print(cube);
-
 		String[] message2 = new String[] {
 				"H", "O", "L", "A", "A" };
-		
 		// instance hypercube
 		Hyperchain chain = new Hyperchain(Hypercube.class);
 		// for each word in original message
@@ -54,34 +44,15 @@ public class Test {
 				Character value = new Character(letter);
 				Integer key = new Integer((int) letter);
 				// store key-value pair
-				chain.put(key, value);
+				chain.putValue(key, value);
 			}
 		}
-		
-//		chain.setGen(Parity.YY);
-//		chain.get().setGen(Parity.YY);
-//		chain.spin();
-//		chain.get().spin();
-//		chain.setGen(Parity.XY);
-//		chain.get().setGen(Parity.XX);
-		
-		
-		Genomap genomap = new Genomap(Haploid.class);
-		genomap.put(cube, (Hyperchain) cube.get());
-		genomap.put((Hypercube) chain.get(), chain);
-		
-		
+		Genomap map = new Genomap(Haploid.class);
+		map.putValue(cube, (Hyperchain) cube.get());
+		map.putValue((Hypercube) chain.get(), chain);
 
-		System.out.print("\n" + genomap.depth());
+		Gamete child = (Gamete) map.getChild().getChild().get();
 		
-//		genomap.reproduceTo(genomap.get());
-//		
-//		System.out.print("\n" + genomap.output());
-		
-//		cube.reproduceTo(chain);
-//		chain.reproduceTo(cube);
-//		
-//		System.out.print(cube.output());
-//		System.out.print("\n" + chain.output());
+		System.out.print(child.getPlasma().getStem());
 	}
 }

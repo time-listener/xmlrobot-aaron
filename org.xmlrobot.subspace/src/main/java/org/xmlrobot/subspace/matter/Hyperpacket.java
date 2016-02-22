@@ -5,7 +5,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.positron.Antiproton;
 import org.xmlrobot.subspace.antimatter.Hyperdatagram;
 import org.xmlrobot.subspace.antimatter.Hyperline;
@@ -75,7 +75,7 @@ public class Hyperpacket
 	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Takion)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		super.mass(sender, event);
 
 		switch (event.getCommand()) {
@@ -96,7 +96,7 @@ public class Hyperpacket
 				}
 			}
 			break;
-		case PUSH:
+		case SEND:
 			if(event.getSource() instanceof Hyperline) {
 				// declare key
 				Mass<Character,Integer> stem;
@@ -156,18 +156,10 @@ public class Hyperpacket
 	 */
 	@Override
 	public Character put(Integer key, Character value) {
-		// declare child
-		Mass<Integer,Character> child;
-		// declare old value
-		Character oldValue;
-		// if update unsuccessful
-		if ((oldValue = (child = getChild()) != null ? 
-				child.putValue(key, value) : null) == null) {
-			// create child
-			Hyperunit pair = new Hyperunit(Hyperline.class, key, value, this);
-			// push child
-			pair.push(Command.PUSH);
-		}
-		return oldValue;
+		// create child
+		Hyperunit pair = new Hyperunit(Hyperline.class, key, value, this);
+		// push child
+		pair.push(Command.SEND);
+		return null;
 	}
 }

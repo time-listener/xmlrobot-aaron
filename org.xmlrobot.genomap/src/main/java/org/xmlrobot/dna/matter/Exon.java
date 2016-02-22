@@ -7,7 +7,7 @@ import org.xmlrobot.dna.antimatter.Hyperexon;
 import org.xmlrobot.dna.antimatter.Hyperintron;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.positron.Antiproton;
 import org.xmlrobot.subspace.Hyperchain;
 import org.xmlrobot.subspace.Hypercube;
@@ -29,7 +29,7 @@ public class Exon
 	private static final long serialVersionUID = 6635269652339700640L;
 
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Proton#getKey()
+	 * @see org.xmlrobot.positron.Antiproton#getKey()
 	 */
 	@Override
 	@XmlElement
@@ -37,14 +37,14 @@ public class Exon
 		return super.getKey();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Proton#setKey(java.lang.Object)
+	 * @see org.xmlrobot.positron.Antiproton#setKey(java.lang.Object)
 	 */
 	@Override
 	public Hyperchain setKey(Hyperchain key) {
 		return super.setKey(key);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.space.Compression#getValue(java.lang.Object)
+	 * @see org.xmlrobot.positron.Antiproton#getValue()
 	 */
 	@Override
 	@XmlElement
@@ -52,7 +52,7 @@ public class Exon
 		return super.getValue();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Proton#setValue(java.lang.Object)
+	 * @see org.xmlrobot.positron.Antiproton#setValue(java.lang.Object)
 	 */
 	@Override
 	public Hypercube setValue(Hypercube value) {
@@ -77,7 +77,7 @@ public class Exon
 	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Takion)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?, ?> event) {
+	public void mass(MassListener sender, Tachyon<?, ?> event) {
 		super.mass(sender, event);
 		
 		switch (event.getCommand()) {
@@ -98,7 +98,7 @@ public class Exon
 				}
 			}
 			break;
-		case PUSH:
+		case SEND:
 			if(event.getSource() instanceof Hyperintron) {
 				// declare stem
 				Mass<Hypercube,Hyperchain> stem;
@@ -154,22 +154,14 @@ public class Exon
 		}
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Proton#putValue(java.lang.Object, java.lang.Object)
+	 * @see org.xmlrobot.positron.Antiproton#put(java.lang.Object, java.lang.Object)
 	 */
 	@Override
 	public Hypercube put(Hyperchain key, Hypercube value) {
-		// declare child
-		Mass<Hyperchain,Hypercube> child;
-		// declare old value
-		Hypercube oldValue;
-		// if update unsuccessful
-		if ((oldValue = (child = getChild()) != null ? 
-				child.putValue(key,	value) : null) == null) {
-			// create child
-			Intron pair = new Intron(Hyperintron.class, key, value, this);
-			// push child
-			pair.push(Command.PUSH);
-		}
-		return oldValue;
+		// create child
+		Intron pair = new Intron(Hyperintron.class, key, value, this);
+		// push child
+		pair.push(Command.SEND);
+		return null;
 	}
 }

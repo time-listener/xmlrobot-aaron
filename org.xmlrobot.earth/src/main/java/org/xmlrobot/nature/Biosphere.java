@@ -14,12 +14,15 @@ import org.xmlrobot.dna.event.Reproduction;
 import org.xmlrobot.genesis.MassListener;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.TimeListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Child;
+import org.xmlrobot.nature.antimatter.Hyperatom;
 import org.xmlrobot.nature.antimatter.Hyperelement;
 import org.xmlrobot.nature.event.Homogenization;
+import org.xmlrobot.nature.matter.Atom;
 import org.xmlrobot.nature.matter.Element;
 import org.xmlrobot.util.Command;
+import org.xmlrobot.util.Parity;
 
 /**
  * Biosphere implementation class.
@@ -37,7 +40,7 @@ public class Biosphere
 	private static final long serialVersionUID = 1440721915804238929L;
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewNut#getKey()
+	 * @see org.xmlrobot.inheritance.Child#getKey()
 	 */
 	@Override
 	@XmlElement
@@ -45,14 +48,14 @@ public class Biosphere
 		return super.getKey();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewNut#setKey(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Child#setKey(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Cell setKey(Cell key) {
 		return super.setKey(key);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewNut#getValue()
+	 * @see org.xmlrobot.inheritance.Child#getValue()
 	 */
 	@Override
 	@XmlElement
@@ -60,40 +63,40 @@ public class Biosphere
 		return super.getValue();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewNut#setValue(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Child#setValue(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Operon setValue(Operon value) {
 		return super.setValue(value);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#getReplicator()
+	 * @see org.xmlrobot.inheritance.Parent#getPlasma()
 	 */
 	@Override
 	@XmlElement(type=Element.class)
-	public Mass<Cell,Operon> getReplicator() {
-		return super.getReplicator();
+	public Mass<Cell,Operon> getPlasma() {
+		return super.getPlasma();
 	}
 	
 	/**
 	 * {@link Biosphere} default class constructor.
 	 */
 	public Biosphere() {
-		super(Element.class, Hyperelement.class, Biosphere.class);
+		super(Element.class, Hyperelement.class, Biosphere.class, Parity.XX);
 	}
 	/**
 	 * {@link Biosphere} class constructor.
 	 * @param antitype the inherited antitype
 	 */
 	public Biosphere(Class<Ecosystem> antitype) {
-		super(Element.class, Hyperelement.class, Biosphere.class, antitype);
+		super(Biosphere.class, antitype, Parity.XX);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.gravity.Recurrence#mass(org.xmlrobot.genesis.Entity, org.xmlrobot.horizon.Darkmass)
+	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Tachyon)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		super.mass(sender, event);
 
 		switch (event.getCommand()) {
@@ -114,7 +117,7 @@ public class Biosphere
 				}
 			}
 			break;
-		case PUSH:
+		case SEND:
 			if(event.getSource() instanceof Being) {
 				// get antimatter
 				Mass<Operon,Cell> key;
@@ -131,7 +134,7 @@ public class Biosphere
 				}
 			}
 			break;
-		case LISTEN:
+		case PUSH:
 			if(event.getSource() instanceof Cell) {
 				// cast source
 				Cell key = (Cell) event.getSource();
@@ -189,7 +192,7 @@ public class Biosphere
 				// cast source
 				Being entity = (Being) event.getSource();
 				// transfer message contents
-				get().putValue(entity.getKey(), entity.getValue());
+				put(entity.getValue(), entity.getKey());
 			}
 			break;
 		default:
@@ -197,26 +200,18 @@ public class Biosphere
 		}
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.space.Contraction#putValue(java.lang.Object, java.lang.Object)
+	 * @see org.xmlrobot.inheritance.Child#put(org.xmlrobot.genesis.TimeListener, org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Operon put(Cell key, Operon value) {
-		// declare child
-		Mass<Cell,Operon> child;
-		// declare old value
-		Operon oldValue;
-		// if update unsuccessful
-		if ((oldValue = (child = getChild()) != null ? child.putValue(key,
-				value) : null) == null) {
-			// create child
-			Organism pair = new Organism(Being.class, key, value, this);
-			// push child
-			pair.push(Command.PUSH);
-		}
-		return oldValue;
+		// create child
+		Organism pair = new Organism(Being.class, key, value, this);
+		// push child
+		pair.push(Command.SEND);
+		return null;
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.hyperspace.Abstraction#serviceChanged(org.osgi.framework.ServiceEvent)
+	 * @see org.xmlrobot.inheritance.Child#serviceChanged(org.osgi.framework.ServiceEvent)
 	 */
 	@Override
 	public void serviceChanged(ServiceEvent event) {
@@ -231,12 +226,15 @@ public class Biosphere
 			Organism pair = (Organism) child;
 			// commute command
 			if(event.getType() == ServiceEvent.REGISTERED) {
-				// replicate mass
-				getReplicator().putValue(pair.getKey(), pair.getValue());
+				// create child
+				Atom atom = instance(Atom.class, Hyperatom.class, 
+						pair.getKey(), pair.getValue(), getPlasma());
+				// push child
+				atom.push(Command.ORDER);
 			}
 			else if(event.getType() == ServiceEvent.UNREGISTERING) {
 				// release replication
-				getReplicator().removeByKey(pair.getKey());
+				getPlasma().release();
 			}
 		}
 	}

@@ -67,13 +67,7 @@ package org.xmlrobot.genesis;
  * @see java.io.Serializable
  * @since before BigBang
  */
-public interface Reproductor<K,V> {
-
-	/**
-	 * Returns current instance's computation output.
-	 * @return current instance's computation output.
-	 */
-	V output();
+public interface Reproductor<K,V> extends Output<V> {
 	
 	/**
 	 * Reproduces key and value arguments in natural order.

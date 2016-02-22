@@ -5,15 +5,23 @@ import org.xmlrobot.horizon.Graviton;
 import org.xmlrobot.subspace.Hyperchain;
 import org.xmlrobot.subspace.Hypercube;
 
-public class Transduction extends Graviton<Hypercube,Hyperchain> {
+/**
+ *  The side-by-side association of homologous paternal and maternal chromosomes 
+ *  during the first prophase of meiosis.
+ * @author joan
+ *
+ */
+public class Synapsis extends Graviton<Hypercube,Hyperchain> {
 
 	/**
 	 * -6874698468208894490L
 	 */
 	private static final long serialVersionUID = -6874698468208894490L;
 
-	public Transduction(Mass<Hypercube,Hyperchain> source) {
+	/**
+	 * @param source
+	 */
+	public Synapsis(Mass<Hypercube,Hyperchain> source) {
 		super(source);
 	}
-
 }

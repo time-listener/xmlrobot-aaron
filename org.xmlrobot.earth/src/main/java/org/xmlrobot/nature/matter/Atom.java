@@ -23,7 +23,15 @@ public class Atom
 	 * -4298462132719102245L
 	 */
 	private static final long serialVersionUID = -4298462132719102245L;
-
+	
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.hyperspace.Abstraction#getName()
+	 */
+	@Override
+	@XmlElement
+	public String getName() {
+		return getKey().getName();
+	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Space#getKey()
 	 */
@@ -104,16 +112,9 @@ public class Atom
 	public Atom(Class<Hyperatom> antitype, Cell key, Operon value, Element parent) {
 		super(Atom.class, antitype, key, value, parent);
 	}
-
+	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.hyperspace.Abstraction#getName()
-	 */
-	@Override
-	public String getName() {
-		return getKey().getName();
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Electron#compare(org.xmlrobot.genesis.Mass, org.xmlrobot.genesis.Mass)
+	 * @see org.xmlrobot.time.Time#compare(org.xmlrobot.genesis.TimeListener, org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public int compare(Mass<Cell,Operon> o1, Mass<Cell,Operon> o2) {

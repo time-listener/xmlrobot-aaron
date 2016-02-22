@@ -17,9 +17,10 @@ import org.xmlrobot.core.matter.Baryon;
 import org.xmlrobot.genesis.MassListener;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.TimeListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Child;
 import org.xmlrobot.util.Command;
+import org.xmlrobot.util.Parity;
 
 /**
  * Universe implementation class.
@@ -71,29 +72,29 @@ public class Universe
 	 */
 	@Override
 	@XmlElement(type=Hyperbaryon.class)
-	public Mass<Spacetime,Minkowski> getReplicator() {
-		return super.getReplicator();
+	public Mass<Spacetime,Minkowski> getPlasma() {
+		return super.getPlasma();
 	}
 	
 	/**
 	 * {@link Universe} default class constructor.
 	 */
 	public Universe() {
-		super(Hyperbaryon.class, Baryon.class, Universe.class);
+		super(Hyperbaryon.class, Baryon.class, Universe.class, Parity.XY);
 	}
 	/**
 	 * {@link Universe} class constructor.
 	 * @param antitype the antitype
 	 */
 	public Universe(Class<Subspace> antitype) {
-		super(Hyperbaryon.class, Baryon.class, Universe.class, antitype);
+		super(Universe.class, antitype, Parity.XY);
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Takion)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		// ancestral recall
 		super.mass(sender, event);
 		// commute command
@@ -115,7 +116,7 @@ public class Universe
 				}
 			}
 			break;
-		case PUSH:
+		case SEND:
 			if(event.getSource() instanceof BigBong) {
 				// declare future
 				Mass<Minkowski,Spacetime> future;
@@ -132,7 +133,7 @@ public class Universe
 				}
 			}
 			break;
-		case LISTEN:
+		case PUSH:
 			if(event.getSource() instanceof Spacetime) {
 				// cast source
 				Spacetime key = (Spacetime) event.getSource();
@@ -142,12 +143,10 @@ public class Universe
 			else if (event.getSource() instanceof BigBong) {
 				// cast source
 				BigBong pair = (BigBong) event.getSource();
-				// declare child
-				Mass<Spacetime, Minkowski> child;
 				// call child
-				if((child = getChild()) != null) {
+				if(!isEmpty()) {
 					// push gravity
-					child.pulse(this, new Gravity(pair));
+					getChild().pulse(this, new Gravity(pair));
 				}
 			}
 			break;
@@ -190,7 +189,7 @@ public class Universe
 				// cast source
 				BigBong pair = (BigBong) event.getSource();
 				// transfer message
-				get().putValue(pair.getKey(), pair.getValue());
+				put(pair.getValue(), pair.getKey());
 			}
 			break;
 
@@ -206,11 +205,11 @@ public class Universe
 		// create child
 		BigBang pair = new BigBang(BigBong.class, key, value, this);
 		// push child
-		pair.push(Command.PUSH);
+		pair.push(Command.SEND);
 		return null;
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.hyperspace.Abstraction#serviceChanged(org.osgi.framework.ServiceEvent)
+	 * @see org.xmlrobot.inheritance.Child#serviceChanged(org.osgi.framework.ServiceEvent)
 	 */
 	@Override
 	public void serviceChanged(ServiceEvent event) {
@@ -221,16 +220,32 @@ public class Universe
 		// assign and check
 		if((child = ref.getProperty(TimeListener.KEY)) != null ? 
 				child instanceof BigBang : false) {
+			// declare source
+			Mass<Spacetime,Minkowski> plasma;
 			// cast source
 			BigBang pair = (BigBang) child;
 			// commute command
 			if(event.getType() == ServiceEvent.REGISTERED) {
-				// replicate mass
-				getReplicator().putValue(pair.getKey(), pair.getValue());
+				// assign and check it's contained
+				if((plasma = getPlasma()) != null ?
+						!plasma.isEmpty() ?
+								!plasma.containsKey(pair.getKey())
+								: true
+						: false) {
+					// replicate mass
+					plasma.putValue(pair.getKey(), pair.getValue());
+				}
 			}
 			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// release replication
-				getReplicator().removeByKey(pair.getKey());
+				// check if empty and chained
+				if((plasma = getPlasma()) != null ? 
+						!plasma.isEmpty() ? 
+								plasma.containsValue(pair.getValue()) 
+								: false
+						: false) {
+					// release child
+					plasma.removeByKey(pair.getKey());
+				}
 			}
 		}
 	}

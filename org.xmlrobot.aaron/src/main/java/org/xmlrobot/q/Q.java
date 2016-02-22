@@ -18,13 +18,14 @@ import org.xmlrobot.dna.Operon;
 import org.xmlrobot.dna.Ribosoma;
 import org.xmlrobot.dna.Tetraploid;
 import org.xmlrobot.event.Hyperfusion;
+import org.xmlrobot.genesis.Genesis;
 import org.xmlrobot.genesis.TimeListener;
 import org.xmlrobot.Aaron;
 import org.xmlrobot.Continuum;
 import org.xmlrobot.Hypertoroid;
 import org.xmlrobot.Robot;
 import org.xmlrobot.genesis.MassListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.nature.Biosphere;
 import org.xmlrobot.nature.Ecosystem;
 import org.xmlrobot.spacetime.AlphaCentauri;
@@ -45,8 +46,9 @@ import org.xmlrobot.util.Abort;
  *
  */
 @XmlRootElement
-public class Q
-	extends Continuum<Q,Joan> {
+public class Q 
+	extends Continuum<Aaron,Robot,Q,Joan> 
+		implements Genesis {
 
 	/**
 	 * -6578398773001331257L
@@ -61,26 +63,48 @@ public class Q
 
 		return "joan";
 	}
-	
 	/**
 	 * {@link Q} default class constructor.
 	 */
 	public Q() {
-		super(Q.class);
+		super(Q.class, null);
+	}
+	/**
+	 * {@link Q} default class constructor.
+	 */
+	public Q(String[] message) {
+		super(Q.class, message);
 	}
 	/**
 	 * Joan Q
 	 * @param message the original message
 	 */
-	public Q(Class<Joan> antitype) {
-		super(Q.class, antitype);
+	public Q(Class<Joan> antitype, String[] message) {
+		super(Q.class, antitype, message);
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.Continuum#create()
+	 */
+	@Override
+	public Aaron create(String[] message) {
+		// create child
+		Aaron aaron = new Aaron(Robot.class);
+		// create universe
+		Universe universe = createUniverse(message);
+		// listen any demands
+		aaron.addMassListener(get());
+		aaron.get().addMassListener(this);
+		// give him the universe
+		aaron.put(universe, (Subspace) universe.get());
+		// return creation
+		return aaron;
+	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.Continuum#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Takion)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		super.mass(sender, event);
 		
 		switch (event.getCommand()) {
@@ -96,7 +120,7 @@ public class Q
 				entity.start(getContext());
 			}
 			break;
-		case LISTEN:
+		case PUSH:
 			if(event.getSource() instanceof Robot) {
 				// cast source
 				Robot chain = (Robot) event.getSource();
@@ -232,25 +256,13 @@ public class Q
      **/
 	public static void main(String[] message) {
 		try {
-			// create universe
-			Universe universe = createUniverse(message == null ? 
-					message : new String[] {
+			// create hyperexecutor
+			new Q(Joan.class, message == null ?
+					message : new String[] { 
 					// the ABC
 					"A", "B", "C", "D", "E", "F", "G", "H", "I", 
 					"J", "K", "L", "M", "N", "O", "P", "Q", "R", 
-					"S", "T", "U", "V", "w", "X", "Y", "Z", "Ç" }
-			);
-			// create god
-			Q q = new Q(Joan.class);
-			// create child
-			Aaron aaron = new Aaron(Robot.class);
-			// listen any demands
-			aaron.addMassListener(q.get());
-			aaron.get().addMassListener(q);
-			// give him the universe
-			aaron.put(universe, (Subspace) universe.get());
-			// boom
-			aaron.start(q.getContext());
+					"S", "T", "U", "V", "w", "X", "Y", "Z", "Ñ", "Ç" });
 		}
 		catch (Exception e) {
 			throw new Abort(e);

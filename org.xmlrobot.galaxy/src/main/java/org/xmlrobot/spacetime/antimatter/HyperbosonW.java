@@ -25,6 +25,14 @@ public class HyperbosonW
 	private static final long serialVersionUID = 1745339382778302728L;
 
 	/* (non-Javadoc)
+	 * @see org.xmlrobot.hyperspace.Abstraction#getName()
+	 */
+	@Override
+	@XmlElement
+	public String getName() {
+		return getKey().getName();
+	}
+	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Space#getKey()
 	 */
 	@Override
@@ -103,14 +111,6 @@ public class HyperbosonW
 	 */
 	public HyperbosonW(Class<BosonW> antitype, Sun key, AlphaCentauri value, HyperbosonZ parent) {
 		super(HyperbosonW.class, antitype, key, value, parent);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Antineutron#name()
-	 */
-	@Override
-	public String getName() {
-		return getKey().getName();
 	}
 
 	/* (non-Javadoc)

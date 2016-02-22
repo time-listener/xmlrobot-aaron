@@ -14,12 +14,15 @@ import org.xmlrobot.dna.event.Procreation;
 import org.xmlrobot.genesis.MassListener;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.TimeListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Child;
+import org.xmlrobot.nature.antimatter.Hyperatom;
 import org.xmlrobot.nature.antimatter.Hyperelement;
 import org.xmlrobot.nature.event.Dispersion;
+import org.xmlrobot.nature.matter.Atom;
 import org.xmlrobot.nature.matter.Element;
 import org.xmlrobot.util.Command;
+import org.xmlrobot.util.Parity;
 
 /**
  * Ecosystem implementation class.
@@ -37,7 +40,7 @@ public class Ecosystem
 	private static final long serialVersionUID = -6342325909526676593L;
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#getKey()
+	 * @see org.xmlrobot.inheritance.Child#getKey()
 	 */
 	@Override
 	@XmlElement
@@ -45,14 +48,14 @@ public class Ecosystem
 		return super.getKey();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#setKey(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Child#setKey(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Operon setKey(Operon key) {
 		return super.setKey(key);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#getValue()
+	 * @see org.xmlrobot.inheritance.Child#getValue()
 	 */
 	@Override
 	@XmlElement
@@ -60,40 +63,40 @@ public class Ecosystem
 		return super.getValue();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#setValue(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Child#setValue(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Cell setValue(Cell value) {
 		return super.setValue(value);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#getReplicator()
+	 * @see org.xmlrobot.inheritance.Parent#getPlasma()
 	 */
 	@Override
 	@XmlElement(type=Hyperelement.class)
-	public Mass<Operon,Cell> getReplicator() {
-		return super.getReplicator();
+	public Mass<Operon,Cell> getPlasma() {
+		return super.getPlasma();
 	}
 	
 	/**
 	 * {@link Ecosystem} default class constructor.
 	 */
 	public Ecosystem() {
-		super(Hyperelement.class, Element.class, Ecosystem.class);
+		super(Hyperelement.class, Element.class, Ecosystem.class, Parity.XY);
 	}
 	/**
 	 * {@link Ecosystem} class constructor.
 	 * @param antitype the inherited antitype
 	 */
 	public Ecosystem(Class<Biosphere> antitype) {
-		super(Hyperelement.class, Element.class, Ecosystem.class, antitype);
+		super(Ecosystem.class, antitype, Parity.XY);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.gravity.Recurrence#mass(org.xmlrobot.genesis.Entity, org.xmlrobot.horizon.Darkmass)
+	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Tachyon)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		super.mass(sender, event);
 
 		switch (event.getCommand()) {
@@ -114,7 +117,7 @@ public class Ecosystem
 				}
 			}
 			break;
-		case PUSH:
+		case SEND:
 			if(event.getSource() instanceof Organism) {
 				// get antimatter
 				Mass<Cell,Operon> key;
@@ -131,7 +134,7 @@ public class Ecosystem
 				}
 			}
 			break;
-		case LISTEN:
+		case PUSH:
 			if(event.getSource() instanceof Operon) {
 				// cast source
 				Operon key = (Operon) event.getSource();
@@ -141,12 +144,10 @@ public class Ecosystem
 			else if(event.getSource() instanceof Organism) {
 				// cast source
 				Organism pair = (Organism) event.getSource();
-				// declare child
-				Mass<Operon,Cell> child;
 				// assign and check
-				if((child = getChild()) != null) {
+				if(!isEmpty()) {
 					// dispersion across the known universe
-					child.pulse(this, new Dispersion(pair));
+					getChild().pulse(this, new Dispersion(pair));
 				}
 			}
 			break;
@@ -189,7 +190,7 @@ public class Ecosystem
 				// cast source
 				Organism entity = (Organism) event.getSource();
 				// transfer message contents
-				get().putValue(entity.getKey(), entity.getValue());
+				put(entity.getValue(), entity.getKey());
 			}
 			break;
 		default:
@@ -197,26 +198,18 @@ public class Ecosystem
 		}
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#put(org.xmlrobot.genesis.Mass, org.xmlrobot.genesis.Mass)
+	 * @see org.xmlrobot.inheritance.Child#put(org.xmlrobot.genesis.TimeListener, org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Cell put(Operon key, Cell value) {
-		// declare child
-		Mass<Operon,Cell> child;
-		// declare old value
-		Cell oldValue;
-		// if update unsuccessful
-		if ((oldValue = (child = getChild()) != null ? 
-				child.putValue(key,	value) : null) == null) {
-			// create child
-			Being pair = new Being(Organism.class, key, value, this);
-			// push child
-			pair.push(Command.PUSH);
-		}
-		return oldValue;
+		// create child
+		Being pair = new Being(Organism.class, key, value, this);
+		// push child
+		pair.push(Command.SEND);
+		return null;
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.hyperspace.Abstraction#serviceChanged(org.osgi.framework.ServiceEvent)
+	 * @see org.xmlrobot.inheritance.Child#serviceChanged(org.osgi.framework.ServiceEvent)
 	 */
 	@Override
 	public void serviceChanged(ServiceEvent event) {
@@ -231,12 +224,15 @@ public class Ecosystem
 			Being pair = (Being) child;
 			// commute command
 			if(event.getType() == ServiceEvent.REGISTERED) {
-				// replicate mass
-				getReplicator().putValue(pair.getKey(), pair.getValue());
+				// create child
+				Hyperatom atom = instance(Hyperatom.class, Atom.class, 
+						pair.getKey(), pair.getValue(), getPlasma());
+				// push child
+				atom.push(Command.ORDER);
 			}
 			else if(event.getType() == ServiceEvent.UNREGISTERING) {
 				// release replication
-				getReplicator().removeByKey(pair.getKey());
+				getPlasma().release();
 			}
 		}
 	}

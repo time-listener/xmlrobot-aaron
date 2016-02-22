@@ -13,11 +13,10 @@ import org.xmlrobot.core.Minkowski;
 import org.xmlrobot.core.Spacetime;
 import org.xmlrobot.core.antimatter.Hypermeson;
 import org.xmlrobot.core.matter.Meson;
-import org.xmlrobot.genesis.Genesis;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
 import org.xmlrobot.genesis.TimeListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Parent;
 import org.xmlrobot.util.Command;
 import org.xmlrobot.util.Parity;
@@ -30,8 +29,7 @@ import org.xmlrobot.util.Parity;
  */
 @XmlRootElement
 public class BigBang 
-	extends Parent<Spacetime,Minkowski> 
-		implements Genesis {
+	extends Parent<Spacetime,Minkowski> {
 	
 	/**
 	 * 2800389938473591910L
@@ -73,8 +71,8 @@ public class BigBang
 	 */
 	@Override
 	@XmlElement(type=Hypermeson.class)
-	public Mass<Spacetime,Minkowski> getReplicator() {
-		return super.getReplicator();
+	public Mass<Spacetime,Minkowski> getPlasma() {
+		return super.getPlasma();
 	}
 	
 	/**
@@ -105,7 +103,7 @@ public class BigBang
 	 * @param antitype the inherited antitype
 	 */
 	public BigBang(Class<BigBong> antitype) {
-		super(Hypermeson.class, Meson.class, BigBang.class, antitype, Parity.XY);
+		super(BigBang.class, antitype, Parity.XY);
 	}
 	/**
 	 * {@link BigBang} class constructor.
@@ -114,7 +112,7 @@ public class BigBang
 	 * @param value {@link Minkowski} the value
 	 */
 	public BigBang(Class<BigBong> antitype, Spacetime key, Minkowski value) {
-		super(Hypermeson.class, Meson.class, BigBang.class, antitype, key, value, Parity.XY);
+		super(BigBang.class, antitype, key, value, Parity.XY);
 	}
 	/**
 	 * {@link BigBang} class constructor.
@@ -124,14 +122,14 @@ public class BigBang
 	 * @param parent {@link Universe} the parent
 	 */
 	public BigBang(Class<BigBong> antitype, Spacetime key, Minkowski value, Universe parent) {
-		super(Hypermeson.class, Meson.class, BigBang.class, antitype, key, value, parent);
+		super(BigBang.class, antitype, key, value, parent);
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.driver.ScrewDriver#mass(org.xmlrobot.genesis.Entity, org.xmlrobot.horizon.Darkmass)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 	
 		super.mass(sender, event);
 
@@ -175,11 +173,11 @@ public class BigBang
 			// commute command
 			if(event.getType() == ServiceEvent.REGISTERED) {
 				// replicate mass
-				getReplicator().add(new Hypermeson(Meson.class, pair.getKey(), pair.getValue()));
+				getPlasma().putValue(pair.getKey(), pair.getValue());
 			}
 			else if(event.getType() == ServiceEvent.UNREGISTERING) {
 				// release replication
-				getReplicator().removeByKey(pair.getKey());
+				getPlasma().removeByKey(pair.getKey());
 			}
 		}
 	}

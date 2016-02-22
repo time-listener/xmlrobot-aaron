@@ -9,7 +9,7 @@ import org.xmlrobot.dna.antimatter.Adam;
 import org.xmlrobot.dna.antimatter.Sperma;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.positron.Antiproton;
 import org.xmlrobot.util.Command;
 
@@ -74,7 +74,7 @@ public class Eva
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Takion)
 	 */
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		super.mass(sender, event);
 		switch (event.getCommand()) {
 		case ORDER:
@@ -94,7 +94,7 @@ public class Eva
 				}
 			}
 			break;
-		case PUSH:
+		case SEND:
 			if(event.getSource() instanceof Sperma) {
 				// declare stem
 				Mass<Ribosoma,Tetraploid> stem;
@@ -154,18 +154,10 @@ public class Eva
 	 */
 	@Override
 	public Ribosoma put(Tetraploid key, Ribosoma value) {
-		// declare child
-		Mass<Tetraploid,Ribosoma> child;
-		// declare old value
-		Ribosoma oldValue;
-		// if update unsuccessful
-		if ((oldValue = (child = getChild()) != null ? 
-				child.putValue(key, value) : null) == null) {
-			// create child
-			Ovum pair = new Ovum(Sperma.class, key, value, this);
-			// push child
-			pair.push(Command.PUSH);
-		}
-		return oldValue;
+		// create child
+		Ovum pair = new Ovum(Sperma.class, key, value, this);
+		// push child
+		pair.push(Command.SEND);
+		return null;
 	}
 }

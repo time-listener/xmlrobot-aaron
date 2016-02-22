@@ -6,14 +6,11 @@ package org.xmlrobot.core;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceReference;
 import org.xmlrobot.core.antimatter.Hyperlepton;
 import org.xmlrobot.core.matter.Lepton;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
-import org.xmlrobot.genesis.TimeListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Parent;
 import org.xmlrobot.spacetime.Capricornus;
 import org.xmlrobot.spacetime.Columbia;
@@ -71,8 +68,8 @@ public class Cluster
 	 */
 	@Override
 	@XmlElement(type=Hyperlepton.class)
-	public Mass<Fornax,Columbia> getReplicator() {
-		return super.getReplicator();
+	public Mass<Fornax,Columbia> getPlasma() {
+		return super.getPlasma();
 	}
 	
 	/**
@@ -104,7 +101,7 @@ public class Cluster
 	 * @param antitype the inherited antitype
 	 */
 	public Cluster(Class<Galaxy> antitype) {
-		super(Hyperlepton.class, Lepton.class, Cluster.class, antitype, Parity.XY);
+		super(Cluster.class, antitype, Parity.XY);
 	}
 	/**
 	 * {@link Cluster} class constructor.
@@ -113,7 +110,7 @@ public class Cluster
 	 * @param value {@link Columbia} the value
 	 */
 	public Cluster(Class<Galaxy> antitype, Fornax key, Columbia value) {
-		super(Hyperlepton.class, Lepton.class, Cluster.class, antitype, key, value, Parity.XY);
+		super(Cluster.class, antitype, key, value, Parity.XY);
 	}
 	/**
 	 * {@link Cluster} class constructor.
@@ -123,14 +120,14 @@ public class Cluster
 	 * @param parent {@link Spacetime} the parent
 	 */
 	public Cluster(Class<Galaxy> antitype, Fornax key, Columbia value, Spacetime parent) {
-		super(Hyperlepton.class, Lepton.class, Cluster.class, antitype, key, value, parent);
+		super(Cluster.class, antitype, key, value, parent);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.gravity.Recurrence#mass(org.xmlrobot.genesis.Entity, org.xmlrobot.horizon.Darkmass)
+	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Tachyon)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		super.mass(sender, event);
 		
 		switch (event.getCommand()) {
@@ -151,33 +148,17 @@ public class Cluster
 	 */
 	@Override
 	public void run() {
-		super.run();
-		// rest in peace
-		push(Command.TRANSFER);
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.hyperspace.Abstraction#serviceChanged(org.osgi.framework.ServiceEvent)
-	 */
-	@Override
-	public void serviceChanged(ServiceEvent event) {
-		// get reference
-		ServiceReference<?> ref = event.getServiceReference();
-		// declare child
-		Object child;
-		// assign and check
-		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
-				child instanceof Cluster : false) {
-			// cast source
-			Cluster pair = (Cluster) child;
-			// commute command
-			if(event.getType() == ServiceEvent.REGISTERED) {
-				// replicate mass
-				getReplicator().add(new Hyperlepton(Lepton.class, pair.getKey(), pair.getValue()));
-			}
-			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// release replication
-				getReplicator().removeByKey(pair.getKey());
-			}
+		// avoid concurrent calls to run
+		if (!message.compareAndSet(RUNNER, null, Thread.currentThread())) {
+			// because is already running
+			return;
+		} 
+		else {
+			// life starts here
+			super.run();
+			// life ends here
+			push(Command.TRANSFER);
 		}
 	}
+
 }

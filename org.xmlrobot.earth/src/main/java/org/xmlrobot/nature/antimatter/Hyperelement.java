@@ -7,7 +7,7 @@ import org.xmlrobot.dna.Cell;
 import org.xmlrobot.dna.Operon;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.nature.matter.Atom;
 import org.xmlrobot.nature.matter.Element;
 import org.xmlrobot.positron.Antiproton;
@@ -77,7 +77,7 @@ public class Hyperelement
 	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Takion)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?, ?> event) {
+	public void mass(MassListener sender, Tachyon<?, ?> event) {
 		super.mass(sender, event);
 		switch (event.getCommand()) {
 		case ORDER:
@@ -97,7 +97,7 @@ public class Hyperelement
 				}
 			}
 			break;
-		case PUSH:
+		case SEND:
 			if(event.getSource() instanceof Atom) {
 				// declare stem
 				Mass<Cell,Operon> stem;
@@ -157,18 +157,10 @@ public class Hyperelement
 	 */
 	@Override
 	public Cell put(Operon key, Cell value) {
-		// declare child
-		Mass<Operon,Cell> child;
-		// declare old value
-		Cell oldValue;
-		// if update unsuccessful
-		if ((oldValue = (child = getChild()) != null ? 
-				child.putValue(key,	value) : null) == null) {
-			// create child
-			Hyperatom pair = new Hyperatom(Atom.class, key, value, this);
-			// push child
-			pair.push(Command.PUSH);
-		}
-		return oldValue;
+		// create child
+		Hyperatom pair = new Hyperatom(Atom.class, key, value, this);
+		// push child
+		pair.push(Command.SEND);
+		return null;
 	}
 }

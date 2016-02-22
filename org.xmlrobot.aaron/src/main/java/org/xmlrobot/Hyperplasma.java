@@ -12,9 +12,10 @@ import org.xmlrobot.core.Universe;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
 import org.xmlrobot.genesis.TimeListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Parent;
 import org.xmlrobot.matter.Hyperxml;
+import org.xmlrobot.util.Command;
 import org.xmlrobot.util.Parity;
 
 /**
@@ -67,8 +68,8 @@ public class Hyperplasma
 	 */
 	@Override
 	@XmlElement(type=Hyperxml.class)
-	public Mass<Subspace,Universe> getReplicator() {
-		return super.getReplicator();
+	public Mass<Subspace,Universe> getPlasma() {
+		return super.getPlasma();
 	}
 	
 	/**
@@ -99,7 +100,7 @@ public class Hyperplasma
 	 * @param antitype the antitype
 	 */
 	public Hyperplasma(Class<Hypertoroid> antitype) {
-		super(Hyperxml.class, Hyperneuron.class, Hyperplasma.class, antitype, Parity.YY);
+		super(Hyperplasma.class, antitype, Parity.YY);
 	}
 	/**
 	 * {@link Hyperplasma} class constructor.
@@ -108,7 +109,7 @@ public class Hyperplasma
 	 * @param value {@link Universe} value
 	 */
 	public Hyperplasma(Class<Hypertoroid> antitype, Subspace key, Universe value) {
-		super(Hyperxml.class, Hyperneuron.class, Hyperplasma.class, antitype, key, value, Parity.YY);
+		super(Hyperplasma.class, antitype, key, value, Parity.YY);
 	}
 	/**
 	 * {@link Hyperplasma} class constructor.
@@ -118,14 +119,14 @@ public class Hyperplasma
 	 * @param parent {@link Robot} the parent
 	 */
 	public Hyperplasma(Class<Hypertoroid> antitype, Subspace key, Universe value, Robot parent) {
-		super(Hyperxml.class, Hyperneuron.class, Hyperplasma.class, antitype, key, value, parent);
+		super(Hyperplasma.class, antitype, key, value, parent);
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.Mass, org.xmlrobot.horizon.Graviton)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?, ?> event) {
+	public void mass(MassListener sender, Tachyon<?, ?> event) {
 		super.mass(sender, event);
 		// do something
 		switch (event.getCommand()) {
@@ -157,12 +158,15 @@ public class Hyperplasma
 			Hyperplasma pair = (Hyperplasma) child;
 
 			if (event.getType() == ServiceEvent.REGISTERED) {
+				// instance xml
+				Hyperxml xml = instance(Hyperxml.class, Hyperneuron.class, 
+						pair.getKey(), pair.getValue(), getPlasma().getRoot());
 				// input to the brain
-				getReplicator().add(new Hyperxml(Hyperneuron.class, pair.getKey(), pair.getValue()));
+				xml.push(Command.SUBMIT);
 			}
 			if (event.getType() == ServiceEvent.UNREGISTERING) {
 				// rest in peace
-				getReplicator().removeByKey(pair.getKey());
+				getPlasma().release();
 			}
 		}
 	}

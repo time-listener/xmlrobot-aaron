@@ -14,12 +14,13 @@ import org.xmlrobot.core.matter.Quark;
 import org.xmlrobot.genesis.MassListener;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.TimeListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Child;
 import org.xmlrobot.spacetime.Columbia;
 import org.xmlrobot.spacetime.Fornax;
 import org.xmlrobot.spacetime.event.Compression;
 import org.xmlrobot.util.Command;
+import org.xmlrobot.util.Parity;
 
 /**
  * Spacetime implementation class.
@@ -37,7 +38,7 @@ public class Spacetime
 	private static final long serialVersionUID = -4610931478020986617L;
 
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#getKey()
+	 * @see org.xmlrobot.inheritance.Child#getKey()
 	 */
 	@Override
 	@XmlElement
@@ -45,14 +46,14 @@ public class Spacetime
 		return super.getKey();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#setKey(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Child#setKey(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Fornax setKey(Fornax key) {
 		return super.setKey(key);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#getValue()
+	 * @see org.xmlrobot.inheritance.Child#getValue()
 	 */
 	@Override
 	@XmlElement
@@ -60,40 +61,40 @@ public class Spacetime
 		return super.getValue();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#setValue(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Child#setValue(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Columbia setValue(Columbia value) {
 		return super.setValue(value);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#getReplicator()
+	 * @see org.xmlrobot.inheritance.Parent#getPlasma()
 	 */
 	@Override
 	@XmlElement(type=Hyperquark.class)
-	public Mass<Fornax,Columbia> getReplicator() {
-		return super.getReplicator();
+	public Mass<Fornax,Columbia> getPlasma() {
+		return super.getPlasma();
 	}
 	
 	/**
 	 * {@link Spacetime} default class constructor.
 	 */
 	public Spacetime() {
-		super(Hyperquark.class, Quark.class, Spacetime.class);
+		super(Hyperquark.class, Quark.class, Spacetime.class, Parity.XY);
 	}
 	/**
 	 * {@link Spacetime} class constructor.
 	 * @param antitype the inherited antitype
 	 */
 	public Spacetime(Class<Minkowski> antitype) {
-		super(Hyperquark.class, Quark.class, Spacetime.class, antitype);
+		super(Spacetime.class, antitype, Parity.XY);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.gravity.Recurrence#mass(org.xmlrobot.genesis.Entity, org.xmlrobot.horizon.Darkmass)
+	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Tachyon)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		// ancestral recall
 		super.mass(sender, event);
 		// commute command
@@ -115,7 +116,7 @@ public class Spacetime
 				}
 			}
 			break;
-		case PUSH:
+		case SEND:
 			if(event.getSource() instanceof Galaxy) {
 				// get antimatter
 				Mass<Columbia,Fornax> future;
@@ -132,7 +133,7 @@ public class Spacetime
 				}
 			}
 			break;
-		case LISTEN:
+		case PUSH:
 			if(event.getSource() instanceof Fornax) {
 				// cast source
 				Fornax dna = (Fornax) event.getSource();
@@ -142,12 +143,10 @@ public class Spacetime
 			else if(event.getSource() instanceof Galaxy) {
 				// cast source
 				Galaxy pair = (Galaxy) event.getSource();
-				// declare child
-				Mass<Fornax,Columbia> child;
 				// call child
-				if((child = getChild()) != null) {
+				if(!isEmpty()) {
 					// emit mass to the future
-					child.pulse(this, new Contraction(pair));
+					getChild().pulse(this, new Contraction(pair));
 				}
 			}
 			break;
@@ -190,7 +189,7 @@ public class Spacetime
 				// cast source
 				Galaxy pair = (Galaxy) event.getSource();
 				// transfer message contents
-				get().putValue(pair.getKey(), pair.getValue());
+				put(pair.getValue(), pair.getKey());
 			}
 			break;
 		default:
@@ -198,26 +197,18 @@ public class Spacetime
 		}
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#put(org.xmlrobot.genesis.Mass, org.xmlrobot.genesis.Mass)
+	 * @see org.xmlrobot.inheritance.Child#put(org.xmlrobot.genesis.TimeListener, org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Columbia put(Fornax key, Columbia value) {
-		// declare child
-		Mass<Fornax,Columbia> child;
-		// declare old value
-		Columbia oldValue;
-		// if update unsuccessful
-		if ((oldValue = (child = getChild()) != null ? 
-				child.putValue(key,	value) : null) == null) {
-			// create child
-			Cluster pair = new Cluster(Galaxy.class, key, value, this);
-			// push child
-			pair.push(Command.PUSH);
-		}
-		return oldValue;
+		// create child
+		Cluster pair = new Cluster(Galaxy.class, key, value, this);
+		// push child
+		pair.push(Command.SEND);
+		return null;
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.hyperspace.Abstraction#serviceChanged(org.osgi.framework.ServiceEvent)
+	 * @see org.xmlrobot.inheritance.Child#serviceChanged(org.osgi.framework.ServiceEvent)
 	 */
 	@Override
 	public void serviceChanged(ServiceEvent event) {
@@ -228,16 +219,32 @@ public class Spacetime
 		// assign and check
 		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
 				child instanceof Cluster : false) {
+			// declare plasma
+			Mass<Fornax,Columbia> plasma;
 			// cast source
 			Cluster pair = (Cluster) child;
 			// commute command
 			if(event.getType() == ServiceEvent.REGISTERED) {
-				// replicate mass
-				getReplicator().putValue(pair.getKey(), pair.getValue());
+				// assign and check it's contained
+				if((plasma = getPlasma()) != null ?
+						!plasma.isEmpty() ?
+								!plasma.containsValue(pair.getValue())
+								: true
+						: false) {
+					// replicate mass
+					plasma.putKey(pair.getValue(), pair.getKey());
+				}
 			}
 			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// release replication
-				getReplicator().removeByKey(pair.getKey());
+				// check if empty and chained
+				if((plasma = getPlasma()) != null ? 
+						!plasma.isEmpty() ? 
+								plasma.containsKey(pair.getKey()) 
+								: false
+						: false) {
+					// release child
+					plasma.removeByValue(pair.getValue());
+				}
 			}
 		}
 	}

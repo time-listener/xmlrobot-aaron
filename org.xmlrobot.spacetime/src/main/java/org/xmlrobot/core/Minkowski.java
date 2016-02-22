@@ -14,12 +14,13 @@ import org.xmlrobot.core.matter.Quark;
 import org.xmlrobot.genesis.MassListener;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.TimeListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Child;
 import org.xmlrobot.spacetime.Columbia;
 import org.xmlrobot.spacetime.Fornax;
 import org.xmlrobot.spacetime.event.Expansion;
 import org.xmlrobot.util.Command;
+import org.xmlrobot.util.Parity;
 
 /**
  * Minkowski implementation class.
@@ -37,7 +38,7 @@ public class Minkowski
 	private static final long serialVersionUID = 4738550804821121680L;
 
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewNut#getKey()
+	 * @see org.xmlrobot.inheritance.Child#getKey()
 	 */
 	@Override
 	@XmlElement
@@ -45,14 +46,14 @@ public class Minkowski
 		return super.getKey();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewNut#setKey(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Child#setKey(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Columbia setKey(Columbia key) {
 		return super.setKey(key);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewNut#getValue()
+	 * @see org.xmlrobot.inheritance.Child#getValue()
 	 */
 	@Override
 	@XmlElement
@@ -60,40 +61,40 @@ public class Minkowski
 		return super.getValue();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewNut#setValue(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Child#setValue(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Fornax setValue(Fornax value) {
 		return super.setValue(value);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#getReplicator()
+	 * @see org.xmlrobot.inheritance.Parent#getPlasma()
 	 */
 	@Override
 	@XmlElement(type=Quark.class)
-	public Mass<Columbia,Fornax> getReplicator() {
-		return super.getReplicator();
+	public Mass<Columbia,Fornax> getPlasma() {
+		return super.getPlasma();
 	}
 	
 	/**
 	 * {@link Minkowski} default class constructor.
 	 */
 	public Minkowski() {
-		super(Quark.class, Hyperquark.class, Minkowski.class);
+		super(Quark.class, Hyperquark.class, Minkowski.class, Parity.XX);
 	}
 	/**
 	 * {@link Minkowski} class constructor.
 	 * @param antitype the inherited antitype
 	 */
 	public Minkowski(Class<Spacetime> antitype) {
-		super(Quark.class, Hyperquark.class, Minkowski.class, antitype);
+		super(Minkowski.class, antitype, Parity.XX);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.gravity.Recurrence#mass(org.xmlrobot.genesis.Entity, org.xmlrobot.horizon.Darkmass)
+	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Tachyon)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		super.mass(sender, event);
 		
 		switch (event.getCommand()) {
@@ -114,7 +115,7 @@ public class Minkowski
 				}
 			}
 			break;
-		case PUSH:
+		case SEND:
 			if(event.getSource() instanceof Cluster) {
 				// get antimatter
 				Mass<Fornax,Columbia> future;
@@ -131,7 +132,7 @@ public class Minkowski
 				}
 			}
 			break;
-		case LISTEN:
+		case PUSH:
 			if(event.getSource() instanceof Columbia) {
 				// cast source
 				Columbia key = (Columbia) event.getSource();
@@ -189,7 +190,7 @@ public class Minkowski
 				// cast source
 				Cluster entity = (Cluster) event.getSource();
 				// transfer message contents
-				get().putValue(entity.getKey(), entity.getValue());
+				put(entity.getValue(), entity.getKey());
 			}
 			break;
 		default:
@@ -197,26 +198,18 @@ public class Minkowski
 		}
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.space.Contraction#putValue(java.lang.Object, java.lang.Object)
+	 * @see org.xmlrobot.inheritance.Child#put(org.xmlrobot.genesis.TimeListener, org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Fornax put(Columbia key, Fornax value) {
-		// declare child
-		Mass<Columbia, Fornax> child;
-		// declare old value
-		Fornax oldValue;
-		// if update unsuccessful
-		if ((oldValue = (child = getChild()) != null ? 
-				child.putValue(key, value) : null) == null) {
-			// create child
-			Galaxy pair = new Galaxy(Cluster.class, key, value, this);
-			// push child
-			pair.push(Command.PUSH);
-		}
-		return oldValue;
+		// create child
+		Galaxy pair = new Galaxy(Cluster.class, key, value, this);
+		// push child
+		pair.push(Command.SEND);
+		return null;
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.hyperspace.Abstraction#serviceChanged(org.osgi.framework.ServiceEvent)
+	 * @see org.xmlrobot.inheritance.Child#serviceChanged(org.osgi.framework.ServiceEvent)
 	 */
 	@Override
 	public void serviceChanged(ServiceEvent event) {
@@ -227,16 +220,32 @@ public class Minkowski
 		// assign and check
 		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
 				child instanceof Galaxy : false) {
+			// declare plasma
+			Mass<Columbia,Fornax> plasma;
 			// cast source
 			Galaxy pair = (Galaxy) child;
 			// commute command
 			if(event.getType() == ServiceEvent.REGISTERED) {
-				// replicate mass
-				getReplicator().putValue(pair.getKey(), pair.getValue());
+				// assign and check it's contained
+				if((plasma = getPlasma()) != null ?
+						!plasma.isEmpty() ?
+								!plasma.containsKey(pair.getKey())
+								: true
+						: false) {
+					// replicate mass
+					plasma.putValue(pair.getKey(), pair.getValue());
+				}
 			}
 			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// release replication
-				getReplicator().removeByKey(pair.getKey());
+				// check if empty and chained
+				if((plasma = getPlasma()) != null ? 
+						!plasma.isEmpty() ? 
+								plasma.containsValue(pair.getValue()) 
+								: false
+						: false) {
+					// release child
+					plasma.removeByKey(pair.getKey());
+				}
 			}
 		}
 	}

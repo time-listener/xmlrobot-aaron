@@ -6,14 +6,11 @@ package org.xmlrobot.core;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceReference;
 import org.xmlrobot.core.antimatter.Hyperlepton;
 import org.xmlrobot.core.matter.Lepton;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
-import org.xmlrobot.genesis.TimeListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Parent;
 import org.xmlrobot.spacetime.Columbia;
 import org.xmlrobot.spacetime.Fornax;
@@ -71,8 +68,8 @@ public class Galaxy
 	 */
 	@Override
 	@XmlElement(type=Lepton.class)
-	public Mass<Columbia,Fornax> getReplicator() {
-		return super.getReplicator();
+	public Mass<Columbia,Fornax> getPlasma() {
+		return super.getPlasma();
 	}
 	
 	/**
@@ -103,7 +100,7 @@ public class Galaxy
 	 * @param antitype the inherited antitype
 	 */
 	public Galaxy(Class<Cluster> antitype) {
-		super(Lepton.class, Hyperlepton.class, Galaxy.class, antitype, Parity.XX);
+		super(Galaxy.class, antitype, Parity.XX);
 	}
 	/**
 	 * {@link Galaxy} class constructor.
@@ -112,7 +109,7 @@ public class Galaxy
 	 * @param value {@link Fornax} the value
 	 */
 	public Galaxy(Class<Cluster> antitype, Columbia key, Fornax value) {
-		super(Lepton.class, Hyperlepton.class, Galaxy.class, antitype, key, value, Parity.XX);
+		super(Galaxy.class, antitype, key, value, Parity.XX);
 	}
 	/**
 	 * {@link Galaxy} class constructor.
@@ -122,14 +119,14 @@ public class Galaxy
 	 * @param parent {@link Minkowski} the parent
 	 */
 	public Galaxy(Class<Cluster> antitype, Columbia key, Fornax value, Minkowski parent) {
-		super(Lepton.class, Hyperlepton.class, Galaxy.class, antitype, key, value, parent);
+		super(Galaxy.class, antitype, key, value, parent);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.gravity.Recurrence#mass(org.xmlrobot.genesis.Entity, org.xmlrobot.horizon.Darkmass)
+	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Tachyon)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		super.mass(sender, event);
 		
 		switch (event.getCommand()) {
@@ -150,33 +147,17 @@ public class Galaxy
 	 */
 	@Override
 	public void run() {
-		super.run();
-		// rest in peace
-		push(Command.TRANSFER);
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.hyperspace.Abstraction#serviceChanged(org.osgi.framework.ServiceEvent)
-	 */
-	@Override
-	public void serviceChanged(ServiceEvent event) {
-		// get reference
-		ServiceReference<?> ref = event.getServiceReference();
-		// declare child
-		Object child;
-		// assign and check
-		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
-				child instanceof Galaxy : false) {
-			// cast source
-			Galaxy pair = (Galaxy) child;
-			// commute command
-			if(event.getType() == ServiceEvent.REGISTERED) {
-				// replicate mass
-				getReplicator().add(new Lepton(Hyperlepton.class, pair.getKey(), pair.getValue()));
-			}
-			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// release replication
-				getReplicator().removeByKey(pair.getKey());
-			}
+		// avoid concurrent calls to run
+		if (!message.compareAndSet(RUNNER, null, Thread.currentThread())) {
+			// because is already running
+			return;
+		} 
+		else {
+			// life starts here
+			super.run();
+			// life ends here
+			push(Command.TRANSFER);
 		}
 	}
+
 }

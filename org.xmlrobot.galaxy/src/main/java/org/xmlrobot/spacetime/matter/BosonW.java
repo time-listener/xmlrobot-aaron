@@ -25,6 +25,14 @@ public class BosonW
 	private static final long serialVersionUID = 4014918301790036086L;
 	
 	/* (non-Javadoc)
+	 * @see org.xmlrobot.hyperspace.Abstraction#getName()
+	 */
+	@Override
+	@XmlElement
+	public String getName() {
+		return getKey().getName();
+	}
+	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Space#getKey()
 	 */
 	@Override
@@ -106,14 +114,7 @@ public class BosonW
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.hyperspace.Abstraction#getName()
-	 */
-	@Override
-	public String getName() {
-		return getKey().getName();
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Electron#compare(org.xmlrobot.genesis.Mass, org.xmlrobot.genesis.Mass)
+	 * @see org.xmlrobot.time.Time#compare(org.xmlrobot.genesis.TimeListener, org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public int compare(Mass<AlphaCentauri,Sun> o1, Mass<AlphaCentauri,Sun> o2) {

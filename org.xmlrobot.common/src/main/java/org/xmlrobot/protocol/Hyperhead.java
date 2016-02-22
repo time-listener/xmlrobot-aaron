@@ -24,19 +24,21 @@ import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceRegistration;
 import org.xmlrobot.genesis.MassListener;
 import org.xmlrobot.genesis.TimeListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
+import org.xmlrobot.util.Abort;
 import org.xmlrobot.util.Command;
 import org.xmlrobot.util.Parity;
 
 /**
- * Entity's brain.
+ * Entity's brain. 
+ * It is the obsolete dictionary of always that is always changing.
  * 
  * @author joan
  *
  */
 @XmlRootElement
 public class Hyperhead
-	extends Dictionary<String,AtomicReference<Object>> 
+	extends Dictionary<String,AtomicReference<?>> 
 		implements MassListener {
 
 	/**
@@ -47,7 +49,7 @@ public class Hyperhead
 	/**
 	 * The backing data
 	 */
-	Dictionary<String,AtomicReference<Object>> map;
+	Dictionary<String,AtomicReference<?>> map;
 	
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.Entity#family()
@@ -56,7 +58,7 @@ public class Hyperhead
 	@XmlTransient
 	public ThreadGroup getFamily() {
 
-		return getAndCast(FAMILY);
+		return getAndGet(FAMILY);
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.Entity#host()
@@ -65,7 +67,7 @@ public class Hyperhead
 	@XmlTransient
 	public ServiceRegistration<?> getHost() {
 
-		return getAndCast(HOST);
+		return getAndGet(HOST);
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.Entity#name()
@@ -81,7 +83,7 @@ public class Hyperhead
 	@Override
 	public Parity getGen() {
 
-		return getAndCast(PARITY);
+		return getAndGet(PARITY);
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.MassListener#setGen(org.xmlrobot.util.Parity)
@@ -96,7 +98,7 @@ public class Hyperhead
 	@Override
 	public MassListener dna() {
 
-		return getAndCast(DNA);
+		return getAndGet(DNA);
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.Entity#runner()
@@ -105,7 +107,7 @@ public class Hyperhead
 	@XmlTransient
 	public Thread getRunner() {
 		
-		return getAndCast(RUNNER);
+		return getAndGet(RUNNER);
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.Mass#getCommand()
@@ -114,7 +116,7 @@ public class Hyperhead
 	@XmlElement
 	public Command getCommand() {
 		
-		return getAndCast(COMMAND);
+		return getAndGet(COMMAND);
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.MassListener#getContext()
@@ -123,7 +125,7 @@ public class Hyperhead
 	@XmlTransient
 	public BundleContext getContext() {
 		
-		return getAndCast(CONTEXT);
+		return getAndGet(CONTEXT);
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.Mass#setCommand(org.xmlrobot.util.Command)
@@ -155,9 +157,14 @@ public class Hyperhead
 	 */
 	public Hyperhead() {
 		// create time-traveler message properties
-		map = new Hashtable<String,AtomicReference<Object>>();
+		map = new Hashtable<String,AtomicReference<?>>();
 		// inherit dna
 		set(TimeListener.DNA, this);
+	}
+	public Hyperhead(MassListener head) {
+		if(head == null ? true : !(head instanceof Hyperhead))
+			throw new Abort();
+		this.map = (Hyperhead) head;
 	}
 	
 	/* (non-Javadoc)
@@ -177,30 +184,59 @@ public class Hyperhead
 	 * @see java.util.Dictionary#elements()
 	 */
 	@Override
-	public Enumeration<AtomicReference<Object>> elements() {
+	public Enumeration<AtomicReference<?>> elements() {
 		
 		return map.elements();
+	}
+	/**
+	 * Declares a reference in the hyperdictionary.
+	 * @param key the key reference
+	 * @return not null if key was previously declared.
+	 */
+	public <X> Object declare(String key){
+		return put(key, new AtomicReference<X>());
+	}
+	/**
+	 * Declares and sets a reference in the hyperdictionary.
+	 * @param key the key reference
+	 * @param value the value reference
+	 * @return the declared reference
+	 * @return not null if key was previously declared.
+	 */
+	public <X> Object declareAndSet(String key, X value){
+		return put(key, new AtomicReference<X>(value));
 	}
 	/* (non-Javadoc)
 	 * @see java.util.Dictionary#get(java.lang.Object)
 	 */
 	@Override
-	public AtomicReference<Object> get(Object key) {
-
+	public AtomicReference<?> get(Object key) {
 		return map.get(key);
 	}
 	/**
+	 * Returns the hyperdictionary reference with the specified key. 
+	 * @param key the input key
+	 * @return the hyperdictionary reference with the specified key
+	 */
+	@SuppressWarnings("unchecked")
+	public <X> AtomicReference<X> getAndCast(String key) {
+		try {
+			return (AtomicReference<X>) get(key);
+		}
+		catch(ClassCastException | NullPointerException unused) {
+			return null;	
+		}
+	}
+	/**
+	 * Returns the hyperdictionary reference value with the specified key. 
 	 * @param key
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
-	public <X> X getAndCast(String key)
-	{
+	public <X> X getAndGet(String key) {
 		try {
-			return (X) get(key).get();	
+			return this.<X>getAndCast(key).get();	
 		}
 		catch(ClassCastException | NullPointerException unused) {
-			
 			return null;
 		}
 	}
@@ -209,27 +245,24 @@ public class Hyperhead
 	 * @param value
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
-	public <X> X getAndSet(String key, X value)
-	{
+	public <X> X getAndSet(String key, X value) {
 		try {
-			return (X) get(key).getAndSet(value);
+			return this.<X>getAndCast(key).getAndSet(value);
 		}
 		catch(ClassCastException | NullPointerException unused) {
-			
 			return null;
 		}
 	}
+	
 	/**
 	 * @param key
 	 * @param oldValue
 	 * @param newValue
 	 * @return
 	 */
-	public <X> boolean compareAndSet(String key, X oldValue, X newValue)
-	{
+	public <X> boolean compareAndSet(String key, X oldValue, X newValue) {
 		try {
-			return get(key).compareAndSet(oldValue, newValue);
+			return getAndCast(key).compareAndSet(oldValue, newValue);
 		}
 		catch(ClassCastException | NullPointerException unused) {
 			
@@ -248,7 +281,7 @@ public class Hyperhead
 	 * @see java.util.Dictionary#put(java.lang.Object, java.lang.Object)
 	 */
 	@Override
-	public AtomicReference<Object> put(String key, AtomicReference<Object> value) {
+	public AtomicReference<?> put(String key, AtomicReference<?> value) {
 		return map.put(key, value);
 	}
 	/**
@@ -256,21 +289,21 @@ public class Hyperhead
 	 * @param value
 	 * @return
 	 */
-	public void set(String key, Object value) {
+	public <X> void set(String key, X value) {
 		// get reference
-		AtomicReference<Object> ref = get(key);
+		AtomicReference<X> ref = getAndCast(key);
 		// check existence
 		if(ref != null)
 			// set new value
 			ref.set(value);
 		// create it
-		else put(key, new AtomicReference<Object>(value));
+		else declareAndSet(key, value);
 	}
 	/* (non-Javadoc)
 	 * @see java.util.Dictionary#remove(java.lang.Object)
 	 */
 	@Override
-	public AtomicReference<Object> remove(Object key) {
+	public AtomicReference<?> remove(Object key) {
 
 		return map.remove(key);
 	}
@@ -304,15 +337,12 @@ public class Hyperhead
 	public void addMassListener(MassListener listener) {
 		return;
 	}
-	@Override
-	public void removeMassListener(MassListener listener) {
-		return;
-	}
+
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.MassListener#mass(org.xmlrobot.genesis.Mass, org.xmlrobot.horizon.Graviton)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		return;
 	}
 	/* (non-Javadoc)
@@ -409,7 +439,20 @@ public class Hyperhead
 	public <T> T invokeAny(Collection<? extends Callable<T>> tasks,
 			long timeout, TimeUnit unit) throws InterruptedException,
 			ExecutionException, TimeoutException {
-
 		return null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.Deflector#pulse(org.xmlrobot.genesis.TimeListener, org.xmlrobot.horizon.Tachyon)
+	 */
+	@Override
+	public <X extends TimeListener<X,Y>, Y extends TimeListener<Y,X>>
+		void pulse(TimeListener<?,?> sender, Tachyon<Y,X> event) {
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.Deflector#echo(org.xmlrobot.genesis.TimeListener, org.xmlrobot.horizon.Tachyon)
+	 */
+	@Override
+	public <X extends TimeListener<X,Y>,Y extends TimeListener<Y,X>> void echo(
+			TimeListener<?,?> sender, Tachyon<X,Y> event) {
 	}
 }

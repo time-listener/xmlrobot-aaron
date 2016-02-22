@@ -17,7 +17,7 @@ import org.xmlrobot.dna.matter.Dna;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
 import org.xmlrobot.genesis.TimeListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Child;
 import org.xmlrobot.util.Command;
 import org.xmlrobot.util.Parity;
@@ -38,7 +38,7 @@ public class Ribosoma
 	private static final long serialVersionUID = 4538358656836061534L;
 
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#getKey()
+	 * @see org.xmlrobot.inheritance.Child#getKey()
 	 */
 	@Override
 	@XmlElement
@@ -46,14 +46,14 @@ public class Ribosoma
 		return super.getKey();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#setKey(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Child#setKey(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Cromosoma setKey(Cromosoma key) {
 		return super.setKey(key);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#getValue()
+	 * @see org.xmlrobot.inheritance.Child#getValue()
 	 */
 	@Override
 	@XmlElement
@@ -61,26 +61,26 @@ public class Ribosoma
 		return super.getValue();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#setValue(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Child#setValue(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Diploid setValue(Diploid value) {
 		return super.setValue(value);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#getReplicator()
+	 * @see org.xmlrobot.inheritance.Parent#getPlasma()
 	 */
 	@Override
 	@XmlElement(type=Hyperdna.class)
-	public Mass<Cromosoma,Diploid> getReplicator() {
-		return super.getReplicator();
+	public Mass<Cromosoma,Diploid> getPlasma() {
+		return super.getPlasma();
 	}
 	
 	/**
 	 * {@link Ribosoma} default class constructor.
 	 */
 	public Ribosoma() {
-		super(Hyperdna.class, Dna.class, Ribosoma.class);
+		super(Hyperdna.class, Dna.class, Ribosoma.class, Parity.XY);
 	}
 	/**
 	 * {@link Ribosoma} class constructor.
@@ -88,14 +88,14 @@ public class Ribosoma
 	 * @param gen {@link Parity} the gender
 	 */
 	public Ribosoma(Class<Tetraploid> antitype) {
-		super(Hyperdna.class, Dna.class, Ribosoma.class, antitype);
+		super(Ribosoma.class, antitype, Parity.XY);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.gravity.Recurrence#mass(org.xmlrobot.genesis.Entity, org.xmlrobot.horizon.Darkmass)
+	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Tachyon)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		super.mass(sender, event);
 		// commute order
 		switch (event.getCommand()) {
@@ -116,7 +116,7 @@ public class Ribosoma
 				}
 			}
 			break;
-		case PUSH:
+		case SEND:
 			if(event.getSource() instanceof Plasmid) {
 				// get antimatter
 				Mass<Diploid,Cromosoma> key;
@@ -133,7 +133,7 @@ public class Ribosoma
 				}
 			}
 			break;
-		case LISTEN:
+		case PUSH:
 			if(event.getSource() instanceof Cromosoma) {
 				// cast source
 				Cromosoma key = (Cromosoma) event.getSource();
@@ -191,7 +191,7 @@ public class Ribosoma
 				// cast source
 				Plasmid entity = (Plasmid) event.getSource();
 				// transfer message contents
-				get().putValue(entity.getKey(), entity.getValue());
+				put(entity.getValue(), entity.getKey());
 			}
 			break;
 		default:
@@ -199,26 +199,18 @@ public class Ribosoma
 		}
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#put(org.xmlrobot.genesis.Mass, org.xmlrobot.genesis.Mass)
+	 * @see org.xmlrobot.inheritance.Child#put(org.xmlrobot.genesis.TimeListener, org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Diploid put(Cromosoma key, Diploid value) {
-		// declare child
-		Mass<Cromosoma, Diploid> child;
-		// declare old value
-		Diploid oldValue;
-		// if update unsuccessful
-		if ((oldValue = (child = getChild()) != null ? 
-				child.putValue(key,	value) : null) == null) {
-			// create child
-			Groove pair = new Groove(Plasmid.class, key, value, this);
-			// push child
-			pair.push(Command.PUSH);
-		}
-		return oldValue;
+		// create child
+		Groove pair = new Groove(Plasmid.class, key, value, this);
+		// push child
+		pair.push(Command.SEND);
+		return null;
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.hyperspace.Abstraction#serviceChanged(org.osgi.framework.ServiceEvent)
+	 * @see org.xmlrobot.inheritance.Child#serviceChanged(org.osgi.framework.ServiceEvent)
 	 */
 	@Override
 	public void serviceChanged(ServiceEvent event) {
@@ -229,16 +221,32 @@ public class Ribosoma
 		// assign and check
 		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
 				child instanceof Groove : false) {
+			// declare plasma
+			Mass<Cromosoma,Diploid> plasma;
 			// cast source
 			Groove pair = (Groove) child;
 			// commute command
 			if(event.getType() == ServiceEvent.REGISTERED) {
-				// replicate mass
-				getReplicator().putValue(pair.getKey(), pair.getValue());
+				// assign and check it's contained
+				if((plasma = getPlasma()) != null ?
+						!plasma.isEmpty() ?
+								!plasma.containsKey(pair.getKey())
+								: true
+						: false) {
+					// replicate mass
+					plasma.putValue(pair.getKey(), pair.getValue());
+				}
 			}
 			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// release replication
-				getReplicator().removeByKey(pair.getKey());
+				// check if empty and chained
+				if((plasma = getPlasma()) != null ? 
+						!plasma.isEmpty() ? 
+								plasma.containsValue(pair.getValue()) 
+								: false
+						: false) {
+					// release child
+					plasma.removeByKey(pair.getKey());
+				}
 			}
 		}
 	}

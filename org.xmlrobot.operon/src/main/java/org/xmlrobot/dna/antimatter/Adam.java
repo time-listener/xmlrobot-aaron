@@ -9,7 +9,7 @@ import org.xmlrobot.dna.matter.Eva;
 import org.xmlrobot.dna.matter.Ovum;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.positron.Antiproton;
 import org.xmlrobot.util.Command;
 
@@ -29,7 +29,7 @@ public class Adam
 	private static final long serialVersionUID = -7001412700159246172L;
 
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Proton#getKey()
+	 * @see org.xmlrobot.positron.Antiproton#getKey()
 	 */
 	@Override
 	@XmlElement
@@ -37,14 +37,14 @@ public class Adam
 		return super.getKey();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Proton#setKey(java.lang.Object)
+	 * @see org.xmlrobot.positron.Antiproton#setKey(java.lang.Object)
 	 */
 	@Override
 	public Ribosoma setKey(Ribosoma key) {
 		return super.setKey(key);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Proton#getValue()
+	 * @see org.xmlrobot.positron.Antiproton#getValue()
 	 */
 	@Override
 	@XmlElement
@@ -52,7 +52,7 @@ public class Adam
 		return super.getValue();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Proton#setValue(java.lang.Object)
+	 * @see org.xmlrobot.positron.Antiproton#setValue(java.lang.Object)
 	 */
 	@Override
 	public Tetraploid setValue(Tetraploid value) {
@@ -77,7 +77,7 @@ public class Adam
 	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Takion)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?, ?> event) {
+	public void mass(MassListener sender, Tachyon<?, ?> event) {
 		super.mass(sender, event);
 		
 		switch (event.getCommand()) {
@@ -98,7 +98,7 @@ public class Adam
 				}
 			}
 			break;
-		case PUSH:
+		case SEND:
 			if(event.getSource() instanceof Ovum) {
 				// declare stem
 				Mass<Tetraploid,Ribosoma> stem;
@@ -154,22 +154,14 @@ public class Adam
 		}
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Proton#putValue(java.lang.Object, java.lang.Object)
+	 * @see org.xmlrobot.positron.Antiproton#put(java.lang.Object, java.lang.Object)
 	 */
 	@Override
 	public Tetraploid put(Ribosoma key, Tetraploid value) {
-		// declare child
-		Mass<Ribosoma,Tetraploid> child;
-		// declare old value
-		Tetraploid oldValue;
-		// if update unsuccessful
-		if ((oldValue = (child = getChild()) != null ? 
-				child.putValue(key, value) : null) == null) {
-			// create child
-			Sperma pair = new Sperma(Ovum.class, key, value, this);
-			// push child
-			pair.push(Command.PUSH);
-		}
-		return oldValue;
+		// create child
+		Sperma pair = new Sperma(Ovum.class, key, value, this);
+		// push child
+		pair.push(Command.SEND);
+		return null;
 	}
 }

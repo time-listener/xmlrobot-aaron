@@ -6,8 +6,6 @@ package org.xmlrobot.dna;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceReference;
 import org.xmlrobot.dna.Allele;
 import org.xmlrobot.dna.Cromosoma;
 import org.xmlrobot.dna.Diploid;
@@ -15,8 +13,7 @@ import org.xmlrobot.dna.antimatter.Hyperrna;
 import org.xmlrobot.dna.matter.Rna;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
-import org.xmlrobot.genesis.TimeListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Parent;
 import org.xmlrobot.util.Command;
 import org.xmlrobot.util.Parity;
@@ -37,7 +34,7 @@ public class Plasmid
 	private static final long serialVersionUID = 2106329525287215569L;
 
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#getKey()
+	 * @see org.xmlrobot.inheritance.Parent#getKey()
 	 */
 	@Override
 	@XmlElement
@@ -45,14 +42,14 @@ public class Plasmid
 		return super.getKey();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#setKey(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Parent#setKey(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Diploid setKey(Diploid key) {
 		return super.setKey(key);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#getValue()
+	 * @see org.xmlrobot.inheritance.Parent#getValue()
 	 */
 	@Override
 	@XmlElement
@@ -60,19 +57,19 @@ public class Plasmid
 		return super.getValue();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#setValue(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Parent#setValue(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Cromosoma setValue(Cromosoma value) {
 		return super.setValue(value);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#getReplicator()
+	 * @see org.xmlrobot.inheritance.Parent#getPlasma()
 	 */
 	@Override
 	@XmlElement(type=Rna.class)
-	public Mass<Diploid,Cromosoma> getReplicator() {
-		return super.getReplicator();
+	public Mass<Diploid,Cromosoma> getPlasma() {
+		return super.getPlasma();
 	}
 	
 	/**
@@ -103,7 +100,7 @@ public class Plasmid
 	 * @param antitype the inherited antitype
 	 */
 	public Plasmid(Class<Ribosoma> antitype) {
-		super(Rna.class, Hyperrna.class, Plasmid.class, antitype, Parity.XX);
+		super(Plasmid.class, antitype, Parity.XX);
 	}
 	/**
 	 * {@link Plasmid} class constructor.
@@ -112,7 +109,7 @@ public class Plasmid
 	 * @param value {@link Cromosoma} the value
 	 */
 	public Plasmid(Class<Groove> antitype, Diploid key, Cromosoma value) {
-		super(Rna.class, Hyperrna.class, Plasmid.class, antitype, key, value, Parity.XX);
+		super(Plasmid.class, antitype, key, value, Parity.XX);
 	}
 	/**
 	 * {@link Plasmid} class constructor.
@@ -122,14 +119,14 @@ public class Plasmid
 	 * @param parent {@link Tetraploid} the parent
 	 */
 	public Plasmid(Class<Groove> antitype, Diploid key, Cromosoma value, Tetraploid parent) {
-		super(Rna.class, Hyperrna.class, Plasmid.class, antitype, key, value, parent);
+		super(Plasmid.class, antitype, key, value, parent);
 	}
 
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.gravity.Recurrence#mass(org.xmlrobot.genesis.Entity, org.xmlrobot.horizon.Darkmass)
+	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Tachyon)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		super.mass(sender, event);
 		
 		switch (event.getCommand()) {
@@ -146,38 +143,21 @@ public class Plasmid
 		}
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#run()
+	 * @see org.xmlrobot.inheritance.Parent#run()
 	 */
 	@Override
 	public void run() {
-		// life starts
-		super.run();
-		// rest in peace
-		push(Command.TRANSFER);
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.hyperspace.Abstraction#serviceChanged(org.osgi.framework.ServiceEvent)
-	 */
-	@Override
-	public void serviceChanged(ServiceEvent event) {
-		// get reference
-		ServiceReference<?> ref = event.getServiceReference();
-		// declare child
-		Object child;
-		// assign and check
-		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
-				child instanceof Plasmid : false) {
-			// cast source
-			Plasmid pair = (Plasmid) child;
-			// commute command
-			if(event.getType() == ServiceEvent.REGISTERED) {
-				// replicate mass
-				getReplicator().add(new Rna(Hyperrna.class, pair.getKey(), pair.getValue()));
-			}
-			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// release replication
-				getReplicator().removeByKey(pair.getKey());
-			}
+		// avoid concurrent calls to run
+		if (!message.compareAndSet(RUNNER, null, Thread.currentThread())) {
+			// because is already running
+			return;
+		} 
+		else {
+			// life starts here
+			super.run();
+			// life ends here
+			push(Command.TRANSFER);
 		}
 	}
+
 }

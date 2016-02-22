@@ -6,10 +6,7 @@ package org.xmlrobot.subspace;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceReference;
 import org.xmlrobot.genesis.Mass;
-import org.xmlrobot.genesis.TimeListener;
 import org.xmlrobot.subspace.antimatter.Hyperline;
 import org.xmlrobot.subspace.matter.Hyperunit;
 import org.xmlrobot.util.Command;
@@ -29,6 +26,15 @@ public class Hyperpair
 	 */
 	private static final long serialVersionUID = -8551753871097847645L;
 
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.time.Time#getName()
+	 */
+	@Override
+	@XmlElement
+	public String getName() {
+
+		return getKey().toString();
+	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Space#getKey()
 	 */
@@ -63,9 +69,9 @@ public class Hyperpair
 	 * @see org.xmlrobot.subspace.Hyperstring#getReplicator()
 	 */
 	@Override
-	@XmlElement(type=Hyperline.class)
-	public Mass<Character,Integer> getReplicator() {
-		return super.getReplicator();
+	@XmlElement
+	public Hyperline getPlasma() {
+		return (Hyperline) super.getPlasma();
 	}
 	
 	/**
@@ -96,7 +102,7 @@ public class Hyperpair
 	 * @param antitype the inherited antitype
 	 */
 	public Hyperpair(Class<Hyperentry> antitype) {
-		super(Hyperline.class, Hyperunit.class, Hyperpair.class, antitype);
+		super(Hyperpair.class, antitype);
 	}
 	/**
 	 * {@link Hyperpair} class constructor.
@@ -105,7 +111,7 @@ public class Hyperpair
 	 * @param value {@link Integer} the value
 	 */
 	public Hyperpair(Class<Hyperentry> antitype, Character key, Integer value) {
-		super(Hyperline.class, Hyperunit.class, Hyperpair.class, antitype, key, value);
+		super(Hyperpair.class, antitype, key, value);
 	}
 	/**
 	 * {@link Hyperpair} class constructor.
@@ -115,11 +121,19 @@ public class Hyperpair
 	 * @param parent {@link Hypercube} the parent
 	 */
 	public Hyperpair(Class<Hyperentry> antitype, Character key, Integer value, Hypercube parent) {
-		super(Hyperline.class, Hyperunit.class, Hyperpair.class, antitype, key, value, parent);
+		super(Hyperpair.class, antitype, key, value, parent);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.lang.Hyperstring#run()
+	 * @see org.xmlrobot.time.Time#compare(org.xmlrobot.genesis.TimeListener, org.xmlrobot.genesis.TimeListener)
+	 */
+	@Override
+	public synchronized int compare(Mass<Character,Integer> o1, Mass<Character,Integer> o2) {
+
+		return Integer.compare(o1.getValue(), o2.getValue());
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.subspace.Hyperstring#run()
 	 */
 	@Override
 	public void run() {
@@ -133,31 +147,6 @@ public class Hyperpair
 			super.run();
 			// life ends here
 			push(Command.TRANSFER);
-		}
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.hyperspace.Abstraction#serviceChanged(org.osgi.framework.ServiceEvent)
-	 */
-	@Override
-	public void serviceChanged(ServiceEvent event) {
-		// get reference
-		ServiceReference<?> ref = event.getServiceReference();
-		// declare child
-		Object child;
-		// assign and check
-		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
-				child instanceof Hyperpair : false) {
-			// cast source
-			Hyperpair pair = (Hyperpair) child;
-			// commute command
-			if(event.getType() == ServiceEvent.REGISTERED) {
-				// replicate mass
-				getReplicator().submit(new Hyperline(Hyperunit.class, pair.getKey(), pair.getValue()));
-			}
-			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// release replication
-				getReplicator().release();
-			}
 		}
 	}
 }

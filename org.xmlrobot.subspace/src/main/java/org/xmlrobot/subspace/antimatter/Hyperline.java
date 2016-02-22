@@ -23,6 +23,13 @@ public class Hyperline
 	private static final long serialVersionUID = -2316162769120745075L;
 	
 	/* (non-Javadoc)
+	 * @see org.xmlrobot.positron.Antineutron#name()
+	 */
+	@Override
+	public String getName() {
+		return getKey().toString();
+	}
+	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Space#getKey()
 	 */
 	@Override
@@ -103,13 +110,7 @@ public class Hyperline
 		super(Hyperline.class, antitype, key, value, parent);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Antineutron#name()
-	 */
-	@Override
-	public String getName() {
-		return getKey().toString();
-	}
+
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.positron.Positron#compare(org.xmlrobot.genesis.Mass, org.xmlrobot.genesis.Mass)
 	 */

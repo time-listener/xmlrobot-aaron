@@ -11,6 +11,10 @@ import org.xmlrobot.spacetime.antimatter.Hypergluon;
 
 /**
  * Gluon implementation class.
+ * Gluons are elementary particles that act as the exchange particles for the strong force between quarks, 
+ * analogous to the exchange of photons in the electromagnetic force between two charged particles. 
+ * In layman terms, they "glue" quarks together, forming protons and neutrons.
+ * 
  * @author joan
  * @parity XX
  * @since 41156.3
@@ -23,7 +27,14 @@ public class Gluon
 	 * 9027202948697242639L
 	 */
 	private static final long serialVersionUID = 9027202948697242639L;
-	
+
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.hyperspace.Abstraction#getName()
+	 */
+	@Override
+	public String getName() {
+		return getKey().getName();
+	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Space#getKey()
 	 */
@@ -106,14 +117,7 @@ public class Gluon
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.MassListener#name()
-	 */
-	@Override
-	public String getName() {
-		return getKey().getName();
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Electron#compare(org.xmlrobot.genesis.Mass, org.xmlrobot.genesis.Mass)
+	 * @see org.xmlrobot.time.Time#compare(org.xmlrobot.genesis.TimeListener, org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public int compare(Mass<Saturn,Jupiter> o1, Mass<Saturn,Jupiter> o2) {

@@ -39,9 +39,8 @@ package org.xmlrobot.genesis;
  * @param <K> is the key
  * @param <V> is the value
  */
-public interface TimeListener
-	<K extends TimeListener<K,V>,V extends TimeListener<V,K>>
-		extends Congregation<K>, Phaser<V>, Deflector {
+public interface TimeListener<K,V>
+	extends Congregation<K>, Phaser<V> {
 
 	/**
 	 * The key.
@@ -73,7 +72,7 @@ public interface TimeListener
 	 * @see org.xmlrobot.genesis.MassListener#dna()
 	 */
 	TimeListener<K,V> dna();
-
+	
     /**
 	 * @return the inherited type
 	 */
@@ -104,17 +103,6 @@ public interface TimeListener
 	 * @author morpheo
 	 */
 	TimeListener.Transmitter<K,V> matrix();
-	
-	/**
-	 * <tt>this</tt> is your last chance. After <tt>this</tt>, there is no return. 
-	 * You take the blue pill—the story ends, you wake up in your bed 
-	 * and believe whatever you want to believe. You take the red pill
-	 * —you stay in <tt>wonderland</tt>, and I show you how deep the rabbit hole 
-	 * goes. Remember: all I'm offering is the <tt>truth</tt>. Nothing more. 
-	 * <br><br>
-	 * @author morpheo
-	 */
-	TimeListener.Transmitter<K,V> matrix(V output);
 
 	/**
 	 * Inheritance transmitter implementation interface.
@@ -129,13 +117,13 @@ public interface TimeListener
 		 * @param child the child to be pushed
 		 * @return true is push was successful
 		 */
-		void push(K child);
+		void inject(K child);
 		
 		/**
 		 * Injects value's child to the current output value.
 		 * @param child the child to be injected
 		 * @return true if injection was successful
 		 */
-		void inject(V child);
+		void push(V child);
 	}
 }

@@ -9,7 +9,7 @@ import org.xmlrobot.dna.matter.Dna;
 import org.xmlrobot.dna.matter.Rna;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.positron.Antiproton;
 import org.xmlrobot.util.Command;
 
@@ -77,7 +77,7 @@ public class Hyperdna
 	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Takion)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		super.mass(sender, event);
 		
 		switch (event.getCommand()) {
@@ -98,7 +98,7 @@ public class Hyperdna
 				}
 			}
 			break;
-		case PUSH:
+		case SEND:
 			if(event.getSource() instanceof Rna) {
 				// declare stem
 				Mass<Diploid,Cromosoma> stem;
@@ -158,18 +158,10 @@ public class Hyperdna
 	 */
 	@Override
 	public Diploid put(Cromosoma key, Diploid value) {
-		// declare child
-		Mass<Cromosoma,Diploid> child;
-		// declare old value
-		Diploid oldValue;
-		// if update unsuccessful
-		if ((oldValue = (child = getChild()) != null ? 
-				child.putValue(key,	value) : null) == null) {
-			// create child
-			Hyperrna pair = new Hyperrna(Rna.class, key, value, this);
-			// push child
-			pair.push(Command.PUSH);
-		}
-		return oldValue;
+		// create child
+		Hyperrna pair = new Hyperrna(Rna.class, key, value, this);
+		// push child
+		pair.push(Command.SEND);
+		return null;
 	}
 }

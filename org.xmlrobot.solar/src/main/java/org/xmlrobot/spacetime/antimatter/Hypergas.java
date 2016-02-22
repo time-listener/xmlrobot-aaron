@@ -5,7 +5,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.nature.Biosphere;
 import org.xmlrobot.nature.Ecosystem;
 import org.xmlrobot.positron.Antiproton;
@@ -79,7 +79,7 @@ public class Hypergas
 	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Takion)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		super.mass(sender, event);
 		switch (event.getCommand()) {
 		case ORDER:
@@ -99,7 +99,7 @@ public class Hypergas
 				}
 			}
 			break;
-		case PUSH:
+		case SEND:
 			if(event.getSource() instanceof Metal) {
 				// declare stem
 				Mass<Biosphere,Ecosystem> stem;
@@ -159,18 +159,10 @@ public class Hypergas
 	 */
 	@Override
 	public Biosphere put(Ecosystem key, Biosphere value) {
-		// declare child
-		Mass<Ecosystem,Biosphere> child;
-		// declare old value
-		Biosphere oldValue;
-		// if update unsuccessful
-		if ((oldValue = (child = getChild()) != null ? child.putValue(key,
-				value) : null) == null) {
-			// create child
-			Hypermetal pair = new Hypermetal(Metal.class, key, value, this);
-			// push child
-			pair.push(Command.PUSH);
-		}
-		return oldValue;
+		// create child
+		Hypermetal pair = new Hypermetal(Metal.class, key, value, this);
+		// push child
+		pair.push(Command.SEND);
+		return null;
 	}
 }

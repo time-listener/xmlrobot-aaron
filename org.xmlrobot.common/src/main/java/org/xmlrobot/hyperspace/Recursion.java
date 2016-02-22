@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.xmlrobot.genesis.TimeListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.util.Abort;
 import org.xmlrobot.util.Parity;
 
@@ -37,7 +37,7 @@ public abstract class Recursion
 	@Override
 	public K call() {
 
-		return dna().call();
+		return message.call();
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.Phaser#get()
@@ -45,7 +45,7 @@ public abstract class Recursion
 	@Override
 	public V get() {
 
-		return dna().get();
+		return message.get();
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.Phaser#get(long, java.util.concurrent.TimeUnit)
@@ -53,18 +53,19 @@ public abstract class Recursion
 	@Override
 	public V get(long timeout, TimeUnit unit) {
 		
-		return dna().get();
+		return message.get();
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.Phaser#set(java.lang.Object)
 	 */
 	@Override
 	public void set(V value) {
+		// unify
+		message.set(value);
+		// check existence
 		if(value != null)
 			// listen antimatter
 			addMassListener(value);
-		// unify
-		dna().set(value);
 	}
 	
   	/**
@@ -117,7 +118,7 @@ public abstract class Recursion
 	@Override
 	public int reproduceTo(V o) {
 	
-		return matrix.reproduce(o.get(), get());
+		return matrix().reproduce(o.get(), get());
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.Reproducible#output()
@@ -125,14 +126,14 @@ public abstract class Recursion
 	@Override
 	public V output() {
 	
-		return matrix.output();
+		return matrix().get();
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.Deflector#pulse(org.xmlrobot.genesis.Mass, org.xmlrobot.horizon.Graviton)
 	 */
 	@Override
 	public <X extends TimeListener<X,Y>, Y extends TimeListener<Y,X>> 
-	void pulse(TimeListener<?,?> sender, Takion<Y,X> event) {
+	void pulse(TimeListener<?,?> sender, Tachyon<Y,X> event) {
 		// call ancestral method
 		super.pulse(sender, event);
 		// declare child
@@ -141,16 +142,16 @@ public abstract class Recursion
 		if(event.getType().equals(getAntitype())) {
 			/* 
 			 * message transmission to wonderland through
-			 * hypergenesis comparison computation. 
+			 * hypergenesis comparison computation.
 			 * */
-			reproduceTo(getAntitype().cast(event.call()));
+			get().reproduceTo(getType().cast(event.get()));
 		}
 		// retrieve child and check existence
 		else if((child = event.getChild()) != null) {
 			// check genetic compatibility
 			if(child.getType().equals(getAntitype())) {
 				// reproduce yourselves by doing sex now
-				reproduceTo(getAntitype().cast(child));
+				get().reproduceTo(getType().cast(child.get()));
 			}
 		}
 		else throw new Abort(this); // something was wrong
@@ -160,9 +161,24 @@ public abstract class Recursion
 	 */
 	@Override
 	public <X extends TimeListener<X,Y>,Y extends TimeListener<Y,X>> 
-	void echo(TimeListener<?,?> sender, Takion<X,Y> event) {
+	void echo(TimeListener<?,?> sender, Tachyon<X,Y> event) {
 		// ancestral recall
 		super.echo(sender, event);
+		// check event compatibility
+		if (event.getType().equals(getAntitype())) {
+			// declare computation result
+			Y proto;
+			// assign and check
+			if((proto = event.getType().cast(output()).output()) != null) {
+				// push takion to the past
+				push(new Tachyon<Y,X>(proto) {
+					/**
+					 * 304776981697561141L
+					 */
+					private static final long serialVersionUID = 304776981697561141L;
+				});
+			}
+		}
 	}
 
 
@@ -182,8 +198,8 @@ public abstract class Recursion
  		/**
  		 * {@link Grid} default class constructor
  		 */
- 		public Grid() {
- 			super();
+ 		public Grid(V output) {
+ 			super(output);
  		}
  		/* (non-Javadoc)
  		 * @see org.xmlrobot.genesis.Hypergenesis.Comparator#compare(java.lang.Object, java.lang.Object)
@@ -195,13 +211,13 @@ public abstract class Recursion
 			// switch comparison result by commuting by parity
 			if (key.getGen().equals(Parity.XY) ? cmp < 0 : cmp > 0) {
 				// send root to the future
-				push(key);
+				inject(key);
 				// declare stem's child
 				V valueChild;
 				// get and check existence
 				if ((valueChild = value.getChild()) != null) {
 					// send stem's child to the future
-					inject(valueChild);
+					push(valueChild);
 					// declare root child
 					K keyChild;
 					// get root's child
@@ -216,26 +232,26 @@ public abstract class Recursion
 					// get and check existence
 					if ((keyChild = key.getChild()) != null) {
 						// so, we fill the chain as much as possible.
-						push(keyChild);
+						inject(keyChild);
 					}
 				}
 			}
 			else if(cmp == 0) {
 				// submit both messages
-				push(key);
-				inject(value);
+				inject(key);
+				push(value);
 				// call recursion and accumulate computation result
 				cmp += reproduce(key.getChild(), value.getChild());
 			}
 			else {
 				// send stem to the future
-				inject(value);
+				push(value);
 				// declare root's child
 				K keyChild;
 				// get and check existence
 				if ((keyChild = key.getChild()) != null) {
 					// send root's child to the future
-					push(keyChild);
+					inject(keyChild);
 					// declare stem's child
 					V valueChild;
 					// get and check existence
@@ -249,7 +265,7 @@ public abstract class Recursion
 					// get and check existence
 					if ((stemChild = value.getChild()) != null) {
 						// so, evolve a little bit.
-						inject(stemChild);
+						push(stemChild);
 					}
 				}
 			}

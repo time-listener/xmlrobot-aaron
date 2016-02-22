@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -17,10 +18,12 @@ import org.xmlrobot.genesis.Hypertext;
 import org.xmlrobot.genesis.MassListener;
 import org.xmlrobot.genesis.TimeListener;
 import org.xmlrobot.genesis.Mass;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.subspace.antimatter.Hyperdatagram;
+import org.xmlrobot.subspace.antimatter.Hyperline;
 import org.xmlrobot.subspace.event.Instant;
 import org.xmlrobot.subspace.matter.Hyperpacket;
+import org.xmlrobot.subspace.matter.Hyperunit;
 import org.xmlrobot.util.Abort;
 import org.xmlrobot.util.Command;
 
@@ -30,10 +33,8 @@ import org.xmlrobot.util.Command;
  * <p>One of the datagrams being sent between entities to get communicated through the 
  * abstract protocol. Some hypercube examples: word, phrase, oration, mass, 
  * sermon, order, XML, javadoc, etc.
- * 
  * <p>The hyperchain is the hypercube. And the hypercube is the hyperchain. So, changes 
  * in the hyperchain will be reflected in the hypercube. And vice-versa.
- * 
  * <p>This class is just another member of the {@code hyperspace congregation framework}
  * 
  * @author joan
@@ -42,32 +43,36 @@ import org.xmlrobot.util.Command;
  */
 @XmlRootElement
 public class Hyperchain
-	extends Hyperinteger 
+	extends Hyperinteger
 		implements Entity<Integer,Character> {
 
 	/**
 	 * -5554421412799541676L
 	 */
 	private static final long serialVersionUID = -5554421412799541676L;
-	
+
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.Hyperinteger#name()
+	 */
+	@Override
+	@XmlElement
+	public String getName() {
+		return concat(new String());
+	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Space#getKey()
 	 */
 	@Override
 	@XmlElement
 	public Integer getKey() {
-		Mass<Integer,Character> child;
-		return (child = getChild()) != null ? child.getKey() : null;
+		return !isEmpty() ? getChild().getKey() : null;
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Space#setKey(java.lang.Object)
 	 */
 	@Override
 	public Integer setKey(Integer key) {
-		Mass<Integer,Character> child;	
-		if((child = getChild()) != null) 
-			return child.setKey(key);
-		else return null;
+		return !isEmpty() ? getChild().setKey(key) : null;
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Space#getValue()
@@ -75,24 +80,22 @@ public class Hyperchain
 	@Override
 	@XmlElement
 	public Character getValue() {
-		Mass<Integer,Character> child;	
-		return (child = getChild()) != null ? child.getValue() : null;
+		return !isEmpty() ? getChild().getValue() : null;
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Space#setValue(java.lang.Object)
 	 */
 	@Override
 	public Character setValue(Character value) {
-		Mass<Integer,Character> child;	
-		if((child = getChild()) != null) 
-			return child.setValue(value);
-		else return null;
+		return !isEmpty() ? getChild().setValue(value) : null;
 	}
-	
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.subspace.Hyperinteger#getReplicator()
+	 */
 	@Override
 	@XmlElement(type=Hyperpacket.class)
-	public Mass<Integer, Character> getReplicator() {
-		return super.getReplicator();
+	public Mass<Integer,Character> getPlasma() {
+		return super.getPlasma();
 	}
 	
 	/**
@@ -106,7 +109,7 @@ public class Hyperchain
 	 * @param antitype the inherited antitype
 	 */
 	public Hyperchain(Class<Hypercube> antitype) {
-		super(Hyperpacket.class, Hyperdatagram.class, Hyperchain.class, antitype);
+		super(Hyperchain.class, antitype);
 	}
 	
 	/* (non-Javadoc)
@@ -144,7 +147,6 @@ public class Hyperchain
 	 */
 	@Override
 	public int compareTo(Mass<Character,Integer> o) {
-	
 		return get().compare(get().getChild(), o.getChild());
 	}
 	/* (non-Javadoc)
@@ -152,25 +154,30 @@ public class Hyperchain
 	 */
 	@Override
 	public int reproduceTo(Mass<Character,Integer> o) {
-
-		return matrix.reproduce(o.get().getChild(), get().getChild());
+		return matrix().reproduce(o.get().getChild(), get().getChild());
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.lang.Hyperinteger#run()
 	 */
 	@Override
 	public void run() {
-	
-		super.run();
-		// rest in peace
-		push(Command.TRANSFER);
+		// avoid concurrent calls to run
+		if (!message.compareAndSet(RUNNER, null, Thread.currentThread())) {
+			// because is already running
+			return;
+		} 
+		else {
+			// life starts here
+			super.run();
+			// life ends here
+			push(Command.TRANSFER);
+		}
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.gravity.Recurrence#mass(org.xmlrobot.genesis.Entity, org.xmlrobot.horizon.Darkmass)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
-
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		super.mass(sender, event);
 		
 		switch (event.getCommand()) {
@@ -191,7 +198,7 @@ public class Hyperchain
 				}
 			}
 			break;
-		case PUSH:
+		case SEND:
 			if(event.getSource() instanceof Hyperpair) {
 				// declare key
 				Mass<Character,Integer> stem;
@@ -208,7 +215,7 @@ public class Hyperchain
 				}
 			}
 			break;
-		case LISTEN:
+		case PUSH:
 			if(event.getSource() instanceof Hyperpair) {
 				// cast source
 				Hyperpair string = (Hyperpair) event.getSource();
@@ -260,7 +267,7 @@ public class Hyperchain
 				// cast source
 				Hyperpair entity = (Hyperpair) event.getSource();
 				// transfer message contents (to the future)
-				get().putValue(entity.getKey(), entity.getValue());
+				put(entity.getValue(), entity.getKey());
 			}
 			break;
 		default:
@@ -268,39 +275,47 @@ public class Hyperchain
 		}
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.gravity.Future#pulse(org.xmlrobot.genesis.Mass, org.xmlrobot.horizon.Graviton)
+	 * @see org.xmlrobot.genesis.Atlas#put(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public Character put(Integer key, Character value) {
+		// create child
+		Hyperentry gene = new Hyperentry(Hyperpair.class, key, value, this);
+		// push child
+		gene.push(Command.SEND);
+		return null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Hyperclock#pulse(org.xmlrobot.genesis.TimeListener, org.xmlrobot.horizon.Tachyon)
 	 */
 	@Override
 	public synchronized <X extends TimeListener<X,Y>,Y extends TimeListener<Y,X>> 
-	void pulse(TimeListener<?,?> listener, Takion<Y,X> event) {
+	void pulse(TimeListener<?,?> listener, Tachyon<Y,X> event) {
 		super.pulse(listener, event);
 		// spin -1/2 inheritance
 		spin();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.gravity.Past#echo(org.xmlrobot.genesis.Mass, org.xmlrobot.horizon.Graviton)
+	 * @see org.xmlrobot.space.Hyperclock#echo(org.xmlrobot.genesis.TimeListener, org.xmlrobot.horizon.Tachyon)
 	 */
 	@Override
 	public synchronized <X extends TimeListener<X,Y>,Y extends TimeListener<Y,X>> 
-	void echo(TimeListener<?,?> listener, Takion<X,Y> event) {
-		
+	void echo(TimeListener<?,?> listener, Tachyon<X,Y> event) {
 		super.echo(listener, event);
 		
 		if(event.getSource() instanceof Hyperinteger) {
 			// iterate through event's children
 			for(X integer : event) {
 				// load output result to current matrix
-				matrix().push((Hyperinteger)integer);
+				matrix().inject((Hyperinteger)integer);
 			}	
 		}
 	}
-
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.time.Freedom#removeAll(org.xmlrobot.genesis.Congregation)
 	 */
 	@Override
 	public boolean removeAll(Mass<Integer,Character> c) {
-
         Objects.requireNonNull(c);
         boolean modified = false;
 
@@ -319,15 +334,6 @@ public class Hyperchain
         return modified;
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.Hyperinteger#name()
-	 */
-	@Override
-	@XmlElement
-	public String getName() {
-
-		return !isEmpty() ? ((Hypertext) getChild()).concat(new String()) : null;
-	}
-	/* (non-Javadoc)
 	 * @see org.xmlrobot.hyperspace.Abstraction#serviceChanged(org.osgi.framework.ServiceEvent)
 	 */
 	@Override
@@ -343,91 +349,203 @@ public class Hyperchain
 			Hyperentry pair = (Hyperentry) child;
 			// commute command
 			if (event.getType() == ServiceEvent.REGISTERED) {
-				// replicate mass
-				getReplicator().putValue(pair.getKey(), pair.getValue());
-			} 
+				// create child
+				Hyperunit unit = instance(Hyperunit.class, Hyperline.class, 
+						pair.getKey(), pair.getValue(), getPlasma());
+				// push child
+				unit.push(Command.SUBMIT);
+			}
 			else if (event.getType() == ServiceEvent.UNREGISTERING) {
 				// release replication
-				getReplicator().removeByKey(pair.getKey());
+				getPlasma().release();
 			}
 		}
 	}
+ 	// visor implementation
+ 	/* (non-Javadoc)
+ 	 * @see org.xmlrobot.genesis.Mass#keyVisor()
+ 	 */
+ 	@Override
+ 	public Congregation<Integer> keyVisor() {
+ 		Congregation<Integer> keys;
+ 		return (keys = keyVisor) == null ? 
+ 				(keyVisor = new KeyVisor(plasma)) : keys;
+ 	}
+ 	/* (non-Javadoc)
+ 	 * @see org.xmlrobot.genesis.Mass#valueVisor()
+ 	 */
+ 	@Override
+ 	public Congregation<Character> valueVisor() {
+ 		Congregation<Character> values;
+ 		return (values = valueVisor) == null ? 
+ 				(valueVisor = new ValueVisor(plasma)) : values;
+ 	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.gravity.Recursion#matrix()
+	 */
+	@Override
+	public Mass.Transmuter<Integer,Character> matrix() {
+
+		TimeListener.Transmitter<Mass<Integer,Character>, Mass<Character, Integer>> m;
+ 		return (m = matrix) != null ? (Holomatrix) m : (Holomatrix) (matrix = new Holomatrix());
+	}
+
+	/**
+	 * @author joan
+	 *
+	 */
+	protected class Holomatrix 
+		extends Translocator {
+		/**
+		 * @throws Abort
+		 */
+		public Holomatrix() {
+			super(instance(getAntitype(), getType()));
+		}
+		/* (non-Javadoc)
+		 * @see org.xmlrobot.Hypergenesis.Comparator#output()
+		 */
+		@Override
+		public Hypercube get() {
+			return (Hypercube) super.get();
+		}
+		/* (non-Javadoc)
+		 * @see org.xmlrobot.space.Hyperclock.Translocator#put(java.lang.Object, java.lang.Object)
+		 */
+		@Override
+		public void put(Integer key, Character value) {
+			get().put(value, key);
+		}
+	}
+	// hyperstring implementation
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.subspace.Hyperstring#concat(java.lang.StringBuilder)
+	 */
+	@Override
+	public StringBuilder concat(StringBuilder o) {
+		return !isEmpty() ? ((Hypertext) getChild()).concat(o) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.subspace.Hyperstring#concat(java.lang.String)
+	 */
+	@Override
+	public String concat(String str) {
+		return !isEmpty() ? ((Hypertext) getChild()).concat(str) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.subspace.Hyperstring#charAt(int)
+	 */
+	@Override
+	public char charAt(int index) {
+		return !isEmpty() ? ((Hypertext) getChild()).charAt(index): null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.subspace.Hyperstring#subSequence(int, int)
+	 */
+	@Override
+	public CharSequence subSequence(int start, int end) {
+		return !isEmpty() ? ((Hypertext) getChild()).subSequence(start, end) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.subspace.Hyperstring#substring(int, int)
+	 */
+	@Override
+	public String substring(int beginIndex, int endIndex) {
+		return !isEmpty() ? ((Hypertext) getChild()).substring(beginIndex, endIndex) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.subspace.Hyperstring#substring(java.lang.StringBuilder, int, int)
+	 */
+	@Override
+	public StringBuilder substring(StringBuilder builder, int beginIndex, int endIndex) {
+		return !isEmpty() ? ((Hypertext) getChild()).substring(builder, beginIndex, endIndex) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.subspace.Hyperstring#sum(java.lang.Integer)
+	 */
+	@Override
+	public Integer sum(Integer o) {
+		return !isEmpty() ? ((Hypertext) getChild()).sum(o) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.subspace.Hyperstring#subtract(java.lang.Integer)
+	 */
+	@Override
+	public Integer subtract(Integer o) {
+		return !isEmpty() ? ((Hypertext) getChild()).subtract(o) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.subspace.Hyperstring#multiply(java.lang.Integer)
+	 */
+	@Override
+	public Integer multiply(Integer o) {
+		return !isEmpty() ? ((Hypertext) getChild()).multiply(o) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.subspace.Hyperstring#divide(java.lang.Integer)
+	 */
+	@Override
+	public Integer divide(Integer o) {
+		return !isEmpty() ? ((Hypertext) getChild()).divide(o) : null;
+	}
+	// entity implementation
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.DNA#getOrDefault(java.lang.Object, java.lang.Object)
 	 */
 	@Override
 	public Character getOrDefault(Integer key, Character defaultValue) {
-		Mass<Integer,Character> child;
-		return (child = getChild()) != null ? child.getValueOrDefault(key, defaultValue) : defaultValue;
+    	return !isEmpty() ? getChild().getValueOrDefault(key, defaultValue) : null;
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.DNA#forEach(java.util.function.BiConsumer)
 	 */
 	@Override
 	public void forEach(BiConsumer<? super Integer, ? super Character> action) {
-		Mass<Integer,Character> child;
-		if((child = getChild()) != null)
-			child.forEachKey(action);
+    	if(!isEmpty())
+    		getChild().forEachKey(action);
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.DNA#putIfAbsent(java.lang.Object, java.lang.Object)
 	 */
 	@Override
 	public Character putIfAbsent(Integer key, Character value) {
-		Mass<Integer,Character> child;
-		return (child = getChild()) != null ? child.putValueIfAbsent(key, value) : null;
+		return !isEmpty() ? getChild().putValueIfAbsent(key, value) : null;
 	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.DNA#remove(java.lang.Object, java.lang.Object)
+	 */
 	@Override
 	public boolean remove(Integer key, Character value) {
-		Mass<Integer,Character> child;
-		return (child = getChild()) != null ? child.removeByKey(key, value) : null;
+    	return !isEmpty() ? getChild().removeByKey(key, value) : null;
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.DNA#replace(java.lang.Object, java.lang.Object, java.lang.Object)
 	 */
 	@Override
 	public boolean replace(Integer key, Character oldValue, Character newValue) {
-		Mass<Integer,Character> child;
-		return (child = getChild()) != null ? child.replaceValue(key, oldValue, newValue) : null;
+		return !isEmpty() ? getChild().replaceValue(key, oldValue, newValue) : null;
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.DNA#replace(java.lang.Object, java.lang.Object)
 	 */
 	@Override
 	public Character replace(Integer key, Character value) {
-		Mass<Integer,Character> child;
-		return (child = getChild()) != null ? child.replaceValue(key, value) : null;
+		return !isEmpty() ? getChild().replaceValue(key, value) : null;
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.DNA#replaceAll(java.util.function.BiFunction)
 	 */
 	@Override
-	public void replaceAll(
-			BiFunction<? super Integer, ? super Character, ? extends Character> function) {
-
-		Mass<Integer,Character> child;
-		
-		if((child = getChild()) != null)
-			child.replaceAllValues(function);
+	public void replaceAll(BiFunction<? super Integer, ? super Character, ? extends Character> function) {
+    	if(!isEmpty())
+    		getChild().replaceAllValues(function);
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.Atlas#get(java.lang.Object)
 	 */
 	@Override
 	public Character get(Integer key) {
-		Mass<Integer,Character> child;
-		return (child = getChild()) != null ? child.getValue(key) : null;
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.Atlas#put(java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public Character put(Integer key, Character value) {
-		// create child
-		Hyperentry gene = new Hyperentry(Hyperpair.class, key, value, this);
-		// push child
-		gene.push(Command.PUSH);
-		return null;
+    	return !isEmpty() ? getChild().getValue(key) : null;
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.Atlas#putAll(org.xmlrobot.genesis.Atlas)
@@ -447,73 +565,312 @@ public class Hyperchain
 
 		return getChild();
 	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.gravity.Recursion#matrix()
+	
+	// space implementation
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Contraction#putValue(java.lang.Object,
+	 * java.lang.Object)
 	 */
 	@Override
-	public TimeListener.Transmitter<Mass<Integer,Character>,Mass<Character,Integer>> matrix() {
-
-		TimeListener.Transmitter<Mass<Integer,Character>,Mass<Character,Integer>> m;
- 		return (m = matrix) != null ? m : (Holomatrix) (matrix = new Holomatrix());
+	public Character putValue(Integer key, Character value) {
+		return !isEmpty() ? getChild().putValue(key, value) : put(key, value);
 	}
-	@Override
-	public org.xmlrobot.genesis.TimeListener.Transmitter<Mass<Integer, Character>, Mass<Character, Integer>> matrix(
-			Mass<Character, Integer> output) {
-		return null;
-	}
-	/**
-	 * @author joan
-	 *
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Contraction#putKey(java.lang.Object,java.lang.Object)
 	 */
-	protected class Holomatrix 
-		extends Transmuter {
-
-		/**
-		 * @throws Abort
-		 */
-		public Holomatrix() {
-			super();
-		}
-		@Override
-		public Hypercube output() {
-			return (Hypercube) super.output();
-		}
-		/* (non-Javadoc)
-		 * @see org.xmlrobot.lang.Hyperinteger.Hypergrid#push(org.xmlrobot.lang.Hyperinteger)
-		 */
-		@Override
-		public void push(Mass<Integer,Character> child) {
-		
-//			Mass<Integer,Character> key = child.clone();
-//			Mass<Character,Integer> value = child.get().clone();
-//			
-//			key.setAntitype(value.getType());
-//			value.setAntitype(key.getType());
-//			
-//			key.set(value);
-//			value.set(key);
-//			
-//			output().add(key);
-			output().put(child.getValue(), child.getKey());
-		}
-		/* (non-Javadoc)
-		 * @see org.xmlrobot.lang.Hyperinteger.Hypergrid#inject(org.xmlrobot.lang.Hyperstring)
-		 */
-		@Override
-		public void inject(Mass<Character,Integer> child) {
-			
-//			Mass<Character,Integer> key = child.clone();
-//			Mass<Integer,Character> value = child.get().clone();
-//			
-//			key.setAntitype(value.getType());
-//			value.setAntitype(key.getType());
-//			
-//			key.set(value);
-//			value.set(key);
-//			
-//			output().get().add(key);
-
-			output().put(child.getKey(), child.getValue());
-		}
+	@Override
+	public Integer putKey(Character value, Integer key) {
+		return !isEmpty() ? getChild().putKey(value, key) : null;
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Contraction#putValueIfAbsent(java.lang.Object,java.lang.Object)
+	 */
+	@Override
+	public Character putValueIfAbsent(Integer key, Character value) {
+		return !isEmpty() ? getChild().putValueIfAbsent(key, value) : null;
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Contraction#putKeyIfAbsent(java.lang.Object,java.lang.Object)
+	 */
+	@Override
+	public Integer putKeyIfAbsent(Character value, Integer key) {
+		return !isEmpty() ? getChild().putKeyIfAbsent(value, key) : null;
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Contraction#putAllValues(org.xmlrobot.genesis.Mass)
+	 */
+	@Override
+	public void putAllValues(Mass<? extends Integer, ? extends Character> m) {
+		if (!isEmpty())
+			super.putAllValues(m);
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Contraction#putAllKeys(org.xmlrobot.genesis.Mass)
+	 */
+	@Override
+	public void putAllKeys(Mass<? extends Character, ? extends Integer> m) {
+		if (!isEmpty())
+			super.putAllKeys(m);
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Compression#call(java.lang.Object)
+	 */
+	@Override
+	public Mass<Integer, Character> call(Integer key) {
+		return !isEmpty() ? getChild().call(key) : null;
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Compression#callReversed(java.lang.Object)
+	 */
+	@Override
+	public Mass<Character, Integer> callReversed(Character value) {
+		return !isEmpty() ? getChild().callReversed(value) : null;
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Compression#getValue(java.lang.Object)
+	 */
+	@Override
+	public Character getValue(Integer key) {
+		return !isEmpty() ? getChild().getValue(key) : null;
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Compression#getKey(java.lang.Object)
+	 */
+	@Override
+	public Integer getKey(Character value) {
+		return !isEmpty() ? getChild().getKey(value) : null;
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Compression#getValueOrDefault(java.lang.Object,java.lang.Object)
+	 */
+	@Override
+	public Character getValueOrDefault(Integer key, Character defaultValue) {
+		return !isEmpty() ? getChild().getValueOrDefault(key, defaultValue)	: null;
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Compression#getKeyOrDefault(java.lang.Object,java.lang.Object)
+	 */
+	@Override
+	public Integer getKeyOrDefault(Character value, Integer defaultKey) {
+		return !isEmpty() ? getChild().getKeyOrDefault(value, defaultKey) : null;
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Attraction#containsKey(java.lang.Object)
+	 */
+	@Override
+	public boolean containsKey(Integer key) {
+		return !isEmpty() ? getChild().containsKey(key) : null;
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Attraction#containsValue(java.lang.Object)
+	 */
+	@Override
+	public boolean containsValue(Character value) {
+		return !isEmpty() ? getChild().containsValue(value) : null;
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Attraction#collectKeys(org.xmlrobot.genesis.Congregation)
+	 */
+	@Override
+	public Congregation<Integer> collectKeys(Congregation<Integer> keys) {
+		return !isEmpty() ? getChild().collectKeys(keys) : null;
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Attraction#collectValues(org.xmlrobot.genesis.Congregation)
+	 */
+	@Override
+	public Congregation<Character> collectValues(Congregation<Character> values) {
+		return !isEmpty() ? getChild().collectValues(values) : null;
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Attraction#forEachKey(java.util.function.BiConsumer)
+	 */
+	@Override
+	public void forEachKey(BiConsumer<? super Integer, ? super Character> action) {
+		if (!isEmpty())
+			super.forEachKey(action);
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Attraction#forEachValue(java.util.function.BiConsumer)
+	 */
+	@Override
+	public void forEachValue(BiConsumer<? super Character, ? super Integer> action) {
+		if (!isEmpty())
+			super.forEachValue(action);
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Repulsion#replaceValue(java.lang.Object, java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public boolean replaceValue(Integer key, Character oldValue, Character newValue) {
+		return !isEmpty() ? getChild().replaceValue(key, oldValue, newValue) : null;
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Repulsion#replaceKey(java.lang.Object, java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public boolean replaceKey(Character value, Integer oldKey, Integer newKey) {
+		return !isEmpty() ? getChild().replaceKey(value, oldKey, newKey) : null;
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Repulsion#replaceAllValues(java.util.function.BiFunction)
+	 */
+	@Override
+	public void replaceAllValues(
+			BiFunction<? super Integer, ? super Character, ? extends Character> function) {
+		if (!isEmpty())
+			super.replaceAllValues(function);
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Repulsion#replaceAllKeys(java.util.function.BiFunction)
+	 */
+	@Override
+	public void replaceAllKeys(
+			BiFunction<? super Character, ? super Integer, ? extends Integer> function) {
+		if (!isEmpty())
+			super.replaceAllKeys(function);
+	}
+	/*
+	 * (non-Javadoc) 
+	 * @see org.xmlrobot.space.Repulsion#replaceValue(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public Character replaceValue(Integer key, Character value) {
+		return !isEmpty() ? getChild().replaceValue(key, value) : null;
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Repulsion#replaceKey(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public Integer replaceKey(Character value, Integer key) {
+		return !isEmpty() ? getChild().replaceKey(value, key) : null;
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Expansion#computeIfAbsent(java.lang.Object, java.util.function.Function)
+	 */
+	@Override
+	public Character computeIfAbsent(Integer key, 
+			Function<? super Integer, ? extends Character> mappingFunction) {
+		return !isEmpty() ? getChild().computeIfAbsent(key, mappingFunction) : null;
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Expansion#computeInvertedIfAbsent(java.lang.Object, java.util.function.Function)
+	 */
+	@Override
+	public Integer computeInvertedIfAbsent(Character key,
+			Function<? super Character, ? extends Integer> mappingFunction) {
+		return !isEmpty() ? getChild().computeInvertedIfAbsent(key,
+				mappingFunction) : null;
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Expansion#compute(java.lang.Object, java.util.function.BiFunction)
+	 */
+	@Override
+	public Character compute(Integer key, 
+			BiFunction<? super Integer, ? super Character, ? extends Character> remappingFunction) {
+		return !isEmpty() ? getChild().compute(key, remappingFunction) : null;
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Expansion#computeInverted(java.lang.Object, java.util.function.BiFunction)
+	 */
+	@Override
+	public Integer computeInverted(Character value,	
+			BiFunction<? super Character, ? super Integer, ? extends Integer> remappingFunction) {
+		return !isEmpty() ? getChild().computeInverted(value, remappingFunction) : null;
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Expansion#computeIfPresent(java.lang.Object, java.util.function.BiFunction)
+	 */
+	@Override
+	public Character computeIfPresent(Integer key, 
+			BiFunction<? super Integer, ? super Character, ? extends Character> remappingFunction) {
+		return !isEmpty() ? getChild().computeIfPresent(key, remappingFunction)	: null;
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Expansion#computeInvertedIfPresent(java.lang.Object, java.util.function.BiFunction)
+	 */
+	@Override
+	public Integer computeInvertedIfPresent(Character key, 
+			BiFunction<? super Character, ? super Integer, ? extends Integer> remappingFunction) {
+		return !isEmpty() ? getChild().computeInvertedIfPresent(key, remappingFunction) : null;
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Dilatation#merge(java.lang.Object, java.lang.Object, java.util.function.BiFunction)
+	 */
+	@Override
+	public Character merge(Integer key,	Character value, 
+			BiFunction<? super Character, ? super Character, ? extends Character> remappingFunction) {
+		return !isEmpty() ? getChild().merge(key, value, remappingFunction) : null;
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Dilatation#mergeInverted(java.lang.Object, java.lang.Object, java.util.function.BiFunction)
+	 */
+	@Override
+	public Integer mergeInverted(Character value, Integer key,
+			BiFunction<? super Integer, ? super Integer, ? extends Integer> remappingFunction) {
+		return !isEmpty() ? getChild().mergeInverted(value, key, remappingFunction) : null;
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Dilatation#removeByKey(java.lang.Object)
+	 */
+	@Override
+	public Mass<Integer, Character> removeByKey(Integer key) {
+		return !isEmpty() ? getChild().removeByKey(key) : null;
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Dilatation#removeByValue(java.lang.Object)
+	 */
+	@Override
+	public Mass<Character, Integer> removeByValue(Character value) {
+		return !isEmpty() ? getChild().removeByValue(value) : null;
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Dilatation#removeByKey(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public boolean removeByKey(Integer key, Character value) {
+		return !isEmpty() ? getChild().removeByKey(key, value) : null;
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.xmlrobot.space.Dilatation#removeByValue(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public boolean removeByValue(Character value, Integer key) {
+		return !isEmpty() ? getChild().removeByValue(value, key) : null;
 	}
 }

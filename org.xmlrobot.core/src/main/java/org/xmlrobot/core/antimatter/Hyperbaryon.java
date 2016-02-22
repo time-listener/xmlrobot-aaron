@@ -12,7 +12,7 @@ import org.xmlrobot.core.matter.Baryon;
 import org.xmlrobot.core.matter.Meson;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.positron.Antiproton;
 import org.xmlrobot.util.Command;
 
@@ -79,7 +79,7 @@ public class Hyperbaryon
 	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Takion)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		// ancestral recall
 		super.mass(sender, event);
 		// commute order
@@ -101,7 +101,7 @@ public class Hyperbaryon
 				}
 			}
 			break;
-		case PUSH:
+		case SEND:
 			if(event.getSource() instanceof Meson) {
 				// declare stem
 				Mass<Minkowski,Spacetime> stem;
@@ -164,7 +164,7 @@ public class Hyperbaryon
 		// create child
 		Hypermeson pair = new Hypermeson(Meson.class, key, value, this);
 		// push child
-		pair.push(Command.PUSH);
+		pair.push(Command.SEND);
 		return null;
 	}
 }

@@ -25,6 +25,13 @@ public class Intron
 	private static final long serialVersionUID = -2718890842282738451L;
 	
 	/* (non-Javadoc)
+	 * @see org.xmlrobot.hyperspace.Abstraction#getName()
+	 */
+	@Override
+	public String getName() {
+		return getKey().getName();
+	}
+	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Space#getKey()
 	 */
 	@Override
@@ -108,14 +115,7 @@ public class Intron
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.MassListener#name()
-	 */
-	@Override
-	public String getName() {
-		return getKey().getName();
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Electron#compare(org.xmlrobot.genesis.Mass, org.xmlrobot.genesis.Mass)
+	 * @see org.xmlrobot.time.Time#compare(org.xmlrobot.genesis.TimeListener, org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public int compare(Mass<Hyperchain,Hypercube> o1, Mass<Hyperchain,Hypercube> o2) {

@@ -12,9 +12,10 @@ import org.xmlrobot.core.Universe;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
 import org.xmlrobot.genesis.TimeListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Parent;
 import org.xmlrobot.matter.Hyperxml;
+import org.xmlrobot.util.Command;
 import org.xmlrobot.util.Parity;
 
 /**
@@ -66,8 +67,8 @@ public class Hypertoroid
 	 */
 	@Override
 	@XmlElement(type=Hyperneuron.class)
-	public Mass<Universe,Subspace> getReplicator() {
-		return super.getReplicator();
+	public Mass<Universe,Subspace> getPlasma() {
+		return super.getPlasma();
 	}
 	
 	/**
@@ -97,7 +98,7 @@ public class Hypertoroid
 	 * @param antitype the antitype
 	 */
 	public Hypertoroid(Class<Hyperplasma> antitype) {
-		super(Hyperneuron.class, Hyperxml.class, Hypertoroid.class, antitype, Parity.YY);
+		super(Hypertoroid.class, antitype, Parity.YY);
 	}
 	/**
 	 * {@link Hypertoroid} class constructor.
@@ -106,7 +107,7 @@ public class Hypertoroid
 	 * @param value {@link Subspace} the value
 	 */
 	public Hypertoroid(Class<Hyperplasma> antitype, Universe key, Subspace value) {
-		super(Hyperneuron.class, Hyperxml.class, Hypertoroid.class, antitype, key, value, Parity.YY);
+		super(Hypertoroid.class, antitype, key, value, Parity.YY);
 	}
 	/**
 	 * {@link Hypertoroid} class constructor.
@@ -115,14 +116,14 @@ public class Hypertoroid
 	 * @param value {@link Subspace} the value
 	 */
 	public Hypertoroid(Class<Hyperplasma> antitype, Universe key, Subspace value, Aaron parent) {
-		super(Hyperneuron.class, Hyperxml.class, Hypertoroid.class, antitype, key, value, parent);
+		super(Hypertoroid.class, antitype, key, value, parent);
 	}
 
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.hyperspace.Hyperspace#mass(org.xmlrobot.genesis.Entity, org.xmlrobot.horizon.Darkmass)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		super.mass(sender, event);
 		// do something
 		switch (event.getCommand()) {
@@ -146,20 +147,18 @@ public class Hypertoroid
 		// get reference
 		ServiceReference<?> ref = event.getServiceReference();
 		// declare source
-		Object child;
+		Object source;
 		// get entity
-		if((child = ref.getProperty(TimeListener.KEY)) != null ? 
-				child instanceof Hypertoroid : false) {
+		if((source = ref.getProperty(TimeListener.KEY)) != null ? 
+				source instanceof Hypertoroid : false) {
 			// cast source
-			Hypertoroid pair = (Hypertoroid) child;
+			Hypertoroid child = (Hypertoroid) source;
 
 			if (event.getType() == ServiceEvent.REGISTERED) {
-				// input to the brain
-				getReplicator().add(new Hyperneuron(Hyperxml.class, pair.getKey(), pair.getValue()));
 			}
 			if (event.getType() == ServiceEvent.UNREGISTERING) {
 				// rest in peace
-				getReplicator().removeByKey(pair.getKey());
+				getPlasma().release();
 			}
 		}
 	}

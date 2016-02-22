@@ -6,12 +6,9 @@ package org.xmlrobot.spacetime;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceReference;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
-import org.xmlrobot.genesis.TimeListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Parent;
 import org.xmlrobot.spacetime.Jupiter;
 import org.xmlrobot.spacetime.Mars;
@@ -37,7 +34,7 @@ public class Pegasi
 	private static final long serialVersionUID = 8604727878873857518L;
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#getKey()
+	 * @see org.xmlrobot.inheritance.Parent#getKey()
 	 */
 	@Override
 	@XmlElement
@@ -45,14 +42,14 @@ public class Pegasi
 		return super.getKey();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#setKey(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Parent#setKey(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Jupiter setKey(Jupiter key) {
 		return super.setKey(key);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#getValue()
+	 * @see org.xmlrobot.inheritance.Parent#getValue()
 	 */
 	@Override
 	@XmlElement
@@ -60,19 +57,19 @@ public class Pegasi
 		return super.getValue();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#setValue(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Parent#setValue(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Saturn setValue(Saturn value) {
 		return super.setValue(value);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#getReplicator()
+	 * @see org.xmlrobot.inheritance.Parent#getPlasma()
 	 */
 	@Override
 	@XmlElement(type=Hypergluon.class)
-	public Mass<Jupiter,Saturn> getReplicator() {
-		return super.getReplicator();
+	public Mass<Jupiter,Saturn> getPlasma() {
+		return super.getPlasma();
 	}
 	
 	/**
@@ -103,7 +100,7 @@ public class Pegasi
 	 * @param antitype the inherited antitype
 	 */
 	public Pegasi(Class<Vega> antitype) {
-		super(Hypergluon.class, Gluon.class, Pegasi.class, antitype, Parity.XY);
+		super(Pegasi.class, antitype, Parity.XY);
 	}
 	/**
 	 * {@link Pegasi} class constructor.
@@ -112,7 +109,7 @@ public class Pegasi
 	 * @param value {@link Saturn} the value
 	 */
 	public Pegasi(Class<Vega> antitype, Jupiter key, Saturn value) {
-		super(Hypergluon.class, Gluon.class, Pegasi.class, antitype, key, value, Parity.XY);
+		super(Pegasi.class, antitype, key, value, Parity.XY);
 	}
 	/**
 	 * {@link Pegasi} class constructor.
@@ -122,14 +119,14 @@ public class Pegasi
 	 * @param parent {@link Sun} the parent
 	 */
 	public Pegasi(Class<Vega> antitype, Jupiter key, Saturn value, Sun parent) {
-		super(Hypergluon.class, Gluon.class, Pegasi.class, antitype, key, value, parent);
+		super(Pegasi.class, antitype, key, value, parent);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.gravity.Recurrence#mass(org.xmlrobot.genesis.Entity, org.xmlrobot.horizon.Darkmass)
+	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Tachyon)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		super.mass(sender, event);
 		
 		switch (event.getCommand()) {
@@ -146,37 +143,21 @@ public class Pegasi
 		}
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#run()
+	 * @see org.xmlrobot.inheritance.Parent#run()
 	 */
 	@Override
 	public void run() {
-		super.run();
-		// rest in peace
-		push(Command.TRANSFER);
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.hyperspace.Abstraction#serviceChanged(org.osgi.framework.ServiceEvent)
-	 */
-	@Override
-	public void serviceChanged(ServiceEvent event) {
-		// get reference
-		ServiceReference<?> ref = event.getServiceReference();
-		// declare child
-		Object child;
-		// assign and check
-		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
-				child instanceof Pegasi : false) {
-			// cast source
-			Pegasi pair = (Pegasi) child;
-			// commute command
-			if(event.getType() == ServiceEvent.REGISTERED) {
-				// replicate mass
-				getReplicator().add(new Hypergluon(Gluon.class, pair.getKey(), pair.getValue()));
-			}
-			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// release replication
-				getReplicator().removeByKey(pair.getKey());
-			}
+		// avoid concurrent calls to run
+		if (!message.compareAndSet(RUNNER, null, Thread.currentThread())) {
+			// because is already running
+			return;
+		} 
+		else {
+			// life starts here
+			super.run();
+			// life ends here
+			push(Command.TRANSFER);
 		}
 	}
+
 }

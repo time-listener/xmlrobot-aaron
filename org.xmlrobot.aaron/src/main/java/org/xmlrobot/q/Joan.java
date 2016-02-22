@@ -26,7 +26,8 @@ import org.xmlrobot.dna.Ribosoma;
 import org.xmlrobot.dna.Tetraploid;
 import org.xmlrobot.event.Hyperfission;
 import org.xmlrobot.genesis.MassListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.genesis.Redemptor;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.nature.Biosphere;
 import org.xmlrobot.nature.Ecosystem;
 import org.xmlrobot.spacetime.AlphaCentauri;
@@ -48,7 +49,8 @@ import org.xmlrobot.util.Abort;
  */
 @XmlRootElement
 public class Joan 
-	extends Continuum<Joan,Q> {
+	extends Continuum<Robot,Aaron,Joan,Q> 
+		implements Redemptor {
 
 	/**
 	 * -7654385932354993830L
@@ -60,7 +62,6 @@ public class Joan
 	 */
 	@Override
 	public String getName() {
-
 		return "TimeListener-root";
 	}
 	
@@ -68,21 +69,45 @@ public class Joan
 	 * {@link Joan} default class constructor.
 	 */
 	public Joan() {
-		super(Joan.class);
+		super(Joan.class, null);
 	}
 	/**
 	 * Q Joan
 	 * @param message the original message
 	 */
-	public Joan(Class<Q> antitype) {
-		super(Joan.class, antitype);
+	public Joan(String[] message) {
+		super(Joan.class, message);
 	}
-	
+	/**
+	 * Joan Q
+	 * @param message the original message
+	 */
+	public Joan(Class<Q> antitype, String[] message) {
+		super(Joan.class, antitype, message);
+	}
+
+    /* (non-Javadoc)
+     * @see org.xmlrobot.Continuum#create(java.lang.String[])
+     */
+    @Override
+    public Robot create(String[] message) {
+		// create parent of parents
+		Robot robot = new Robot(Aaron.class);
+		// create subspace
+		Subspace subspace = createSubspace(message);
+		// listen any demands
+		robot.addMassListener(get());
+		robot.get().addMassListener(this);
+		// give him the universe
+		robot.put(subspace, (Universe) subspace.get());
+		// return creation
+		return robot;
+    }
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Takion)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 	
 		super.mass(sender, event);
 		
@@ -99,7 +124,7 @@ public class Joan
 				entity.start(getContext());
 			}
 			break;
-		case LISTEN:
+		case PUSH:
 			if(event.getSource() instanceof Aaron) {
 				// cast source
 				Aaron entity = (Aaron) event.getSource();
@@ -229,24 +254,14 @@ public class Joan
      **/
 	public static void main(String[] message) {
 		try {
-			Joan q = new Joan(Q.class);
-			// create universe
-			Subspace subspace = createSubspace(message == null ? 
-					message : new String[] {
+			// create hyperredemptor
+			new Joan(Q.class, message == null ?
+					message : new String[] { 
 					// the ABC
 					"A", "B", "C", "D", "E", "F", "G", "H", "I", 
 					"J", "K", "L", "M", "N", "O", "P", "Q", "R", 
-					"S", "T", "U", "V", "w", "X", "Y", "Z", "Ç" });
-			// create god
-			Robot robot = new Robot(Aaron.class);
-			// listen any demands
-			robot.addMassListener(q.get());
-			robot.get().addMassListener(q);
-			// give him the universe
-			robot.put(subspace, (Universe) subspace.get());
-			// boom
-			robot.start(q.getContext());
-		} 
+					"S", "T", "U", "V", "w", "X", "Y", "Z", "Ñ", "Ç" });
+		}
 		catch (Exception e) {
 			throw new Abort(e);
 		}

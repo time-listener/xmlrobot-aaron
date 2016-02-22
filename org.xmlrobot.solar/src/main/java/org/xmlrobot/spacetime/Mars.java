@@ -6,12 +6,9 @@ package org.xmlrobot.spacetime;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceReference;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
-import org.xmlrobot.genesis.TimeListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Parent;
 import org.xmlrobot.nature.Being;
 import org.xmlrobot.nature.Biosphere;
@@ -37,7 +34,7 @@ public class Mars
 	private static final long serialVersionUID = 5496849604846314737L;
 
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#getKey()
+	 * @see org.xmlrobot.inheritance.Parent#getKey()
 	 */
 	@Override
 	@XmlElement
@@ -45,14 +42,14 @@ public class Mars
 		return super.getKey();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#setKey(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Parent#setKey(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Ecosystem setKey(Ecosystem key) {
 		return super.setKey(key);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#getValue()
+	 * @see org.xmlrobot.inheritance.Parent#getValue()
 	 */
 	@Override
 	@XmlElement
@@ -60,19 +57,19 @@ public class Mars
 		return super.getValue();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#setValue(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Parent#setValue(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Biosphere setValue(Biosphere value) {
 		return super.setValue(value);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#getReplicator()
+	 * @see org.xmlrobot.inheritance.Parent#getPlasma()
 	 */
 	@Override
 	@XmlElement(type=Hypermetal.class)
-	public Mass<Ecosystem,Biosphere> getReplicator() {
-		return super.getReplicator();
+	public Mass<Ecosystem,Biosphere> getPlasma() {
+		return super.getPlasma();
 	}
 	
 	/**
@@ -103,7 +100,7 @@ public class Mars
 	 * @param antitype the inherited antitype
 	 */
 	public Mars(Class<Earth> antitype) {
-		super(Hypermetal.class, Metal.class, Mars.class, antitype, Parity.XY);
+		super(Mars.class, antitype, Parity.XY);
 	}
 	/**
 	 * {@link Mars} class constructor.
@@ -112,7 +109,7 @@ public class Mars
 	 * @param value {@link Biosphere} the value
 	 */
 	public Mars(Class<Earth> antitype, Ecosystem key, Biosphere value) {
-		super(Hypermetal.class, Metal.class, Mars.class, antitype, key, value, Parity.XX);
+		super(Mars.class, antitype, key, value, Parity.XX);
 	}
 	/**
 	 * {@link Mars} class constructor.
@@ -122,14 +119,14 @@ public class Mars
 	 * @param parent {@link Jupiter} the parent
 	 */
 	public Mars(Class<Earth> antitype, Ecosystem key, Biosphere value, Jupiter parent) {
-		super(Hypermetal.class, Metal.class, Mars.class, antitype, key, value, parent);
+		super(Mars.class, antitype, key, value, parent);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.gravity.Recurrence#mass(org.xmlrobot.genesis.Entity, org.xmlrobot.horizon.Darkmass)
+	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Tachyon)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 	
 		super.mass(sender, event);
 		switch (event.getCommand()) {
@@ -146,37 +143,20 @@ public class Mars
 		}
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#run()
+	 * @see org.xmlrobot.inheritance.Parent#run()
 	 */
 	@Override
 	public void run() {
-		super.run();
-		// rip
-		push(Command.TRANSFER);
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.hyperspace.Abstraction#serviceChanged(org.osgi.framework.ServiceEvent)
-	 */
-	@Override
-	public void serviceChanged(ServiceEvent event) {
-		// get reference
-		ServiceReference<?> ref = event.getServiceReference();
-		// declare child
-		Object child;
-		// assign and check
-		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
-				child instanceof Mars : false) {
-			// cast source
-			Mars pair = (Mars) child;
-			// commute command
-			if(event.getType() == ServiceEvent.REGISTERED) {
-				// replicate mass
-				getReplicator().add(new Hypermetal(Metal.class, pair.getKey(), pair.getValue()));
-			}
-			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// release replication
-				getReplicator().removeByKey(pair.getKey());
-			}
+		// avoid concurrent calls to run
+		if (!message.compareAndSet(RUNNER, null, Thread.currentThread())) {
+			// because is already running
+			return;
+		} 
+		else {
+			// life starts here
+			super.run();
+			// life ends here
+			push(Command.TRANSFER);
 		}
 	}
 }

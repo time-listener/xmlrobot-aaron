@@ -23,7 +23,14 @@ public class Hyperintron
 	 * 4517820012623779722L
 	 */
 	private static final long serialVersionUID = 4517820012623779722L;
-
+	
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.positron.Antineutron#name()
+	 */
+	@Override
+	public String getName() {
+		return getKey().getName();
+	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Space#getKey()
 	 */
@@ -105,13 +112,6 @@ public class Hyperintron
 		super(Hyperintron.class, antitype, key, value, parent);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Antineutron#name()
-	 */
-	@Override
-	public String getName() {
-		return getKey().getName();
-	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.positron.Positron#compare(org.xmlrobot.genesis.Mass, org.xmlrobot.genesis.Mass)
 	 */

@@ -5,7 +5,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.nature.Biosphere;
 import org.xmlrobot.nature.Ecosystem;
 import org.xmlrobot.positron.Antiproton;
@@ -29,7 +29,7 @@ public class Gas
 	private static final long serialVersionUID = -3602380595804343582L;
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Proton#getKey()
+	 * @see org.xmlrobot.positron.Antiproton#getKey()
 	 */
 	@Override
 	@XmlElement
@@ -37,14 +37,14 @@ public class Gas
 		return super.getKey();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Proton#setKey(java.lang.Object)
+	 * @see org.xmlrobot.positron.Antiproton#setKey(java.lang.Object)
 	 */
 	@Override
 	public Biosphere setKey(Biosphere key) {
 		return super.setKey(key);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Proton#getValue()
+	 * @see org.xmlrobot.positron.Antiproton#getValue()
 	 */
 	@Override
 	@XmlElement
@@ -52,7 +52,7 @@ public class Gas
 		return super.getValue();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Proton#setValue(java.lang.Object)
+	 * @see org.xmlrobot.positron.Antiproton#setValue(java.lang.Object)
 	 */
 	@Override
 	public Ecosystem setValue(Ecosystem value) {
@@ -77,7 +77,7 @@ public class Gas
 	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Takion)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		super.mass(sender, event);
 		switch (event.getCommand()) {
 		case ORDER:
@@ -97,7 +97,7 @@ public class Gas
 				}
 			}
 			break;
-		case PUSH:
+		case SEND:
 			if(event.getSource() instanceof Hypermetal) {
 				// declare stem
 				Mass<Ecosystem,Biosphere> stem;
@@ -153,22 +153,14 @@ public class Gas
 		}
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Proton#putValue(java.lang.Object, java.lang.Object)
+	 * @see org.xmlrobot.positron.Antiproton#put(java.lang.Object, java.lang.Object)
 	 */
 	@Override
 	public Ecosystem put(Biosphere key, Ecosystem value) {
-		// declare child
-		Mass<Biosphere,Ecosystem> child;
-		// declare old value
-		Ecosystem oldValue;
-		// if update unsuccessful
-		if ((oldValue = (child = getChild()) != null ? 
-				child.putValue(key, value) : null) == null) {
-			// create child
-			Metal pair = new Metal(Hypermetal.class, key, value, this);
-			// push child
-			pair.push(Command.PUSH);
-		}
-		return oldValue;
+		// create child
+		Metal pair = new Metal(Hypermetal.class, key, value, this);
+		// push child
+		pair.push(Command.SEND);
+		return null;
 	}
 }

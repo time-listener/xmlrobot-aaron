@@ -6,15 +6,12 @@ package org.xmlrobot.nature;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceReference;
 import org.xmlrobot.dna.Cell;
 import org.xmlrobot.dna.Cytoplasm;
 import org.xmlrobot.dna.Operon;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
-import org.xmlrobot.genesis.TimeListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Parent;
 import org.xmlrobot.nature.antimatter.Hyperatom;
 import org.xmlrobot.nature.matter.Atom;
@@ -37,7 +34,7 @@ public class Being
 	private static final long serialVersionUID = -2219408315913205280L;
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#getKey()
+	 * @see org.xmlrobot.inheritance.Parent#getKey()
 	 */
 	@Override
 	@XmlElement
@@ -45,14 +42,14 @@ public class Being
 		return super.getKey();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#setKey(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Parent#setKey(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Operon setKey(Operon key) {
 		return super.setKey(key);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#getValue()
+	 * @see org.xmlrobot.inheritance.Parent#getValue()
 	 */
 	@Override
 	@XmlElement
@@ -60,19 +57,19 @@ public class Being
 		return super.getValue();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#setValue(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Parent#setValue(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Cell setValue(Cell value) {
 		return super.setValue(value);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#getReplicator()
+	 * @see org.xmlrobot.inheritance.Parent#getPlasma()
 	 */
 	@Override
 	@XmlElement(type=Hyperatom.class)
-	public Mass<Operon,Cell> getReplicator() {
-		return super.getReplicator();
+	public Mass<Operon,Cell> getPlasma() {
+		return super.getPlasma();
 	}
 	
 	/**
@@ -104,7 +101,7 @@ public class Being
 	 * @param antitype the inherited antitype
 	 */
 	public Being(Class<Organism> antitype) {
-		super(Hyperatom.class, Atom.class, Being.class, antitype, Parity.XY);
+		super(Being.class, antitype, Parity.XY);
 	}
 	/**
 	 * {@link Being} class constructor.
@@ -113,7 +110,7 @@ public class Being
 	 * @param value {@link Cell} the value
 	 */
 	public Being(Class<Organism> antitype, Operon key, Cell value) {
-		super(Hyperatom.class, Atom.class, Being.class, antitype, key, value, Parity.XY);
+		super(Being.class, antitype, key, value, Parity.XY);
 	}
 	/**
 	 * {@link Being} class constructor.
@@ -123,14 +120,14 @@ public class Being
 	 * @param parent {@link Ecosystem} the parent
 	 */
 	public Being(Class<Organism> antitype, Operon key, Cell value, Ecosystem parent) {
-		super(Hyperatom.class, Atom.class, Being.class, antitype, key, value, parent);
+		super(Being.class, antitype, key, value, parent);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.gravity.Recurrence#mass(org.xmlrobot.genesis.Entity, org.xmlrobot.horizon.Darkmass)
+	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Tachyon)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		super.mass(sender, event);
 		
 		switch (event.getCommand()) {
@@ -147,37 +144,21 @@ public class Being
 		}
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#run()
+	 * @see org.xmlrobot.inheritance.Parent#run()
 	 */
 	@Override
 	public void run() {
-		super.run();
-		// rest in peace
-		push(Command.TRANSFER);
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.hyperspace.Abstraction#serviceChanged(org.osgi.framework.ServiceEvent)
-	 */
-	@Override
-	public void serviceChanged(ServiceEvent event) {
-		// get reference
-		ServiceReference<?> ref = event.getServiceReference();
-		// declare child
-		Object child;
-		// assign and check
-		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
-				child instanceof Being : false) {
-			// cast source
-			Being pair = (Being) child;
-			// commute command
-			if(event.getType() == ServiceEvent.REGISTERED) {
-				// replicate mass
-				getReplicator().add(new Hyperatom(Atom.class, pair.getKey(), pair.getValue()));
-			}
-			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// release replication
-				getReplicator().removeByKey(pair.getKey());
-			}
+		// avoid concurrent calls to run
+		if (!message.compareAndSet(RUNNER, null, Thread.currentThread())) {
+			// because is already running
+			return;
+		} 
+		else {
+			// life starts here
+			super.run();
+			// life ends here
+			push(Command.TRANSFER);
 		}
 	}
+
 }

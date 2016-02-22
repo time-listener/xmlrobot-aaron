@@ -23,7 +23,7 @@ import org.xmlrobot.genesis.Congregation;
 import org.xmlrobot.genesis.MassListener;
 import org.xmlrobot.genesis.TimeListener;
 import org.xmlrobot.genesis.Phaser;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.util.Abort;
 import org.xmlrobot.util.Command;
 import org.xmlrobot.util.Parity;
@@ -49,15 +49,13 @@ public class Hyperbody
 	 */
 	@Override
 	public V get() {
-
-		return getAndCast(VALUE);
+		return getAndGet(VALUE);
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.Phaser#set(java.lang.Object)
 	 */
 	@Override
 	public void set(V value) {
-		
 		set(VALUE, value);
 	}
 	/* (non-Javadoc)
@@ -65,16 +63,14 @@ public class Hyperbody
 	 */
 	@Override
 	public K call() {
-		
-		return getAndCast(KEY);
+		return getAndGet(KEY);
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.Mass#dna()
 	 */
 	@Override
 	public TimeListener<K,V> dna() {
-		
-		return getAndCast(DNA);
+		return getAndGet(DNA);
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.Mass#getGen()
@@ -82,15 +78,13 @@ public class Hyperbody
 	@Override
 	@XmlElement
 	public Parity getGen() {
-
-		return getAndCast(PARITY);
+		return getAndGet(PARITY);
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.Mass#setGen(org.xmlrobot.util.Parity)
 	 */
 	@Override
 	public void setGen(Parity gene) {
-		
 		set(PARITY, gene);
 	}
 	/* (non-Javadoc)
@@ -99,15 +93,13 @@ public class Hyperbody
 	@Override
 	@XmlElement
 	public Class<K> getType() {
-
-		return getAndCast(TYPE);
+		return getAndGet(TYPE);
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.Mass#setType(java.lang.Class)
 	 */
 	@Override
 	public void setType(Class<? extends K> type) {
-		
 		set(TYPE, type);
 	}
 	/* (non-Javadoc)
@@ -116,15 +108,13 @@ public class Hyperbody
 	@Override
 	@XmlElement
 	public Class<? extends V> getAntitype() {
-		
-		return getAndCast(ANTITYPE);
+		return getAndGet(ANTITYPE);
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.Mass#setAntitype(java.lang.Class)
 	 */
 	@Override
 	public void setAntitype(Class<? extends V> value) {
-		
 		set(ANTITYPE, value);
 	}
 	/* (non-Javadoc)
@@ -133,8 +123,14 @@ public class Hyperbody
 	@Override
 	@XmlTransient
 	public K getChild() {
-		
-		return getAndCast(CHILD);
+		return getAndGet(CHILD);
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.Congregation#setChild(java.lang.Object)
+	 */
+	@Override
+	public void setChild(K listener) {
+		set(CHILD, listener);
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.Congregation#getParent()
@@ -142,24 +138,43 @@ public class Hyperbody
 	@Override
 	@XmlTransient
 	public K getParent() {
-		
-		return getAndCast(PARENT);
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.Congregation#setChild(java.lang.Object)
-	 */
-	@Override
-	public void setChild(K listener) {
-		
-		set(CHILD, listener);
+		return getAndGet(PARENT);
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.Congregation#setParent(java.lang.Object)
 	 */
 	@Override
 	public void setParent(K listener) {
-		
 		set(PARENT, listener);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.TimeListener#getRoot()
+	 */
+	@Override
+	public K getRoot() {
+		return getAndGet(ROOT);
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.TimeListener#setRoot(java.lang.Object)
+	 */
+	@Override
+	public void setRoot(K root) {
+		set(ROOT, root);
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.TimeListener#getStem()
+	 */
+	@Override
+	public V getStem() {
+		return getAndGet(STEM);
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.TimeListener#setStem(java.lang.Object)
+	 */
+	@Override
+	public void setStem(V stem) {
+		set(STEM, stem);
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.protocol.Hyperhead#getName()
@@ -182,6 +197,8 @@ public class Hyperbody
 	 */
 	public Hyperbody(Parity parity) {
 		this(new Hyperhead());
+		// start dna initialization
+		initializeDna((Hyperhead) map);
 		// inherit parity
 		set(PARITY, parity);
 	}
@@ -210,10 +227,7 @@ public class Hyperbody
 	 * @throws Abort
 	 */
 	public Hyperbody(MassListener map) {
-		if(map == null ? true : !(map instanceof Hyperhead))
-			throw new Abort();
-		// start dna initialization
-		initializeDna((Hyperhead) map);
+		super(map);
 	}
 	
 	/**
@@ -224,8 +238,14 @@ public class Hyperbody
 		map.set(COMMAND, Command.GENESIS);
 		// update dna reference
 		map.set(DNA, this);
-		// inherit map
-		this.map = map;
+		// declare child
+		map.<K>declare(CHILD);
+		// declare parent
+		map.<K>declare(PARENT);
+		// declare root
+		map.<K>declare(ROOT);
+		// declare root
+		map.<V>declare(STEM);
 	}
 	/* (non-Javadoc)
 	 * @see java.lang.Object#clone()
@@ -242,7 +262,7 @@ public class Hyperbody
 	 */
 	@Override
 	public <X extends TimeListener<X,Y>,Y extends TimeListener<Y,X>> 
-	void pulse(TimeListener<?,?> sender, Takion<Y,X> event) {
+	void pulse(TimeListener<?,?> sender, Tachyon<Y,X> event) {
 		
 		call().pulse(sender, event);
 	}
@@ -251,7 +271,7 @@ public class Hyperbody
 	 */
 	@Override
 	public <X extends TimeListener<X,Y>,Y extends TimeListener<Y,X>> void echo(
-			TimeListener<?,?> sender, Takion<X,Y> event) {
+			TimeListener<?,?> sender, Tachyon<X,Y> event) {
 		
 		call().echo(sender, event);
 	}
@@ -284,7 +304,7 @@ public class Hyperbody
 	 * @see org.xmlrobot.genesis.MassListener#mass(org.xmlrobot.genesis.Entity, org.xmlrobot.horizon.Darkmass)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		
 		call().mass(sender, event);
 	}
@@ -723,14 +743,7 @@ public class Hyperbody
 		
 		call().addMassListener(listener);
 	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.protocol.Hyperhead#removeMassListener(org.xmlrobot.genesis.MassListener)
-	 */
-	@Override
-	public void removeMassListener(MassListener listener) {
-		
-		call().addMassListener(listener);
-	}
+
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.Reproducible#output()
 	 */
@@ -755,13 +768,5 @@ public class Hyperbody
 	@Override
 	public void write(File file) {
 		call().write(file);
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.TimeListener#matrix(org.xmlrobot.genesis.TimeListener)
-	 */
-	@Override
-	public org.xmlrobot.genesis.TimeListener.Transmitter<K, V> matrix(V output) {
-
-		return call().matrix(output);
 	}
 }

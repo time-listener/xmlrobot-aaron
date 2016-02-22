@@ -5,7 +5,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.positron.Antiproton;
 import org.xmlrobot.spacetime.Jupiter;
 import org.xmlrobot.spacetime.Saturn;
@@ -15,6 +15,19 @@ import org.xmlrobot.util.Command;
 
 /**
  * Photon implementation class.
+ * 
+ * A photon is an elementary particle, the quantum of light and all other forms of electromagnetic radiation. 
+ * It is the force carrier for the electromagnetic force, even when static via virtual photons. 
+ * The effects of this force are easily observable at the microscopic and at the macroscopic level, 
+ * because the photon has zero rest mass; this allows long distance interactions. 
+ * Like all elementary particles, photons are currently best explained by quantum mechanics and exhibit 
+ * wave–particle duality, exhibiting properties of waves and of. For example, a single photon 
+ * may be refracted by a lens or exhibit wave interference with itself, but also act as a particle 
+ * giving a definite result when its position is measured. Waves and quanta, being two observable 
+ * aspects of a single phenomenon, cannot have their true nature described in terms of any mechanical model.
+ * 
+ * It's elementary antiparticle is {@link Hyperphoton}.
+ * 
  * @author joan
  * @parity XX
  * @since 41155.3
@@ -29,7 +42,7 @@ public class Photon
 	private static final long serialVersionUID = 8804208983784652129L;
 
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Proton#getKey()
+	 * @see org.xmlrobot.positron.Antiproton#getKey()
 	 */
 	@Override
 	@XmlElement
@@ -37,14 +50,14 @@ public class Photon
 		return super.getKey();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Proton#setKey(java.lang.Object)
+	 * @see org.xmlrobot.positron.Antiproton#setKey(java.lang.Object)
 	 */
 	@Override
 	public Saturn setKey(Saturn key) {
 		return super.setKey(key);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Proton#getValue()
+	 * @see org.xmlrobot.positron.Antiproton#getValue()
 	 */
 	@Override
 	@XmlElement
@@ -52,7 +65,7 @@ public class Photon
 		return super.getValue();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Proton#setValue(java.lang.Object)
+	 * @see org.xmlrobot.positron.Antiproton#setValue(java.lang.Object)
 	 */
 	@Override
 	public Jupiter setValue(Jupiter value) {
@@ -77,7 +90,7 @@ public class Photon
 	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Takion)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?, ?> event) {
+	public void mass(MassListener sender, Tachyon<?, ?> event) {
 		super.mass(sender, event);
 		switch (event.getCommand()) {
 		case ORDER:
@@ -97,7 +110,7 @@ public class Photon
 				}
 			}
 			break;
-		case PUSH:
+		case SEND:
 			if(event.getSource() instanceof Hypergluon) {
 				// declare stem
 				Mass<Jupiter,Saturn> stem;
@@ -153,22 +166,14 @@ public class Photon
 		}
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Proton#putValue(java.lang.Object, java.lang.Object)
+	 * @see org.xmlrobot.positron.Antiproton#put(java.lang.Object, java.lang.Object)
 	 */
 	@Override
 	public Jupiter put(Saturn key, Jupiter value) {
-		// declare child
-		Mass<Saturn,Jupiter> child;
-		// declare old value
-		Jupiter oldValue;
-		// if update unsuccessful
-		if ((oldValue = (child = getChild()) != null ? child.putValue(key,
-				value) : null) == null) {
-			// create child
-			Gluon pair = new Gluon(Hypergluon.class, key, value, this);
-			// push child
-			pair.push(Command.PUSH);
-		}
-		return oldValue;
+		// create child
+		Gluon pair = new Gluon(Hypergluon.class, key, value, this);
+		// push child
+		pair.push(Command.SEND);
+		return null;
 	}
 }

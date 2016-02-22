@@ -5,7 +5,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.positron.Antiproton;
 import org.xmlrobot.spacetime.Andromeda;
 import org.xmlrobot.spacetime.MilkyWay;
@@ -77,7 +77,7 @@ public class Muon
 	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Takion)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?, ?> event) {
+	public void mass(MassListener sender, Tachyon<?, ?> event) {
 		super.mass(sender, event);
 		switch (event.getCommand()) {
 		case ORDER:
@@ -97,7 +97,7 @@ public class Muon
 				}
 			}
 			break;
-		case PUSH:
+		case SEND:
 			if(event.getSource() instanceof Hyperhiggs) {
 				// declare stem
 				Mass<MilkyWay,Andromeda> future;
@@ -153,22 +153,14 @@ public class Muon
 		}
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Proton#putValue(java.lang.Object, java.lang.Object)
+	 * @see org.xmlrobot.positron.Antiproton#put(java.lang.Object, java.lang.Object)
 	 */
 	@Override
 	public MilkyWay put(Andromeda key, MilkyWay value) {
-		// declare child
-		Mass<Andromeda,MilkyWay> child;
-		// declare old value
-		MilkyWay oldValue;
-		// if update unsuccessful
-		if ((oldValue = (child = getChild()) != null ? 
-				child.putValue(key, value) : null) == null) {
-			// create child
-			Higgs pair = new Higgs(Hyperhiggs.class, key, value, this);
-			// push child
-			pair.push(Command.PUSH);
-		}
-		return oldValue;
+		// create child
+		Higgs pair = new Higgs(Hyperhiggs.class, key, value, this);
+		// push child
+		pair.push(Command.SEND);
+		return null;
 	}
 }

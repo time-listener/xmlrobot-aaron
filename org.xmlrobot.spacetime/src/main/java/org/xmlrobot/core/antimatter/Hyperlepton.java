@@ -23,7 +23,15 @@ public class Hyperlepton
 	 * 5334316184698114845L
 	 */
 	private static final long serialVersionUID = 5334316184698114845L;
-	
+
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.hyperspace.Abstraction#getName()
+	 */
+	@Override
+	public String getName() {
+
+		return getKey().getName();
+	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Space#getKey()
 	 */
@@ -106,19 +114,10 @@ public class Hyperlepton
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Antineutron#getName()
-	 */
-	@Override
-	public String getName() {
-
-		return getKey().getName();
-	}
-	/* (non-Javadoc)
 	 * @see org.xmlrobot.positron.Positron#compare(org.xmlrobot.genesis.Mass, org.xmlrobot.genesis.Mass)
 	 */
 	@Override
 	public int compare(Mass<Fornax, Columbia> o1, Mass<Fornax, Columbia> o2) {
-
 		return o1.getKey().compareTo(o2.getValue());
 	}
 }

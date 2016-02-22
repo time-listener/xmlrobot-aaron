@@ -25,6 +25,14 @@ public class Metal
 	private static final long serialVersionUID = -359433908567036074L;
 
 	/* (non-Javadoc)
+	 * @see org.xmlrobot.hyperspace.Abstraction#getName()
+	 */
+	@Override
+	public String getName() {
+
+		return getKey().getName();
+	}
+	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Space#getKey()
 	 */
 	@Override
@@ -106,15 +114,7 @@ public class Metal
 	}
 
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.MassListener#getName()
-	 */
-	@Override
-	public String getName() {
-
-		return getKey().getName();
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Electron#compare(org.xmlrobot.genesis.Mass, org.xmlrobot.genesis.Mass)
+	 * @see org.xmlrobot.time.Time#compare(org.xmlrobot.genesis.TimeListener, org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public int compare(Mass<Biosphere,Ecosystem> o1, Mass<Biosphere,Ecosystem> o2) {

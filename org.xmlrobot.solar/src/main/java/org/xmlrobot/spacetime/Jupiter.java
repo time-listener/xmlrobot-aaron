@@ -11,7 +11,7 @@ import org.osgi.framework.ServiceReference;
 import org.xmlrobot.genesis.MassListener;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.TimeListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Child;
 import org.xmlrobot.nature.Biosphere;
 import org.xmlrobot.nature.Ecosystem;
@@ -20,6 +20,7 @@ import org.xmlrobot.spacetime.antimatter.Hypergas;
 import org.xmlrobot.spacetime.event.Impact;
 import org.xmlrobot.spacetime.matter.Gas;
 import org.xmlrobot.util.Command;
+import org.xmlrobot.util.Parity;
 
 /**
  * Master of the Sky.
@@ -37,7 +38,7 @@ public class Jupiter
 	private static final long serialVersionUID = 6147224097482696400L;
 
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#getKey()
+	 * @see org.xmlrobot.inheritance.Child#getKey()
 	 */
 	@Override
 	@XmlElement
@@ -45,14 +46,14 @@ public class Jupiter
 		return super.getKey();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#setKey(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Child#setKey(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Ecosystem setKey(Ecosystem key) {
 		return super.setKey(key);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#getValue()
+	 * @see org.xmlrobot.inheritance.Child#getValue()
 	 */
 	@Override
 	@XmlElement
@@ -60,19 +61,19 @@ public class Jupiter
 		return super.getValue();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#setValue(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Child#setValue(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Biosphere setValue(Biosphere value) {
 		return super.setValue(value);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#getReplicator()
+	 * @see org.xmlrobot.inheritance.Parent#getPlasma()
 	 */
 	@Override
 	@XmlElement(type=Hypergas.class)
-	public Mass<Ecosystem,Biosphere> getReplicator() {
-		return super.getReplicator();
+	public Mass<Ecosystem,Biosphere> getPlasma() {
+		return super.getPlasma();
 	}
 	
 	/**
@@ -80,7 +81,7 @@ public class Jupiter
 	 */
 	public Jupiter() {
 		
-		super(Hypergas.class, Gas.class, Jupiter.class);
+		super(Hypergas.class, Gas.class, Jupiter.class, Parity.XY);
 	}
 	/**
 	 * {@link Jupiter} class constructor.
@@ -88,14 +89,14 @@ public class Jupiter
 	 */
 	public Jupiter(Class<Saturn> antitype) {
 		
-		super(Hypergas.class, Gas.class, Jupiter.class, antitype);
+		super(Jupiter.class, antitype, Parity.XY);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.gravity.Recurrence#mass(org.xmlrobot.genesis.Entity, org.xmlrobot.horizon.Darkmass)
+	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Tachyon)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		super.mass(sender, event);
 
 		switch (event.getCommand()) {
@@ -116,7 +117,7 @@ public class Jupiter
 				}
 			}
 			break;
-		case PUSH:
+		case SEND:
 			if(event.getSource() instanceof Earth) {
 				// get matter
 				Mass<Biosphere,Ecosystem> future;
@@ -133,7 +134,7 @@ public class Jupiter
 				}
 			}
 			break;
-		case LISTEN:
+		case PUSH:
 			if(event.getSource() instanceof Ecosystem) {
 				// cast source
 				Ecosystem key = (Ecosystem) event.getSource();
@@ -191,7 +192,7 @@ public class Jupiter
 				// cast source
 				Earth entity = (Earth) event.getSource();
 				// transfer message contents
-				get().putValue(entity.getKey(), entity.getValue());
+				put(entity.getValue(), entity.getKey());
 			}
 			break;
 		default:
@@ -199,26 +200,18 @@ public class Jupiter
 		}
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#put(org.xmlrobot.genesis.Mass, org.xmlrobot.genesis.Mass)
+	 * @see org.xmlrobot.inheritance.Child#put(org.xmlrobot.genesis.TimeListener, org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Biosphere put(Ecosystem key, Biosphere value) {
-		// declare child
-		Mass<Ecosystem,Biosphere> child;
-		// declare old value
-		Biosphere oldValue;
-		// if update unsuccessful
-		if ((oldValue = (child = getChild()) != null ? 
-				child.putValue(key, value) : null) == null) {
-			// create child
-			Mars pair = new Mars(Earth.class, key, value, this);
-			// push child
-			pair.push(Command.PUSH);
-		}
-		return oldValue;
+		// create child
+		Mars pair = new Mars(Earth.class, key, value, this);
+		// push child
+		pair.push(Command.SEND);
+		return null;
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.hyperspace.Abstraction#serviceChanged(org.osgi.framework.ServiceEvent)
+	 * @see org.xmlrobot.inheritance.Child#serviceChanged(org.osgi.framework.ServiceEvent)
 	 */
 	@Override
 	public void serviceChanged(ServiceEvent event) {
@@ -229,16 +222,32 @@ public class Jupiter
 		// assign and check
 		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
 				child instanceof Mars : false) {
+			// declare plasma
+			Mass<Ecosystem,Biosphere> plasma;
 			// cast source
 			Mars pair = (Mars) child;
 			// commute command
-			if(event.getType() == ServiceEvent.REGISTERED) {
-				// replicate mass
-				getReplicator().putValue(pair.getKey(), pair.getValue());
+			if (event.getType() == ServiceEvent.REGISTERED) {
+				// assign and check it's contained
+				if((plasma = getPlasma()) != null ?
+						!plasma.isEmpty() ?
+								!plasma.containsValue(pair.getValue())
+								: true
+						: false) {
+					// replicate mass
+					plasma.putKey(pair.getValue(), pair.getKey());
+				}
 			}
-			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// release replication
-				getReplicator().removeByKey(pair.getKey());
+			else if (event.getType() == ServiceEvent.UNREGISTERING) {
+				// check if empty and chained
+				if((plasma = getPlasma()) != null ? 
+						!plasma.isEmpty() ? 
+								plasma.containsKey(pair.getKey()) 
+								: false
+						: false) {
+					// release child
+					plasma.removeByValue(pair.getValue());
+				}
 			}
 		}
 	}

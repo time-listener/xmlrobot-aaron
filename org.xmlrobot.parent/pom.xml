@@ -21,14 +21,14 @@
 	<!-- PROFILES -->
 	<profiles>
 
-		<!-- PROFILE: GOD -->
+		<!-- PROFILE: Q -->
 		<profile>
-			<id>god</id>
+			<id>q</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<properties>
-				<build.profile.id>god</build.profile.id>
+				<build.profile.id>q</build.profile.id>
 			</properties>
 		</profile>
 

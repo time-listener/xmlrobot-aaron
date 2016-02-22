@@ -4,12 +4,14 @@ import java.util.Iterator;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceReference;
+import org.xmlrobot.Aaron.Wormhole;
 import org.xmlrobot.antimatter.Hyperbrain;
 import org.xmlrobot.core.Subspace;
 import org.xmlrobot.core.Universe;
@@ -21,7 +23,7 @@ import org.xmlrobot.genesis.Entity;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
 import org.xmlrobot.genesis.TimeListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Parent;
 import org.xmlrobot.matter.Hypermind;
 import org.xmlrobot.util.Command;
@@ -43,24 +45,29 @@ public class Robot
 	 */
 	private static final long serialVersionUID = -3478889532242260284L;
 
+    /* (non-Javadoc)
+     * @see org.xmlrobot.inheritance.Parent#getName()
+     */
+    @Override
+	@XmlElement
+    public String getName() {
+    
+    	return "Aaron";
+    }
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.inheritance.Parent#getKey()
 	 */
 	@Override
 	@XmlElement
 	public Subspace getKey() {
-		Mass<Subspace,Universe> child;
-		return (child = getChild()) != null ? child.getKey() : null;
+		return !isEmpty() ? getChild().getKey() : null;
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.inheritance.Parent#setKey(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Subspace setKey(Subspace key) {
-		Mass<Subspace,Universe> child;
-		if((child = getChild()) != null)
-			return child.setKey(key);
-		else return null;
+		return !isEmpty() ? getChild().setKey(key) : null;
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.inheritance.Parent#getValue()
@@ -68,26 +75,22 @@ public class Robot
 	@Override
 	@XmlElement
 	public Universe getValue() {
-		Mass<Subspace,Universe> child;
-		return (child = getChild()) != null ? child.getValue() : null;
+		return !isEmpty() ? getChild().getValue() : null;
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.inheritance.Parent#setValue(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Universe setValue(Universe value) {
-		Mass<Subspace,Universe> child;
-		if((child = getChild()) != null)
-			return child.setValue(value);
-		else return null;
+		return !isEmpty() ? getChild().setValue(value) : null;
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.inheritance.Parent#getReplicator()
 	 */
 	@Override
 	@XmlElement(type=Hypermind.class)
-	public Mass<Subspace,Universe> getReplicator() {
-		return super.getReplicator();
+	public Entity<Subspace,Universe> getPlasma() {
+		return (Entity<Subspace,Universe>) super.getPlasma();
 	}
 	
 	/**
@@ -101,48 +104,57 @@ public class Robot
 	 * @param antitype the antitype
 	 */
 	public Robot(Class<Aaron> antitype) {
-		super(Hypermind.class, Hyperbrain.class, Robot.class, antitype, Parity.YY);
+		super(Robot.class, antitype, Parity.YY);
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.Atlas#entrySet()
-	 */
-	@Override
-	public Congregation<Mass<Subspace, Universe>> entrySet() {
 
-		return getChild();
-	}
+	// inheritance implementation
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.DNA#forEach(java.util.function.BiConsumer)
+	 * @see org.xmlrobot.time.Time#compare(org.xmlrobot.genesis.TimeListener, org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
-	public void forEach(BiConsumer<? super Subspace, ? super Universe> action) {
-		// declare child
-		Mass<Subspace, Universe> child;
-		// check existence and channel
-		if ((child = getChild()) != null)
-			child.forEachKey(action);
+	public int compare(Mass<Subspace,Universe> o1, Mass<Subspace,Universe> o2) {
+		// typical recursive composition
+		if (o1 != null) {
+
+			if (o2 != null) {
+				// get current identifier pairs difference
+				int cmp = o1.compareTo(o2.get());
+				// call recursion
+				cmp += compare(o1.getChild(), o2.getChild());
+				// return result
+				return cmp;
+			} else {
+				return 1;
+			}
+		} else if (o2 != null) {
+
+			return -1;
+		} else {
+			// starting-finishing
+			return 0;
+		}
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.Atlas#get(java.lang.Object)
+	 * @see org.xmlrobot.hyperspace.Recursion#compareTo(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
-	public Universe get(Subspace key) {
-		Mass<Subspace,Universe> child;
-		return (child = getChild()) != null ? child.getValue(key) : null;
+	public int compareTo(Mass<Universe,Subspace> o) {
+
+		return get().compare(get().getChild(), o.getChild());
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.DNA#getOrDefault(java.lang.Object, java.lang.Object)
+	 * @see org.xmlrobot.hyperspace.Recursion#reproduceTo(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
-	public Universe getOrDefault(Subspace key, Universe defaultValue) {
-		// declare child
-		Mass<Subspace,Universe> child;
-		// check existence and channel
-		return (child = getChild()) != null ? child.getValueOrDefault(key, defaultValue) : null;
+	public int reproduceTo(Mass<Universe,Subspace> o) {
+
+		return matrix().reproduce(o.get().getChild(), get().getChild());
 	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Takion)
+	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		super.mass(sender, event);
 
 		switch (event.getCommand()) {
@@ -163,7 +175,7 @@ public class Robot
 				}
 			}
 			break;
-		case PUSH:
+		case SEND:
 			if(event.getSource() instanceof Hypertoroid) {
 				// cast source
 				Hypertoroid pair = (Hypertoroid) event.getSource();
@@ -180,7 +192,7 @@ public class Robot
 				}
 			}
 			break;
-		case LISTEN:
+		case PUSH:
 			if(event.getSource() instanceof Subspace) {
 				
 				Subspace key = (Subspace) event.getSource();
@@ -238,7 +250,7 @@ public class Robot
 				// cast source
 				Hypertoroid pair = (Hypertoroid) event.getSource();
 				// transfer message to the future
-				get().putValue(pair.getKey(), pair.getValue());
+				put(pair.getValue(), pair.getKey());
 			}
 			break;
 		default:
@@ -253,38 +265,8 @@ public class Robot
 		// create child
 		Hyperplasma pair = new Hyperplasma(Hypertoroid.class, key, value, this);
 		// push child
-		pair.push(Command.PUSH);
+		pair.push(Command.SEND);
 		return null;
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.Atlas#putAll(org.xmlrobot.genesis.Atlas)
-	 */
-	@Override
-	public void putAll(
-			Atlas<? extends Subspace, ? extends Universe, ? extends Mass<Subspace, Universe>> m) {
-
-		for(Mass<Subspace,Universe> pair : m)
-			put(pair.getKey(), pair.getValue());
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.DNA#putIfAbsent(java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public Universe putIfAbsent(Subspace key, Universe value) {
-		// declare child
-		Mass<Subspace,Universe> child;
-		// check existence and channel
-		return (child = getChild()) != null ? child.putValueIfAbsent(key, value) : null;
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.DNA#remove(java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public boolean remove(Subspace key, Universe value) {
-		// declare child
-		Mass<Subspace,Universe> child;
-		// check existence and channel
-		return (child = getChild()) != null ? child.removeByKey(key, value) : null;
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.time.Freedom#removeAll(org.xmlrobot.genesis.TimeListener)
@@ -307,38 +289,6 @@ public class Robot
             }
         }
         return modified;
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.DNA#replace(java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public Universe replace(Subspace key, Universe value) {
-		// declare child
-		Mass<Subspace,Universe> child;
-		// check existence and channel
-		return (child = getChild()) != null ? child.replaceValue(key, value) : null;
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.DNA#replace(java.lang.Object, java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public boolean replace(Subspace key, Universe oldValue, Universe newValue) {
-		// declare child
-		Mass<Subspace,Universe> child;
-		// check existence and channel
-		return (child = getChild()) != null ? child.replaceValue(key, oldValue, newValue) : null;
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.DNA#replaceAll(java.util.function.BiFunction)
-	 */
-	@Override
-	public void replaceAll(
-			BiFunction<? super Subspace, ? super Universe, ? extends Universe> function) {
-		// declare child
-		Mass<Subspace,Universe> child;
-		// check existence and channel
-		if((child = getChild()) != null)
-			child.replaceAllValues(function);
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.inheritance.Parent#run()
@@ -373,12 +323,396 @@ public class Robot
 			// switch command
 			if (event.getType() == ServiceEvent.REGISTERED) {
 				// input to the brain
-				getReplicator().putValue(pair.getKey(), pair.getValue());
+				getPlasma().putValue(pair.getKey(), pair.getValue());
 			}
 			if (event.getType() == ServiceEvent.UNREGISTERING) {
 				// rest in peace
-				getReplicator().removeByKey(pair.getKey());
+				getPlasma().removeByKey(pair.getKey());
 			}
 		}
+	}
+	// matrix implementation
+ 	/* (non-Javadoc)
+ 	 * @see org.xmlrobot.inheritance.Parent#matrix()
+ 	 */
+ 	@Override
+ 	public Mass.Transmuter<Subspace,Universe> matrix() {
+ 		Mass.Transmuter<Subspace,Universe> m;
+ 		return (m = (Mass.Transmuter<Subspace,Universe>) matrix) != null ? 
+ 				m : (Mass.Transmuter<Subspace,Universe>) (matrix = new Blackhole());
+ 	}
+	/**
+	 * The blackhole implementation class.
+	 * <b>root</b>'s mass receiver.
+	 * @author joan
+	 */
+	protected class Blackhole
+		extends Translocator {
+
+		/**
+		 * {@link Wormhole} default class constructor.
+		 */
+		public Blackhole() {
+			super(instance(getAntitype(), getType()));
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.xmlrobot.Hypergenesis.Comparator#get()
+		 */
+		@Override
+		public Aaron get() {
+			return (Aaron) super.get();
+		}
+		/* (non-Javadoc)
+		 * @see org.xmlrobot.space.Hyperclock.Translocator#put(java.lang.Object, java.lang.Object)
+		 */
+		@Override
+		public void put(Subspace key, Universe value) {
+			get().put(value, key);
+		}
+	}
+	
+	// entity implementation
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.Atlas#entrySet()
+	 */
+	@Override
+	public Congregation<Mass<Subspace,Universe>> entrySet() {
+		return getChild();
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.DNA#forEach(java.util.function.BiConsumer)
+	 */
+	@Override
+	public void forEach(BiConsumer<? super Subspace, ? super Universe> action) {
+    	if(!isEmpty())
+    		getChild().forEachKey(action);
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.Atlas#get(java.lang.Object)
+	 */
+	@Override
+	public Universe get(Subspace key) {
+    	return !isEmpty() ? getChild().getValue(key) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.DNA#getOrDefault(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public Universe getOrDefault(Subspace key, Universe defaultValue) {
+    	return !isEmpty() ? getChild().getValueOrDefault(key, defaultValue) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.Atlas#putAll(org.xmlrobot.genesis.Atlas)
+	 */
+	@Override
+	public void putAll(Atlas<? extends Subspace, ? extends Universe, ? extends Mass<Subspace, Universe>> m) {
+		for(Mass<Subspace,Universe> pair : m)
+			put(pair.getKey(), pair.getValue());
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.DNA#putIfAbsent(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public Universe putIfAbsent(Subspace key, Universe value) {
+		return !isEmpty() ? getChild().putValueIfAbsent(key, value) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.DNA#remove(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public boolean remove(Subspace key, Universe value) {
+    	return !isEmpty() ? getChild().removeByKey(key, value) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.DNA#replace(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public Universe replace(Subspace key, Universe value) {
+		return !isEmpty() ? getChild().replaceValue(key, value) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.DNA#replace(java.lang.Object, java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public boolean replace(Subspace key, Universe oldValue, Universe newValue) {
+		return !isEmpty() ? getChild().replaceValue(key, oldValue, newValue) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.DNA#replaceAll(java.util.function.BiFunction)
+	 */
+	@Override
+	public void replaceAll(
+			BiFunction<? super Subspace, ? super Universe, ? extends Universe> function) {
+    	if(!isEmpty())
+    		getChild().replaceAllValues(function);
+	}
+	
+	// space implementation
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Contraction#putValue(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public Universe putValue(Subspace key, Universe value) {
+		return !isEmpty() ? getChild().putValue(key, value) : put(key, value);
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Contraction#putKey(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public Subspace putKey(Universe value, Subspace key) {
+		return !isEmpty() ? getChild().putKey(value, key) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Contraction#putValueIfAbsent(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public Universe putValueIfAbsent(Subspace key, Universe value) {
+		return !isEmpty() ? getChild().putValueIfAbsent(key, value) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Contraction#putKeyIfAbsent(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public Subspace putKeyIfAbsent(Universe value, Subspace key) {
+		return !isEmpty() ? getChild().putKeyIfAbsent(value, key) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Contraction#putAllValues(org.xmlrobot.genesis.Mass)
+	 */
+	@Override
+	public void putAllValues(Mass<? extends Subspace, ? extends Universe> m) {
+		if(!isEmpty())
+			super.putAllValues(m);
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Contraction#putAllKeys(org.xmlrobot.genesis.Mass)
+	 */
+	@Override
+	public void putAllKeys(Mass<? extends Universe, ? extends Subspace> m) {
+		if(!isEmpty())
+			super.putAllKeys(m);
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Compression#call(java.lang.Object)
+	 */
+	@Override
+	public Mass<Subspace,Universe> call(Subspace key) {
+		return !isEmpty() ? getChild().call(key) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Compression#callReversed(java.lang.Object)
+	 */
+	@Override
+	public Mass<Universe, Subspace> callReversed(Universe value) {
+		return !isEmpty() ? getChild().callReversed(value) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Compression#getValue(java.lang.Object)
+	 */
+	@Override
+	public Universe getValue(Subspace key) {
+		return !isEmpty() ? getChild().getValue(key) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Compression#getKey(java.lang.Object)
+	 */
+	@Override
+	public Subspace getKey(Universe value) {
+		return !isEmpty() ? getChild().getKey(value) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Compression#getValueOrDefault(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public Universe getValueOrDefault(Subspace key, Universe defaultValue) {
+		return !isEmpty() ? getChild().getValueOrDefault(key, defaultValue) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Compression#getKeyOrDefault(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public Subspace getKeyOrDefault(Universe value, Subspace defaultKey) {
+		return !isEmpty() ? getChild().getKeyOrDefault(value, defaultKey) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Attraction#containsKey(java.lang.Object)
+	 */
+	@Override
+	public boolean containsKey(Subspace key) {
+		return !isEmpty() ? getChild().containsKey(key) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Attraction#containsValue(java.lang.Object)
+	 */
+	@Override
+	public boolean containsValue(Universe value) {
+		return !isEmpty() ? getChild().containsValue(value) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Attraction#collectKeys(org.xmlrobot.genesis.Congregation)
+	 */
+	@Override
+	public Congregation<Subspace> collectKeys(Congregation<Subspace> keys) {
+		return !isEmpty() ? getChild().collectKeys(keys) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Attraction#collectValues(org.xmlrobot.genesis.Congregation)
+	 */
+	@Override
+	public Congregation<Universe> collectValues(Congregation<Universe> values) {
+		return !isEmpty() ? getChild().collectValues(values) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Attraction#forEachKey(java.util.function.BiConsumer)
+	 */
+	@Override
+	public void forEachKey(BiConsumer<? super Subspace, ? super Universe> action) {
+		if(!isEmpty())
+			super.forEachKey(action);
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Attraction#forEachValue(java.util.function.BiConsumer)
+	 */
+	@Override
+	public void forEachValue(BiConsumer<? super Universe, ? super Subspace> action) {
+		if(!isEmpty())
+			super.forEachValue(action);
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Repulsion#replaceValue(java.lang.Object, java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public boolean replaceValue(Subspace key, Universe oldValue, Universe newValue) {
+		return !isEmpty() ? getChild().replaceValue(key, oldValue, newValue) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Repulsion#replaceKey(java.lang.Object, java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public boolean replaceKey(Universe value, Subspace oldKey, Subspace newKey) {
+		return !isEmpty() ? getChild().replaceKey(value, oldKey, newKey) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Repulsion#replaceAllValues(java.util.function.BiFunction)
+	 */
+	@Override
+	public void replaceAllValues(BiFunction<? super Subspace, ? super Universe, ? extends Universe> function) {
+		if(!isEmpty())
+			super.replaceAllValues(function);
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Repulsion#replaceAllKeys(java.util.function.BiFunction)
+	 */
+	@Override
+	public void replaceAllKeys(BiFunction<? super Universe, ? super Subspace, ? extends Subspace> function) {
+		if(!isEmpty())
+			super.replaceAllKeys(function);
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Repulsion#replaceValue(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public Universe replaceValue(Subspace key, Universe value) {
+		return !isEmpty() ? getChild().replaceValue(key, value) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Repulsion#replaceKey(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public Subspace replaceKey(Universe value, Subspace key) {
+		return !isEmpty() ? getChild().replaceKey(value, key) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Expansion#computeIfAbsent(java.lang.Object, java.util.function.Function)
+	 */
+	@Override
+	public Universe computeIfAbsent(Subspace key,
+			Function<? super Subspace, ? extends Universe> mappingFunction) {
+		return !isEmpty() ? getChild().computeIfAbsent(key, mappingFunction) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Expansion#computeInvertedIfAbsent(java.lang.Object, java.util.function.Function)
+	 */
+	@Override
+	public Subspace computeInvertedIfAbsent(Universe key,
+			Function<? super Universe, ? extends Subspace> mappingFunction) {
+		return !isEmpty() ? getChild().computeInvertedIfAbsent(key, mappingFunction) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Expansion#compute(java.lang.Object, java.util.function.BiFunction)
+	 */
+	@Override
+	public Universe compute(Subspace key,
+			BiFunction<? super Subspace, ? super Universe, ? extends Universe> remappingFunction) {
+		return !isEmpty() ? getChild().compute(key, remappingFunction) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Expansion#computeInverted(java.lang.Object, java.util.function.BiFunction)
+	 */
+	@Override
+	public Subspace computeInverted(Universe value,
+			BiFunction<? super Universe, ? super Subspace, ? extends Subspace> remappingFunction) {
+		return !isEmpty() ? getChild().computeInverted(value, remappingFunction) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Expansion#computeIfPresent(java.lang.Object, java.util.function.BiFunction)
+	 */
+	@Override
+	public Universe computeIfPresent(Subspace key,
+			BiFunction<? super Subspace, ? super Universe, ? extends Universe> remappingFunction) {
+		return !isEmpty() ? getChild().computeIfPresent(key, remappingFunction) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Expansion#computeInvertedIfPresent(java.lang.Object, java.util.function.BiFunction)
+	 */
+	@Override
+	public Subspace computeInvertedIfPresent(Universe key,
+			BiFunction<? super Universe, ? super Subspace, ? extends Subspace> remappingFunction) {
+		return !isEmpty() ? getChild().computeInvertedIfPresent(key, remappingFunction) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Dilatation#merge(java.lang.Object, java.lang.Object, java.util.function.BiFunction)
+	 */
+	@Override
+	public Universe merge(Subspace key, Universe value,
+			BiFunction<? super Universe, ? super Universe, ? extends Universe> remappingFunction) {
+		return !isEmpty() ? getChild().merge(key, value, remappingFunction) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Dilatation#mergeInverted(java.lang.Object, java.lang.Object, java.util.function.BiFunction)
+	 */
+	@Override
+	public Subspace mergeInverted(Universe value, Subspace key,
+			BiFunction<? super Subspace, ? super Subspace, ? extends Subspace> remappingFunction) {
+		return !isEmpty() ? getChild().mergeInverted(value, key, remappingFunction) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Dilatation#removeByKey(java.lang.Object)
+	 */
+	@Override
+	public Mass<Subspace,Universe> removeByKey(Subspace key) {
+		return !isEmpty() ? getChild().removeByKey(key) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Dilatation#removeByValue(java.lang.Object)
+	 */
+	@Override
+	public Mass<Universe,Subspace> removeByValue(Universe value) {
+		return !isEmpty() ? getChild().removeByValue(value) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Dilatation#removeByKey(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public boolean removeByKey(Subspace key, Universe value) {
+		return !isEmpty() ? getChild().removeByKey(key, value) : null;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Dilatation#removeByValue(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public boolean removeByValue(Universe value, Subspace key) {
+		return !isEmpty() ? getChild().removeByValue(value, key) : null;
 	}
 }

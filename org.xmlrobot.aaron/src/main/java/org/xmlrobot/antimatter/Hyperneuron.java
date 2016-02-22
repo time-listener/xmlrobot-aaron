@@ -6,8 +6,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.xmlrobot.core.Subspace;
 import org.xmlrobot.core.Universe;
 import org.xmlrobot.genesis.Mass;
+import org.xmlrobot.genesis.MassListener;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.matter.Hyperxml;
 import org.xmlrobot.positron.Antineutron;
+import org.xmlrobot.util.Parity;
 
 /**
  * Hyperneuron implementation class.
@@ -120,5 +123,143 @@ public class Hyperneuron
 	@Override
 	public String getName() {
 		return getKey().getName();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Takion)
+	 */
+	@Override
+	public void mass(MassListener sender, Tachyon<?,?> event) {
+		super.mass(sender, event);
+		
+		switch (event.getCommand()) {
+		case ORDER:
+			if(event.getSource() instanceof Hyperxml) {
+				// declare future
+				Mass<Subspace,Universe> future;
+				// cast source
+				Hyperxml pair = (Hyperxml) event.getSource();
+				// check if empty and chained
+				if((future = get()) != null ? 
+						!future.isEmpty() ? 
+								!future.contains(pair) 
+								: true
+						: false) {
+					// release child
+					future.order(pair);
+				}
+			}
+			break;
+		case SEND:
+			if(event.getSource() instanceof Hyperxml) {
+				// declare future
+				Mass<Subspace,Universe> future;
+				// cast source
+				Hyperxml pair = (Hyperxml) event.getSource();
+				// check if empty and chained
+				if((future = get()) != null ?
+						!future.isEmpty() ?
+								!future.contains(pair)
+								: false 
+						: false) {
+					// add pair
+					future.add(pair);
+				}
+			}
+			break;
+		case RELEASE:
+			if(event.getSource() instanceof Hyperxml) {
+				// declare stem
+				Mass<Subspace,Universe> future;
+				// cast source
+				Hyperxml pair = (Hyperxml) event.getSource();
+				// check if empty and chained
+				if((future = get()) != null ? 
+						!future.isEmpty() ? 
+								future.contains(pair) 
+								: false
+						: false) {
+					// release child
+					future.remove(pair);
+				}
+			}
+			break;
+		case SUBMIT:
+			if(event.getSource() instanceof Hyperxml) {
+				// declare stem
+				Mass<Subspace,Universe> future;
+				// cast source
+				Hyperxml pair = (Hyperxml) event.getSource();
+				// check if empty and chained
+				if((future = get()) != null ? 
+						!future.isEmpty() ? 
+								!future.contains(pair) 
+								: true
+						: false) {
+					// push child
+					future.submit(pair);
+				}
+			}
+			break;
+		default:
+			break;
+		}
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.Hypergenesis#matrix()
+	 */
+	@Override
+	public Mass.Transmuter<Universe,Subspace> matrix() {
+
+		Mass.Transmuter<Universe,Subspace> m;
+ 		return (m = (Mass.Transmuter<Universe,Subspace>) matrix) != null ? 
+ 				m : (Mass.Transmuter<Universe,Subspace>) (matrix = new Hyperwafer());
+	}
+	/**
+	 * {@link Hyperwafer} implementation class.
+	 * @author joan
+	 */
+	protected class Hyperwafer 
+		extends Comparator
+			implements Mass.Transmuter<Universe,Subspace> {
+		
+		/**
+		 * {@link Hyperwafer} default class constructor.
+		 */
+		public Hyperwafer() {
+			super();
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.xmlrobot.Hypergenesis.Comparator#reproduce(org.xmlrobot.genesis.TimeListener, org.xmlrobot.genesis.TimeListener)
+		 */
+		@Override
+		public int reproduce(Mass<Universe,Subspace> key, Mass<Subspace,Universe> value) {
+			int cmp = super.reproduce(key, value);
+			
+			if(key.getGen().equals(Parity.XY) ? cmp > 0 : cmp < 0) {
+				put(value.getValue(), value.getKey());
+				return -1;
+			}
+			else if(cmp == 0) {
+				put(key.getKey(), key.getValue());
+				// doubled paired output: evolve
+				put(value.getValue(), value.getKey());
+				return 0;
+			}
+			else {
+				put(key.getKey(), key.getValue());
+				return 1;
+			}
+		}
+		/* (non-Javadoc)
+		 * @see org.xmlrobot.genesis.Mass.Transmuter#put(java.lang.Object, java.lang.Object)
+		 */
+		@Override
+		public void put(Universe key, Subspace value) {
+			if(get() == null)
+				super.set(instance(getAntitype(), getType(), value, key));
+			else inject(instance(getType(), getAntitype(), key, value));
+		}
 	}
 }

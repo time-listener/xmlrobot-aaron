@@ -13,8 +13,10 @@ public class Transmission
 	 */
 	private static final long serialVersionUID = -7257948843848880307L;
 
+	/**
+	 * @param source
+	 */
 	public Transmission(Mass<Hyperchain,Hypercube> source) {
 		super(source);
 	}
-
 }

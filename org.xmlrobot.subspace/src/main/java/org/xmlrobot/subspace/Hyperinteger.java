@@ -6,12 +6,14 @@ package org.xmlrobot.subspace;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceReference;
 import org.xmlrobot.genesis.Hypertext;
-import org.xmlrobot.genesis.TimeListener;
 import org.xmlrobot.genesis.Mass;
+import org.xmlrobot.genesis.Replicator;
+import org.xmlrobot.genesis.TimeListener;
 import org.xmlrobot.horizon.EventHorizon;
 import org.xmlrobot.space.Space;
-import org.xmlrobot.util.Abort;
 import org.xmlrobot.util.Command;
 import org.xmlrobot.util.Parity;
 
@@ -26,6 +28,9 @@ import org.xmlrobot.util.Parity;
  * And vice-versa. So, changes in the hyperstring will be 
  * reflected in the hyperinteger. And vice-versa.
  * 
+ * <p>This class is just another member of the<br>
+ * {@code hyperspace congregation framework}.
+ * 
  * @author joan
  * @parity XX
  * @since 28
@@ -33,37 +38,35 @@ import org.xmlrobot.util.Parity;
 @XmlTransient
 public abstract class Hyperinteger
 	extends Space<Integer,Character> 
-		implements Hypertext {
+		implements Replicator<Integer,Character>, 
+			Hypertext {
 
 	/**
 	 * 3747383271792133254L
 	 */
 	private static final long serialVersionUID = 3747383271792133254L;
 	
-	private transient volatile Mass<Integer,Character> plasma;
+	transient volatile Mass<Integer,Character> plasma;
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.MassListener#name()
+	 * @see org.xmlrobot.genesis.Replicator#getPlasma()
+	 */
+	@Override
+	public Mass<Integer,Character> getPlasma() {
+		return plasma;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.time.Time#getName()
 	 */
 	@Override
 	@XmlElement
 	public String getName() {
-		
 		return getValue().toString();
 	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.space.Singularity#getReplicator()
-	 */
-	@Override
-	public Mass<Integer,Character> getReplicator() {
-		return plasma;
-	}
-	
 	/**
 	 * {@link Hyperinteger} default class constructor.
 	 */
 	public Hyperinteger() {
-		
 		super();
 	}
 	/**
@@ -75,31 +78,12 @@ public abstract class Hyperinteger
 	protected Hyperinteger(
 			Class<? extends Mass<Integer,Character>> matter,
 			Class<? extends Mass<Character,Integer>> antimatter,  
-			Class<? extends Mass<Integer,Character>> type) {
+			Class<? extends Hyperinteger> type) {
 		super(type, Parity.XX);
 		// instance mass
 		plasma = instance(matter, antimatter);
-		// listen mass
-		plasma.addMassListener(this);
 	}
-	/**
-	 * {@link Hyperinteger} class constructor.
-	 * @param matter the matter type
-	 * @param antimatter the antimatter type
-	 * @param type the type
-	 * @param parent the parent of inheritance
-	 */
-	protected Hyperinteger(
-			Class<? extends Mass<Integer,Character>> matter,
-			Class<? extends Mass<Character,Integer>> antimatter,  
-			Class<? extends Mass<Integer,Character>> type,
-			Mass<Integer,Character> parent) {
-		super(type, parent);
-		// instance mass
-		plasma = instance(matter, antimatter);
-		// listen mass
-		plasma.addMassListener(this);
-	}
+
 	/**
 	 * {@link Hyperinteger} class constructor.
 	 * @param matter the matter type
@@ -111,14 +95,12 @@ public abstract class Hyperinteger
 	protected Hyperinteger(
 			Class<? extends Mass<Integer,Character>> matter,
 			Class<? extends Mass<Character,Integer>> antimatter,  
-			Class<? extends Mass<Integer,Character>> type,
+			Class<? extends Hyperinteger> type,
 			Integer key, Character value) {
 		// call constructor
 		super(type, key, value, Parity.XX);
 		// instance mass
 		plasma = instance(matter, antimatter, key, value);
-		// listen mass
-		plasma.addMassListener(this);
 	}
 	/**
 	 * {@link Hyperinteger} class constructor.
@@ -132,93 +114,49 @@ public abstract class Hyperinteger
 	protected Hyperinteger(
 			Class<? extends Mass<Integer,Character>> matter,
 			Class<? extends Mass<Character,Integer>> antimatter,  
-			Class<? extends Mass<Integer,Character>> type,
-			Integer key, Character value, Mass<Integer,Character> parent) {
+			Class<? extends Hyperinteger> type,
+			Integer key, Character value, Hyperinteger parent) {
 		super(type, key, value, parent);
 		// instance mass
-		plasma = instance(matter, antimatter, key, value);
-		// listen mass
-		plasma.addMassListener(this);
+		plasma = instance(matter, antimatter, key, value, parent.getPlasma());
 	}
 	/**
 	 * {@link Hyperinteger} class constructor.
-	 * @param matter the matter type
-	 * @param antimatter the antimatter type
 	 * @param type the inherited type
 	 * @param antitype the inherited antitype
 	 */
 	protected Hyperinteger(
-			Class<? extends Mass<Integer,Character>> matter,
-			Class<? extends Mass<Character,Integer>> antimatter,  
-			Class<? extends Mass<Integer,Character>> type, 
+			Class<? extends Hyperinteger> type,
 			Class<? extends Hyperstring> antitype) {
 		super(type, antitype, Parity.XX);
-		// instance mass
-		plasma = instance(matter, antimatter);
-		// listen mass
-		plasma.addMassListener(this);
 	}
+
 	/**
 	 * {@link Hyperinteger} class constructor.
-	 * @param matter the matter type
-	 * @param antimatter the antimatter type
-	 * @param type the inherited type
-	 * @param antitype the inherited antitype
-	 * @param parent the parent of inheritance
-	 */
-	protected Hyperinteger(
-			Class<? extends Mass<Integer,Character>> matter,
-			Class<? extends Mass<Character,Integer>> antimatter,
-			Class<? extends Mass<Integer,Character>> type,
-			Class<? extends Hyperstring> antitype, Mass<Integer,Character> parent) {
-		super(type, antitype, parent);
-		// instance mass
-		plasma = instance(matter, antimatter);
-		// listen mass
-		plasma.addMassListener(this);
-	}
-	/**
-	 * {@link Hyperinteger} class constructor.
-	 * @param matter the matter type
-	 * @param antimatter the antimatter type
 	 * @param type the inherited type
 	 * @param antitype the inherited antitype
 	 * @param key {@link Integer} the key
 	 * @param value {@link Character} the value
 	 */
 	protected Hyperinteger(
-			Class<? extends Mass<Integer,Character>> matter,
-			Class<? extends Mass<Character,Integer>> antimatter,
-			Class<? extends Mass<Integer,Character>> type, 
+			Class<? extends Hyperinteger> type, 
 			Class<? extends Hyperstring> antitype, 
 			Integer key, Character value) {
 		// call constructor
 		super(type, antitype, key, value, Parity.XX);
-		// instance mass
-		plasma = instance(matter, antimatter, key, value);
-		// listen mass
-		plasma.addMassListener(this);
 	}
 	/**
 	 * {@link Hyperinteger} class constructor.
-	 * @param matter the matter type
-	 * @param antimatter the antimatter type
 	 * @param type the inherited type
 	 * @param antitype the inherited antitype
 	 * @param key {@link Integer} the key
 	 * @param value {@link Character} the value
 	 */
 	protected Hyperinteger(
-			Class<? extends Mass<Integer,Character>> matter,
-			Class<? extends Mass<Character,Integer>> antimatter,
-			Class<? extends Mass<Integer,Character>> type, 
+			Class<? extends Hyperinteger> type, 
 			Class<? extends Hyperstring> antitype, 
-			Integer key, Character value, Mass<Integer,Character> parent) {
+			Integer key, Character value, Hyperinteger parent) {
 		super(type, antitype, key, value, parent);
-		// instance mass
-		plasma = instance(matter, antimatter, key, value);
-		// listen mass
-		plasma.addMassListener(this);
 	}
 	
 	/* (non-Javadoc)
@@ -229,32 +167,198 @@ public abstract class Hyperinteger
 	
 		return (Hyperinteger) super.clone();
 	}
+ 	/* (non-Javadoc)
+ 	 * @see org.xmlrobot.hyperspace.Abstraction#serviceChanged(org.osgi.framework.ServiceEvent)
+ 	 */
+ 	@Override
+	public void serviceChanged(ServiceEvent event) {
+		// get reference
+		ServiceReference<?> ref = event.getServiceReference();
+		// assign and check
+		if (ref.getProperty(TimeListener.KEY) == this) {
+			// commute command
+			if (event.getType() == ServiceEvent.REGISTERED) {
+
+				plasma.push(Command.SUBMIT);
+			} 
+			else if (event.getType() == ServiceEvent.UNREGISTERING) {
+				// release replication
+				plasma.push(Command.RELEASE);
+			}
+		}
+	}
+
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.gravity.Gravity#compare(org.xmlrobot.genesis.Mass, org.xmlrobot.genesis.Mass)
+	 * @see org.xmlrobot.time.Time#run()
 	 */
 	@Override
-	public int compare(Mass<Integer,Character> o1, Mass<Integer,Character> o2) {
-
-		return Character.compare(o1.getValue(), o2.getValue());
+	public void run() {
+		super.run();
+		
+		try {
+			// listen time
+			Thread.sleep(longValue());
+		}
+		catch(Exception ex) {
+			// if someone kills current instance
+			push(Command.INTERRUPTED);
+		}
 	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.time.Time#set(org.xmlrobot.genesis.TimeListener)
+	 */
+	@Override
+	public void set(Mass<Character,Integer> value) {
+		super.set(value);
+		// cast source
+		Hyperstring stem = (Hyperstring) value;
+		// set child's plasma
+		stem.plasma = plasma.get();
+		// my plasma is listened by my root's plasma
+		stem.plasma.setStem(plasma.getRoot());
+		stem.plasma.setRoot(plasma.getStem());
+		// listen plasma masses
+		stem.plasma.addMassListener(this);
+		plasma.addMassListener(stem);
+	}
+
+	// matrix implementation
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.Hypergenesis#matrix()
+	 */
+	@Override
+	public Mass.Transmuter<Integer,Character> matrix() {
+		 Mass.Transmuter<Integer,Character> m;
+ 		return (m = (Mass.Transmuter<Integer,Character>) matrix) != null ? 
+ 				m : (Mass.Transmuter<Integer,Character>) (matrix = new Hypergrid());
+	}
+	/**
+	 * The hypergrid. A hyperdigital frontier,
+	 * 
+	 * @author joan
+	 */
+	protected class Hypergrid 
+		extends Comparator 
+			implements Mass.Transmuter<Integer,Character> {
+
+		/**
+		 * {@link Hypergrid} default class constructor.
+		 */
+		public Hypergrid() {
+			super();
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.xmlrobot.Hypergenesis.Comparator#reproduce(java.lang.Object, java.lang.Object)
+		 */
+		@Override
+		public int reproduce(Mass<Integer,Character> key, Mass<Character,Integer> value) {
+			// compute comparison result
+			int cmp = super.reproduce(key, value);
+			// maximization operation
+			if(cmp < 0) {
+				// set key-value pair
+				put(value.getValue(), value.getKey());
+				return -1;
+			}
+			else if(cmp == 0) {
+				// set key-value pair
+				put(key.getKey(), key.getValue());
+				// doubled paired output: evolve
+				put(value.getValue(), value.getKey());
+				return 0;
+			}
+			else {
+				// set key-value pair
+				put(key.getKey(), key.getValue());
+				return 1;
+			}
+		}
+		/* (non-Javadoc)
+		 * @see org.xmlrobot.genesis.Mass.Transmuter#put(java.lang.Object, java.lang.Object)
+		 */
+		@Override
+		public void put(Integer key, Character value) {
+			if(get() == null)
+				super.set(instance(getAntitype(), getType(), value, key));
+			else inject(instance(getType(), getAntitype(), key, value));
+		}
+	}
+	//natural numbers base operations
+	/**
+	 * Natural addition
+	 * @param o the output
+	 * @return the output
+	 */
+	public Integer sum(Integer o) {
+		o += getKey();
+		return !isEmpty() ? ((Hypertext) getChild()).sum(o) : o;
+	}
+	/**
+	 * Natural subtract
+	 * @param o the output
+	 * @return the output
+	 */
+	public Integer subtract(Integer o) {
+		o -= getKey();
+		return !isEmpty() ?	((Hypertext)getChild()).subtract(o) : o;
+	}
+	/**
+	 * Natural multiplication
+	 * @param o the output
+	 * @return the output
+	 */
+	public Integer multiply(Integer o) {
+		o *= getKey();
+		return !isEmpty() ? ((Hypertext)getChild()).multiply(o)	: o;
+	}
+	/**
+	 * Natural division
+	 * @param o the output
+	 * @return the output
+	 */
+	public Integer divide(Integer o) {
+		o /= getKey();
+		return !isEmpty() ?	((Hypertext)getChild()).divide(o) : o ;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.Number#intValue()
+	 */
+	@Override
+	public int intValue() {
+		return getKey().intValue();
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.Number#longValue()
+	 */
+	@Override
+	public long longValue() {
+		return getKey().longValue();
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.Number#floatValue()
+	 */
+	@Override
+	public float floatValue() {
+		return getKey().floatValue();
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.Number#doubleValue()
+	 */
+	@Override
+	public double doubleValue() {
+		return getKey().doubleValue();
+	}
+	
+	// text implementation
     /* (non-Javadoc)
      * @see org.xmlrobot.genesis.Text#concat(java.lang.String)
      */
     public String concat(String str) {
-    	
-        if (getValue() == null) {
-            return str;
-        }
         // concatenate string
-        str = str.concat(getValue().toString());
-        // get the child
-        Mass<Integer,Character> child = getChild();
+        str = str.concat(getKey().toString());
         // return string or call recursion
-        return child != null ? 
-        		child instanceof Hypertext ? 
-        				((Hypertext) child).concat(str) 
-        				: str 
-        		: str;
+        return !isEmpty() ? ((Hypertext) getChild()).concat(str) : str;
     }
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.Text#concat(java.lang.StringBuilder)
@@ -262,15 +366,9 @@ public abstract class Hyperinteger
 	@Override
 	public StringBuilder concat(StringBuilder o) {
 		// do concatenation
-		o.append(getValue());
-        // get the child
-		Mass<Integer,Character> child = getChild();
+		o.append(getKey());
         // return builder or call recursion
-		return child != null ? 
-				child instanceof Hypertext ? 
-						((Hypertext) child).concat(o) 
-						: o 
-				: o;
+		return !isEmpty() ? ((Hypertext) getChild()).concat(o) : o ;
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.Text#substring(int, int)
@@ -302,13 +400,9 @@ public abstract class Hyperinteger
 		if (endIndex == 0) {
 			return builder;
 		}
-        // get the child
-		Mass<Integer,Character> child = getChild();
         // return builder or call recursion
-		return child != null ? 
-				child instanceof Hypertext ? 
-						((Hypertext) child).substring(builder, --beginIndex, --endIndex) 
-						: builder 
+		return !isEmpty() ? 
+				((Hypertext) getChild()).substring(builder, --beginIndex, --endIndex) 
 				: builder;
 	}
 	/* (non-Javadoc)
@@ -316,7 +410,6 @@ public abstract class Hyperinteger
 	 */
 	@Override
 	public int length() {
-
 		return depth();
 	}
 	/* (non-Javadoc)
@@ -336,192 +429,5 @@ public abstract class Hyperinteger
 	public CharSequence subSequence(int start, int end) {
 
 		return this.substring(start, end);
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.time.Time#run()
-	 */
-	@Override
-	public void run() {
-		
-		super.run();
-		
-		try {
-			// listen time
-			Thread.sleep(getKey());
-			// mass transfer
-			push(Command.TRANSFER);
-		}
-		catch(Exception ex) {
-			// if someone kills current instance
-			push(Command.INTERRUPTED);
-		}
-	}
-	//natural numbers base operations
-	/**
-	 * Natural addition
-	 * @param o the output
-	 * @return the output
-	 */
-	public Integer sum(Integer o) {
-		
-		Mass<Integer,Character> child = getChild();
-		
-		o += getKey();
-
-		return child != null ? 
-				child instanceof Hypertext ? 
-						((Hypertext) child).sum(o) 
-						: o 
-				: o;
-	}
-	/**
-	 * Natural subtract
-	 * @param o the output
-	 * @return the output
-	 */
-	public Integer subtract(Integer o) {
-		
-		Mass<Integer,Character> child = getChild();
-		
-		o -= getKey();
-
-		return child != null ? 
-				child instanceof Hypertext ? 
-						((Hypertext)child).subtract(o) 
-						: o
-				: o;
-	}
-	/**
-	 * Natural multiplication
-	 * @param o the output
-	 * @return the output
-	 */
-	public Integer multiply(Integer o) {
-		
-		Mass<Integer,Character> child = getChild();
-		
-		o *= getKey();
-
-		return child != null ? 
-				child instanceof Hypertext ? 
-						((Hypertext)child).multiply(o) 
-						: o 
-				: o;
-	}
-	/**
-	 * Natural division
-	 * @param o the output
-	 * @return the output
-	 */
-	public Integer divide(Integer o) {
-
-		Mass<Integer,Character> child = getChild();
-		
-		o /= getKey();
-
-		return child != null ? 
-				child instanceof Hypertext ? 
-						((Hypertext)child).divide(o) 
-						: o 
-				: o;
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.Number#intValue()
-	 */
-	@Override
-	public int intValue() {
-		
-		return getKey().intValue();
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.Number#longValue()
-	 */
-	@Override
-	public long longValue() {
-
-		return getKey().longValue();
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.Number#floatValue()
-	 */
-	@Override
-	public float floatValue() {
-
-		return getKey().floatValue();
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.Number#doubleValue()
-	 */
-	@Override
-	public double doubleValue() {
-
-		return getKey().doubleValue();
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.gravity.Recursion#matrix()
-	 */
-	@Override
-	public TimeListener.Transmitter<Mass<Integer,Character>,Mass<Character,Integer>> matrix() {
-
-		TimeListener.Transmitter<Mass<Integer,Character>,Mass<Character,Integer>> m;
- 		return (m = matrix) != null ? m : (matrix = new Hypergrid());
-	}
-	@Override
-	public org.xmlrobot.genesis.TimeListener.Transmitter<Mass<Integer, Character>, Mass<Character, Integer>> matrix(
-			Mass<Character,Integer> output) {
-		return null;
-	}
-	
-	/**
-	 * The hypergrid.
-	 * 
-	 * @author joan
-	 *
-	 */
-	protected class Hypergrid 
-		extends Comparator {
-
-		/**
-		 * @throws Abort
-		 */
-		public Hypergrid() {
-			super();
-		}
-		/* (non-Javadoc)
-		 * @see org.xmlrobot.gravity.Recursion.Grid#compare(org.xmlrobot.genesis.Mass, org.xmlrobot.genesis.Mass)
-		 */
-		@Override
-		public int reproduce(Mass<Integer,Character> key, Mass<Character,Integer> value) {
-			// compute comparison result
-			int cmp = super.reproduce(key, value);
-			// maximization operation
-			if(cmp < 0) {
-				// assign key-value message
-				push(instance(getType(), getAntitype(), value.getValue(), value.getKey()));
-				return -1;
-			}
-			else if(cmp == 0) {
-				// doubled paired output: evolve
-				push(instance(getType(), getAntitype(), key.getKey(), key.getValue()));
-				push(instance(getType(), getAntitype(), value.getValue(), value.getKey()));
-				return 0;
-			}
-			else {
-				// assign key-value mapping pair
-				push(instance(getType(), getAntitype(), key.getKey(), key.getValue()));
-				return 1;
-			}
-		}
-		@Override
-		public void push(Mass<Integer, Character> child) {
-
-			output().get().add(child);
-		}
-		@Override
-		public void inject(Mass<Character, Integer> child) {
-
-			output().add(child);
-		}
 	}
 }

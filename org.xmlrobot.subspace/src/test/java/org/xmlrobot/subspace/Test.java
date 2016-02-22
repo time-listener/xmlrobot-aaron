@@ -1,5 +1,7 @@
 package org.xmlrobot.subspace;
 
+import org.xmlrobot.genesis.Mass;
+
 
 public class Test {
 
@@ -41,10 +43,16 @@ public class Test {
 				chain.put(key, value);
 			}
 		}
-		
-		chain.matrix();
+//		chain.matrix();
 		chain.reproduceTo(cube);
 		
-		System.out.print(chain.output());
+		System.out.print("\n" + chain.output());
+		
+		Mass<Character,Integer> child = cube.getChild();
+		Mass<Integer,Character> hyperchild = cube.get().getChild();
+		
+		hyperchild.reproduceTo(child);
+		
+		System.out.print("\n" + hyperchild.output());
 	}
 }

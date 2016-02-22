@@ -11,7 +11,7 @@ import org.osgi.framework.ServiceReference;
 import org.xmlrobot.genesis.MassListener;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.TimeListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Child;
 import org.xmlrobot.spacetime.Andromeda;
 import org.xmlrobot.spacetime.MilkyWay;
@@ -20,6 +20,7 @@ import org.xmlrobot.spacetime.event.Expansion;
 import org.xmlrobot.spacetime.event.Rotation;
 import org.xmlrobot.spacetime.matter.Muon;
 import org.xmlrobot.util.Command;
+import org.xmlrobot.util.Parity;
 
 /**
  * Fornax implementation class.
@@ -37,7 +38,7 @@ public class Fornax
 	private static final long serialVersionUID = -8282005929352690501L;
 
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#getKey()
+	 * @see org.xmlrobot.inheritance.Child#getKey()
 	 */
 	@Override
 	@XmlElement
@@ -45,14 +46,14 @@ public class Fornax
 		return super.getKey();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#setKey(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Child#setKey(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public MilkyWay setKey(MilkyWay key) {
 		return super.setKey(key);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#getValue()
+	 * @see org.xmlrobot.inheritance.Child#getValue()
 	 */
 	@Override
 	@XmlElement
@@ -60,41 +61,40 @@ public class Fornax
 		return super.getValue();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#setValue(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Child#setValue(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Andromeda setValue(Andromeda value) {
 		return super.setValue(value);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#getReplicator()
+	 * @see org.xmlrobot.inheritance.Parent#getPlasma()
 	 */
 	@Override
 	@XmlElement(type=Hypermuon.class)
-	public Mass<MilkyWay,Andromeda> getReplicator() {
-		return super.getReplicator();
+	public Mass<MilkyWay,Andromeda> getPlasma() {
+		return super.getPlasma();
 	}
 	
 	/**
 	 * {@link Fornax} default class constructor.
 	 */
 	public Fornax() {
-		
-		super(Hypermuon.class, Muon.class, Fornax.class);
+		super(Hypermuon.class, Muon.class, Fornax.class, Parity.XY);
 	}
 	/**
 	 * {@link Fornax} class constructor.
 	 * @param antitype the inherited antitype
 	 */
 	public Fornax(Class<Columbia> antitype) {
-		
-		super(Hypermuon.class, Muon.class, Fornax.class, antitype);
+		super(Fornax.class, antitype, Parity.XY);
 	}
+	
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.gravity.Recurrence#mass(org.xmlrobot.genesis.Entity, org.xmlrobot.horizon.Darkmass)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		super.mass(sender, event);
 		
 		switch (event.getCommand()) {
@@ -115,7 +115,7 @@ public class Fornax
 				}
 			}
 			break;
-		case PUSH:
+		case SEND:
 			if(event.getSource() instanceof Perseus) {
 				// get antimatter
 				Mass<Andromeda,MilkyWay> future;
@@ -132,7 +132,7 @@ public class Fornax
 				}
 			}
 			break;
-		case LISTEN:
+		case PUSH:
 			if(event.getSource() instanceof MilkyWay) {
 				// cast source
 				MilkyWay key = (MilkyWay) event.getSource();
@@ -190,34 +190,23 @@ public class Fornax
 				// cast source
 				Perseus pair = (Perseus) event.getSource();
 				// transfer message contents
-				get().putValue(pair.getKey(), pair.getValue());
+				put(pair.getValue(), pair.getKey());
 			}
 			break;
 		default:
 			break;
 		}
 	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#put(org.xmlrobot.genesis.Mass, org.xmlrobot.genesis.Mass)
-	 */
 	@Override
 	public Andromeda put(MilkyWay key, Andromeda value) {
-		// declare child
-		Mass<MilkyWay,Andromeda> child;
-		// declare old value
-		Andromeda oldValue;
-		// if update unsuccessful
-		if ((oldValue = (child = getChild()) != null ? 
-				child.putValue(key, value) : null) == null) {
-			// create child
-			Capricornus pair = new Capricornus(Perseus.class, key, value, this);
-			// push child
-			pair.push(Command.PUSH);
-		}
-		return oldValue;
+		// create child
+		Capricornus pair = new Capricornus(Perseus.class, key, value, this);
+		// push child
+		pair.push(Command.SEND);
+		return null;
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.hyperspace.Abstraction#serviceChanged(org.osgi.framework.ServiceEvent)
+	 * @see org.xmlrobot.inheritance.Child#serviceChanged(org.osgi.framework.ServiceEvent)
 	 */
 	@Override
 	public void serviceChanged(ServiceEvent event) {
@@ -228,16 +217,32 @@ public class Fornax
 		// assign and check
 		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
 				child instanceof Capricornus : false) {
+			// declare plasma
+			Mass<MilkyWay,Andromeda> plasma;
 			// cast source
 			Capricornus pair = (Capricornus) child;
 			// commute command
 			if(event.getType() == ServiceEvent.REGISTERED) {
-				// replicate mass
-				getReplicator().putValue(pair.getKey(), pair.getValue());
+				// assign and check it's contained
+				if((plasma = getPlasma()) != null ?
+						!plasma.isEmpty() ?
+								!plasma.containsKey(pair.getKey())
+								: true
+						: false) {
+					// replicate mass
+					plasma.putValue(pair.getKey(), pair.getValue());
+				}
 			}
 			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// release replication
-				getReplicator().removeByKey(pair.getKey());
+				// check if empty and chained
+				if((plasma = getPlasma()) != null ? 
+						!plasma.isEmpty() ? 
+								plasma.containsValue(pair.getValue()) 
+								: false
+						: false) {
+					// release child
+					plasma.removeByKey(pair.getKey());
+				}
 			}
 		}
 	}

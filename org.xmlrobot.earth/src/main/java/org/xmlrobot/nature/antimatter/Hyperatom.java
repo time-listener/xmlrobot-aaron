@@ -23,7 +23,15 @@ public class Hyperatom
 	 * 4058808614266793154L
 	 */
 	private static final long serialVersionUID = 4058808614266793154L;
-
+	
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.hyperspace.Abstraction#getName()
+	 */
+	@Override
+	@XmlElement
+	public String getName() {
+		return getKey().getName();
+	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Space#getKey()
 	 */
@@ -105,13 +113,6 @@ public class Hyperatom
 		super(Hyperatom.class, antitype, key, value, parent);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Antineutron#name()
-	 */
-	@Override
-	public String getName() {
-		return getKey().getName();
-	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.positron.Positron#compare(org.xmlrobot.genesis.Mass, org.xmlrobot.genesis.Mass)
 	 */

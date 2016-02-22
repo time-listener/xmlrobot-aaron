@@ -17,9 +17,10 @@ import org.xmlrobot.core.matter.Baryon;
 import org.xmlrobot.genesis.MassListener;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.TimeListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Child;
 import org.xmlrobot.util.Command;
+import org.xmlrobot.util.Parity;
 
 /**
  * Subspace Interspecies Abstract Communications Protocol.
@@ -71,29 +72,29 @@ public class Subspace
 	 */
 	@Override
 	@XmlElement(type=Baryon.class)
-	public Mass<Minkowski,Spacetime> getReplicator() {
-		return super.getReplicator();
+	public Mass<Minkowski,Spacetime> getPlasma() {
+		return super.getPlasma();
 	}
 	
 	/**
 	 * {@link Subspace} default class constructor.
 	 */
 	public Subspace() {
-		super(Baryon.class, Hyperbaryon.class, Subspace.class);
+		super(Baryon.class, Hyperbaryon.class, Subspace.class, Parity.XX);
 	}
 	/**
 	 * {@link Subspace} class constructor.
 	 * @param antitype the antitype
 	 */
 	public Subspace(Class<Universe> antitype) {
-		super(Baryon.class, Hyperbaryon.class, Subspace.class, antitype);
+		super(Subspace.class, antitype, Parity.XX);
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Takion)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		// ancestral recall
 		super.mass(sender, event);
 		// commute order
@@ -115,7 +116,7 @@ public class Subspace
 				}
 			}
 			break;
-		case PUSH:
+		case SEND:
 			if (event.getSource() instanceof BigBang) {
 				// declare future
 				Mass<Spacetime,Minkowski> future;
@@ -132,7 +133,7 @@ public class Subspace
 				}
 			}
 			break;
-		case LISTEN:
+		case PUSH:
 			if(event.getSource() instanceof Minkowski) {
 				// cast source
 				Minkowski key = (Minkowski) event.getSource();
@@ -190,7 +191,7 @@ public class Subspace
 				// cast source
 				BigBang pair = (BigBang) event.getSource();
 				// transfer key-value indexing pair mapping entry message
-				get().putValue(pair.getKey(), pair.getValue());
+				put(pair.getValue(), pair.getKey());
 			}
 			break;
 
@@ -206,11 +207,11 @@ public class Subspace
 		// create child
 		BigBong pair = new BigBong(BigBang.class, key, value, this);
 		// push child
-		pair.push(Command.PUSH);
+		pair.push(Command.SEND);
 		return null;
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.hyperspace.Abstraction#serviceChanged(org.osgi.framework.ServiceEvent)
+	 * @see org.xmlrobot.inheritance.Child#serviceChanged(org.osgi.framework.ServiceEvent)
 	 */
 	@Override
 	public void serviceChanged(ServiceEvent event) {
@@ -221,16 +222,32 @@ public class Subspace
 		// assign and check
 		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
 				child instanceof BigBong : false) {
+			// declare source
+			Mass<Minkowski,Spacetime> plasma;
 			// cast source
 			BigBong pair = (BigBong) child;
 			// commute command
 			if(event.getType() == ServiceEvent.REGISTERED) {
-				// replicate mass
-				getReplicator().putValue(pair.getKey(), pair.getValue());
+				// assign and check it's contained
+				if((plasma = getPlasma()) != null ?
+						!plasma.isEmpty() ?
+								!plasma.containsValue(pair.getValue())
+								: true
+						: false) {
+					// replicate mass
+					plasma.putKey(pair.getValue(), pair.getKey());
+				}
 			}
 			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// release replication
-				getReplicator().removeByKey(pair.getKey());
+				// check if empty and chained
+				if((plasma = getPlasma()) != null ? 
+						!plasma.isEmpty() ? 
+								plasma.containsKey(pair.getKey()) 
+								: false
+						: false) {
+					// release child
+					plasma.removeByValue(pair.getValue());
+				}
 			}
 		}
 	}

@@ -16,13 +16,21 @@ import org.xmlrobot.positron.Antineutron;
  * @since 1520.3
  */
 @XmlRootElement
-public class Rna extends Antineutron<Diploid,Cromosoma>{
+public class Rna 
+	extends Antineutron<Diploid,Cromosoma>{
 
 	/**
 	 * -5814223426684491592L
 	 */
 	private static final long serialVersionUID = -5814223426684491592L;
-
+	
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.hyperspace.Abstraction#getName()
+	 */
+	@Override
+	public String getName() {
+		return getKey().getName();
+	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Space#getKey()
 	 */
@@ -103,16 +111,9 @@ public class Rna extends Antineutron<Diploid,Cromosoma>{
 	public Rna(Class<Hyperrna> antitype, Diploid key, Cromosoma value, Dna parent) {
 		super(Rna.class, antitype, key, value, parent);
 	}
-	
+
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.MassListener#name()
-	 */
-	@Override
-	public String getName() {
-		return getKey().getName();
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Electron#compare(org.xmlrobot.genesis.Mass, org.xmlrobot.genesis.Mass)
+	 * @see org.xmlrobot.time.Time#compare(org.xmlrobot.genesis.TimeListener, org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public int compare(Mass<Diploid,Cromosoma> o1, Mass<Diploid,Cromosoma> o2) {

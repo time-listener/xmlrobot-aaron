@@ -9,7 +9,7 @@ import org.xmlrobot.dna.antimatter.Hyperdna;
 import org.xmlrobot.dna.antimatter.Hyperrna;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.positron.Antiproton;
 import org.xmlrobot.util.Command;
 
@@ -29,7 +29,7 @@ public class Dna
 	private static final long serialVersionUID = 6271069892701220397L;
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Proton#getKey()
+	 * @see org.xmlrobot.positron.Antiproton#getKey()
 	 */
 	@Override
 	@XmlElement
@@ -37,14 +37,14 @@ public class Dna
 		return super.getKey();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Proton#setKey(java.lang.Object)
+	 * @see org.xmlrobot.positron.Antiproton#setKey(java.lang.Object)
 	 */
 	@Override
 	public Diploid setKey(Diploid key) {
 		return super.setKey(key);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Proton#getValue()
+	 * @see org.xmlrobot.positron.Antiproton#getValue()
 	 */
 	@Override
 	@XmlElement
@@ -52,7 +52,7 @@ public class Dna
 		return super.getValue();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Proton#setValue(java.lang.Object)
+	 * @see org.xmlrobot.positron.Antiproton#setValue(java.lang.Object)
 	 */
 	@Override
 	public Cromosoma setValue(Cromosoma value) {
@@ -76,7 +76,7 @@ public class Dna
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Takion)
 	 */
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		super.mass(sender, event);
 		// obey
 		switch (event.getCommand()) {
@@ -97,7 +97,7 @@ public class Dna
 				}
 			}
 			break;
-		case PUSH:
+		case SEND:
 			if(event.getSource() instanceof Hyperrna) {
 				// declare stem
 				Mass<Cromosoma,Diploid> stem;
@@ -153,27 +153,14 @@ public class Dna
 		}
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Proton#putValue(java.lang.Object, java.lang.Object)
+	 * @see org.xmlrobot.positron.Antiproton#put(java.lang.Object, java.lang.Object)
 	 */
 	@Override
-	public Cromosoma putValue(Diploid key, Cromosoma value) {
-		// declare child
-		Mass<Diploid,Cromosoma> child;
-		// declare old value
-		Cromosoma oldValue;
-		// if update unsuccessful
-		if ((oldValue = (child = getChild()) != null ? 
-				child.putValue(key,	value) : null) == null) {
-			// create child
-			Rna pair = new Rna(Hyperrna.class, key, value, this);
-			// push child
-			pair.push(Command.PUSH);
-		}
-		return oldValue;
-	}
-	@Override
 	public Cromosoma put(Diploid key, Cromosoma value) {
-		// TODO Auto-generated method stub
+		// create child
+		Rna pair = new Rna(Hyperrna.class, key, value, this);
+		// push child
+		pair.push(Command.SEND);
 		return null;
 	}
 }

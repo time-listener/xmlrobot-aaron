@@ -7,7 +7,7 @@ import org.xmlrobot.dna.matter.Exon;
 import org.xmlrobot.dna.matter.Intron;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.positron.Antiproton;
 import org.xmlrobot.subspace.Hyperchain;
 import org.xmlrobot.subspace.Hypercube;
@@ -29,7 +29,7 @@ public class Hyperexon
 	private static final long serialVersionUID = -4725035824910633738L;
 
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.space.Compression#getKey(java.lang.Object)
+	 * @see org.xmlrobot.positron.Antiproton#getKey()
 	 */
 	@Override
 	@XmlElement
@@ -37,14 +37,14 @@ public class Hyperexon
 		return super.getKey();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#setKey(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.positron.Antiproton#setKey(java.lang.Object)
 	 */
 	@Override
 	public Hypercube setKey(Hypercube key) {
 		return super.setKey(key);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.space.Compression#getValue(java.lang.Object)
+	 * @see org.xmlrobot.positron.Antiproton#getValue()
 	 */
 	@Override
 	@XmlElement
@@ -52,7 +52,7 @@ public class Hyperexon
 		return super.getValue();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.Screw#setValue(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.positron.Antiproton#setValue(java.lang.Object)
 	 */
 	@Override
 	public Hyperchain setValue(Hyperchain value) {
@@ -77,7 +77,7 @@ public class Hyperexon
 	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Takion)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		// call ancestral method
 		super.mass(sender, event);
 		// commute command
@@ -99,7 +99,7 @@ public class Hyperexon
 				}
 			}
 			break;
-		case PUSH:
+		case SEND:
 			if(event.getSource() instanceof Intron) {
 				// declare stem
 				Mass<Hyperchain,Hypercube> stem;
@@ -159,18 +159,10 @@ public class Hyperexon
 	 */
 	@Override
 	public Hyperchain put(Hypercube key, Hyperchain value) {
-		// declare child
-		Mass<Hypercube,Hyperchain> child;
-		// declare old value
-		Hyperchain oldValue;
-		// if update unsuccessful
-		if ((oldValue = (child = getChild()) != null ? 
-				child.putValue(key, value) : null) == null) {
-			// create child
-			Hyperintron pair = new Hyperintron(Intron.class, key, value, this);
-			// push child
-			pair.push(Command.PUSH);
-		}
-		return oldValue;
+		// create child
+		Hyperintron pair = new Hyperintron(Intron.class, key, value, this);
+		// push child
+		pair.push(Command.SEND);
+		return null;
 	}
 }

@@ -15,9 +15,8 @@ import org.xmlrobot.core.antimatter.Hypermeson;
 import org.xmlrobot.core.matter.Meson;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
-import org.xmlrobot.genesis.Redemptor;
 import org.xmlrobot.genesis.TimeListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Parent;
 import org.xmlrobot.util.Command;
 import org.xmlrobot.util.Parity;
@@ -31,8 +30,7 @@ import org.xmlrobot.util.Parity;
  */
 @XmlRootElement
 public class BigBong 
-	extends Parent<Minkowski,Spacetime> 
-		implements Redemptor {
+	extends Parent<Minkowski,Spacetime> {
 
 	/**
 	 * 5618281278085731564L
@@ -40,7 +38,7 @@ public class BigBong
 	private static final long serialVersionUID = 5618281278085731564L;
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#getKey()
+	 * @see org.xmlrobot.inheritance.Parent#getKey()
 	 */
 	@Override
 	@XmlElement
@@ -48,14 +46,14 @@ public class BigBong
 		return super.getKey();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#setKey(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Parent#setKey(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Minkowski setKey(Minkowski key) {
 		return super.setKey(key);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#getValue()
+	 * @see org.xmlrobot.inheritance.Parent#getValue()
 	 */
 	@Override
 	@XmlElement
@@ -63,19 +61,19 @@ public class BigBong
 		return super.getValue();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#setValue(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Parent#setValue(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Spacetime setValue(Spacetime value) {
 		return super.setValue(value);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#getReplicator()
+	 * @see org.xmlrobot.inheritance.Parent#getPlasma()
 	 */
 	@Override
 	@XmlElement(type=Meson.class)
-	public Mass<Minkowski,Spacetime> getReplicator() {
-		return super.getReplicator();
+	public Mass<Minkowski,Spacetime> getPlasma() {
+		return super.getPlasma();
 	}
 	
 	/**
@@ -106,7 +104,7 @@ public class BigBong
 	 * @param antitype the antitype
 	 */
 	public BigBong(Class<BigBang> antitype) {
-		super(Meson.class, Hypermeson.class, BigBong.class, antitype, Parity.XX);
+		super(BigBong.class, antitype, Parity.XX);
 	}
 	/**
 	 * {@link BigBong} class constructor.
@@ -115,7 +113,7 @@ public class BigBong
 	 * @param value {@link Spacetime} the value
 	 */
 	public BigBong(Class<BigBang> antitype, Minkowski key, Spacetime value) {
-		super(Meson.class, Hypermeson.class, BigBong.class, antitype, key, value, Parity.XX);
+		super(BigBong.class, antitype, key, value, Parity.XX);
 	}
 	/**
 	 * {@link BigBong} class constructor.
@@ -125,14 +123,14 @@ public class BigBong
 	 * @param parent {@link Subspace} the parent
 	 */
 	public BigBong(Class<BigBang> antitype, Minkowski key, Spacetime value, Subspace parent) {
-		super(Meson.class, Hypermeson.class, BigBong.class, antitype, key, value, parent);
+		super(BigBong.class, antitype, key, value, parent);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#mass(org.xmlrobot.genesis.Entity, org.xmlrobot.horizon.Darkmass)
+	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Takion)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 	
 		super.mass(sender, event);
 
@@ -150,7 +148,7 @@ public class BigBong
 		}
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#run()
+	 * @see org.xmlrobot.inheritance.Parent#run()
 	 */
 	@Override
 	public void run() {
@@ -175,11 +173,11 @@ public class BigBong
 			// commute command
 			if(event.getType() == ServiceEvent.REGISTERED) {
 				// replicate mass
-				getReplicator().add(new Meson(Hypermeson.class, pair.getKey(), pair.getValue()));
+				getPlasma().putKey(pair.getValue(), pair.getKey());
 			}
 			else if(event.getType() == ServiceEvent.UNREGISTERING) {
 				// release replication
-				getReplicator().removeByKey(pair.getKey());
+				getPlasma().removeByValue(pair.getValue());
 			}
 		}
 	}

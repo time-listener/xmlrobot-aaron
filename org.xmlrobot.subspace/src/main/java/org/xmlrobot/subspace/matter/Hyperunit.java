@@ -58,7 +58,6 @@ public class Hyperunit
 	@Override
 	@XmlElement
 	public String getName() {
-		
 		return getValue().toString();
 	}
 	

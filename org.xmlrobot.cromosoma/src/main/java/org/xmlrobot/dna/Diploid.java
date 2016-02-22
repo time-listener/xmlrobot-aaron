@@ -17,9 +17,10 @@ import org.xmlrobot.dna.matter.Phenotype;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
 import org.xmlrobot.genesis.TimeListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Child;
 import org.xmlrobot.util.Command;
+import org.xmlrobot.util.Parity;
 
 /**
  * Diploid implementation class.
@@ -37,7 +38,7 @@ public class Diploid
 	private static final long serialVersionUID = 1603750231206900779L;
 
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewNut#getKey()
+	 * @see org.xmlrobot.inheritance.Child#getKey()
 	 */
 	@Override
 	@XmlElement
@@ -45,14 +46,14 @@ public class Diploid
 		return super.getKey();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewNut#setKey(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Child#setKey(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Haploid setKey(Haploid key) {
 		return super.setKey(key);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewNut#getValue()
+	 * @see org.xmlrobot.inheritance.Child#getValue()
 	 */
 	@Override
 	@XmlElement
@@ -60,40 +61,40 @@ public class Diploid
 		return super.getValue();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewNut#setValue(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Child#setValue(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Genomap setValue(Genomap value) {
 		return super.setValue(value);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#getReplicator()
+	 * @see org.xmlrobot.inheritance.Parent#getPlasma()
 	 */
 	@Override
 	@XmlElement(type=Phenotype.class)
-	public Mass<Haploid,Genomap> getReplicator() {
-		return super.getReplicator();
+	public Mass<Haploid,Genomap> getPlasma() {
+		return super.getPlasma();
 	}
 	
 	/**
 	 * {@link Diploid} default class constructor.
 	 */
 	public Diploid() {
-		super(Phenotype.class, Hyperphenotype.class, Diploid.class);
+		super(Phenotype.class, Hyperphenotype.class, Diploid.class, Parity.XX);
 	}
 	/**
 	 * {@link Diploid} class constructor.
 	 * @param antitype the inherited antitype
 	 */
 	public Diploid(Class<Cromosoma> antitype) {
-		super(Phenotype.class, Hyperphenotype.class, Diploid.class, antitype);
+		super(Diploid.class, antitype, Parity.XX);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.gravity.Recurrence#mass(org.xmlrobot.genesis.Entity, org.xmlrobot.horizon.Darkmass)
+	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Tachyon)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		// call ancestral method
 		super.mass(sender, event);
 		// commute command
@@ -115,7 +116,7 @@ public class Diploid
 				}
 			}
 			break;
-		case PUSH:
+		case SEND:
 			if(event.getSource() instanceof BasePair) {
 				// get antimatter
 				Mass<Genomap,Haploid> stem;
@@ -132,7 +133,7 @@ public class Diploid
 				}
 			}
 			break;
-		case LISTEN:
+		case PUSH:
 			if(event.getSource() instanceof Haploid) {
 				// cast source
 				Haploid key = (Haploid) event.getSource();
@@ -190,7 +191,7 @@ public class Diploid
 				// cast source
 				BasePair entity = (BasePair) event.getSource();
 				// transfer message contents
-				get().putValue(entity.getKey(), entity.getValue());
+				put(entity.getValue(), entity.getKey());
 			}
 			break;
 		default:
@@ -198,18 +199,18 @@ public class Diploid
 		}
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.space.Contraction#putValue(java.lang.Object, java.lang.Object)
+	 * @see org.xmlrobot.inheritance.Child#put(org.xmlrobot.genesis.TimeListener, org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Genomap put(Haploid key, Genomap value) {
 		// create child
 		Allele pair = new Allele(BasePair.class, key, value, this);
 		// push child
-		pair.push(Command.PUSH);
+		pair.push(Command.SEND);
 		return null;
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.hyperspace.Abstraction#serviceChanged(org.osgi.framework.ServiceEvent)
+	 * @see org.xmlrobot.inheritance.Child#serviceChanged(org.osgi.framework.ServiceEvent)
 	 */
 	@Override
 	public void serviceChanged(ServiceEvent event) {
@@ -220,16 +221,32 @@ public class Diploid
 		// assign and check
 		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
 				child instanceof Allele : false) {
+			// declare plasma
+			Mass<Haploid,Genomap> plasma;
 			// cast source
 			Allele pair = (Allele) child;
 			// commute command
 			if (event.getType() == ServiceEvent.REGISTERED) {
-				// replicate mass
-				getReplicator().putValue(pair.getKey(), pair.getValue());
+				// assign and check it's contained
+				if((plasma = getPlasma()) != null ?
+						!plasma.isEmpty() ?
+								!plasma.containsKey(pair.getKey())
+								: true
+						: false) {
+					// replicate mass
+					plasma.putValue(pair.getKey(), pair.getValue());
+				}
 			} 
 			else if (event.getType() == ServiceEvent.UNREGISTERING) {
-				// release replication
-				getReplicator().removeByKey(pair.getKey());
+				// check if empty and chained
+				if((plasma = getPlasma()) != null ? 
+						!plasma.isEmpty() ? 
+								plasma.containsValue(pair.getValue()) 
+								: false
+						: false) {
+					// release child
+					plasma.removeByKey(pair.getKey());
+				}
 			}
 		}
 	}

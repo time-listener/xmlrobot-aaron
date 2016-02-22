@@ -6,8 +6,6 @@ package org.xmlrobot.dna;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceReference;
 import org.xmlrobot.dna.Plasmid;
 import org.xmlrobot.dna.Ribosoma;
 import org.xmlrobot.dna.Tetraploid;
@@ -15,8 +13,7 @@ import org.xmlrobot.dna.antimatter.Sperma;
 import org.xmlrobot.dna.matter.Ovum;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
-import org.xmlrobot.genesis.TimeListener;
-import org.xmlrobot.horizon.Takion;
+import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Parent;
 import org.xmlrobot.util.Command;
 import org.xmlrobot.util.Parity;
@@ -37,7 +34,7 @@ public class Nucleoplasm
 	private static final long serialVersionUID = 3057140414113756471L;
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#getKey()
+	 * @see org.xmlrobot.inheritance.Parent#getKey()
 	 */
 	@Override
 	@XmlElement
@@ -45,14 +42,14 @@ public class Nucleoplasm
 		return super.getKey();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#setKey(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Parent#setKey(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Tetraploid setKey(Tetraploid key) {
 		return super.setKey(key);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#getValue()
+	 * @see org.xmlrobot.inheritance.Parent#getValue()
 	 */
 	@Override
 	@XmlElement
@@ -60,19 +57,19 @@ public class Nucleoplasm
 		return super.getValue();
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#setValue(org.xmlrobot.genesis.TimeListener)
+	 * @see org.xmlrobot.inheritance.Parent#setValue(org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public Ribosoma setValue(Ribosoma value) {
 		return super.setValue(value);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#getReplicator()
+	 * @see org.xmlrobot.inheritance.Parent#getPlasma()
 	 */
 	@Override
 	@XmlElement(type=Ovum.class)
-	public Mass<Tetraploid,Ribosoma> getReplicator() {
-		return super.getReplicator();
+	public Mass<Tetraploid,Ribosoma> getPlasma() {
+		return super.getPlasma();
 	}
 	
 	/**
@@ -104,7 +101,7 @@ public class Nucleoplasm
 	 * @param antitype the inherited antitype
 	 */
 	public Nucleoplasm(Class<Cytoplasm> antitype) {
-		super(Ovum.class, Sperma.class, Nucleoplasm.class, antitype, Parity.XX);
+		super(Nucleoplasm.class, antitype, Parity.XX);
 	}
 	/**
 	 * {@link Nucleoplasm} class constructor.
@@ -113,7 +110,7 @@ public class Nucleoplasm
 	 * @param value {@link Ribosoma} the value
 	 */
 	public Nucleoplasm(Class<Cytoplasm> antitype, Tetraploid key, Ribosoma value) {
-		super(Ovum.class, Sperma.class, Nucleoplasm.class, antitype, key, value, Parity.XX);
+		super(Nucleoplasm.class, antitype, key, value, Parity.XX);
 	}
 	/**
 	 * {@link Nucleoplasm} class constructor.
@@ -123,14 +120,14 @@ public class Nucleoplasm
 	 * @param parent {@link Cell} the parent
 	 */
 	public Nucleoplasm(Class<Cytoplasm> antitype, Tetraploid key, Ribosoma value, Cell parent) {
-		super(Ovum.class, Sperma.class, Nucleoplasm.class, antitype, key, value, parent);
+		super(Nucleoplasm.class, antitype, key, value, parent);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.gravity.Recurrence#mass(org.xmlrobot.genesis.Entity, org.xmlrobot.horizon.Darkmass)
+	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Tachyon)
 	 */
 	@Override
-	public void mass(MassListener sender, Takion<?,?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		super.mass(sender, event);
 
 		switch (event.getCommand()) {
@@ -147,37 +144,21 @@ public class Nucleoplasm
 		}
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#run()
+	 * @see org.xmlrobot.inheritance.Parent#run()
 	 */
 	@Override
 	public void run() {
-		super.run();
-		// rest in peace
-		push(Command.TRANSFER);
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.hyperspace.Abstraction#serviceChanged(org.osgi.framework.ServiceEvent)
-	 */
-	@Override
-	public void serviceChanged(ServiceEvent event) {
-		// get reference
-		ServiceReference<?> ref = event.getServiceReference();
-		// declare child
-		Object child;
-		// assign and check
-		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
-				child instanceof Nucleoplasm : false) {
-			// cast source
-			Nucleoplasm pair = (Nucleoplasm) child;
-			// commute command
-			if(event.getType() == ServiceEvent.REGISTERED) {
-				// replicate mass
-				getReplicator().add(new Ovum(Sperma.class, pair.getKey(), pair.getValue()));
-			}
-			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// release replication
-				getReplicator().removeByKey(pair.getKey());
-			}
+		// avoid concurrent calls to run
+		if (!message.compareAndSet(RUNNER, null, Thread.currentThread())) {
+			// because is already running
+			return;
+		} 
+		else {
+			// life starts here
+			super.run();
+			// life ends here
+			push(Command.TRANSFER);
 		}
 	}
+
 }
