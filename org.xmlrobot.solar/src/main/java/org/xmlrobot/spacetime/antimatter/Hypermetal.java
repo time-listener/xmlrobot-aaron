@@ -6,7 +6,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.nature.Biosphere;
 import org.xmlrobot.nature.Ecosystem;
-import org.xmlrobot.positron.Antineutron;
+import org.xmlrobot.positron.Positron;
 import org.xmlrobot.spacetime.matter.Metal;
 
 /**
@@ -17,7 +17,7 @@ import org.xmlrobot.spacetime.matter.Metal;
  */
 @XmlRootElement
 public class Hypermetal 
-	extends Antineutron<Ecosystem,Biosphere> {
+	extends Positron<Ecosystem,Biosphere> {
 
 	/**
 	 * -2195434403508136782L

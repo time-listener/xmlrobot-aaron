@@ -20,10 +20,9 @@ import org.xmlrobot.genesis.TimeListener;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.subspace.antimatter.Hyperdatagram;
-import org.xmlrobot.subspace.antimatter.Hyperline;
+import org.xmlrobot.subspace.event.Flop;
 import org.xmlrobot.subspace.event.Instant;
 import org.xmlrobot.subspace.matter.Hyperpacket;
-import org.xmlrobot.subspace.matter.Hyperunit;
 import org.xmlrobot.util.Abort;
 import org.xmlrobot.util.Command;
 
@@ -94,8 +93,15 @@ public class Hyperchain
 	 */
 	@Override
 	@XmlElement(type=Hyperpacket.class)
-	public Mass<Integer,Character> getPlasma() {
-		return super.getPlasma();
+	public Entity<Integer,Character> getReplicator() {
+		return (Entity<Integer,Character>) super.getReplicator();
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.hyperspace.Recursion#get()
+	 */
+	@Override
+	public Entity<Character,Integer> get() {
+		return (Entity<Character,Integer>) super.get();
 	}
 	
 	/**
@@ -154,7 +160,12 @@ public class Hyperchain
 	 */
 	@Override
 	public int reproduceTo(Mass<Character,Integer> o) {
-		return matrix().reproduce(o.get().getChild(), get().getChild());
+		// call hypergenesis computation
+		int cmp = get().matrix().reproduce(o.getChild(), getChild());
+		// push hypergenesis computation result
+		push(new Flop(get().output()));
+		// return result computation
+		return cmp;
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.lang.Hyperinteger#run()
@@ -217,14 +228,12 @@ public class Hyperchain
 			break;
 		case PUSH:
 			if(event.getSource() instanceof Hyperpair) {
-				// cast source
-				Hyperpair string = (Hyperpair) event.getSource();
-				// declare child of inheritance
-				Mass<Integer,Character> child;
 				// assign and check
-				if((child = getChild()) != null) {
+				if(!isEmpty()) {
+					// cast source
+					Hyperpair string = (Hyperpair) event.getSource();
 					// send pulse across the future
-					child.pulse(this, new Instant(string));
+					getChild().pulse(this, new Instant(string));
 				}
 			}
 			break;
@@ -264,10 +273,8 @@ public class Hyperchain
 			break;
 		case TRANSFER:
 			if(event.getSource() instanceof Hyperpair) {
-				// cast source
-				Hyperpair entity = (Hyperpair) event.getSource();
-				// transfer message contents (to the future)
-				put(entity.getValue(), entity.getKey());
+				// live long and prosper
+				event.stop(getContext());
 			}
 			break;
 		default:
@@ -302,14 +309,7 @@ public class Hyperchain
 	public synchronized <X extends TimeListener<X,Y>,Y extends TimeListener<Y,X>> 
 	void echo(TimeListener<?,?> listener, Tachyon<X,Y> event) {
 		super.echo(listener, event);
-		
-		if(event.getSource() instanceof Hyperinteger) {
-			// iterate through event's children
-			for(X integer : event) {
-				// load output result to current matrix
-				matrix().inject((Hyperinteger)integer);
-			}	
-		}
+		matrix = null;
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.time.Freedom#removeAll(org.xmlrobot.genesis.Congregation)
@@ -334,6 +334,14 @@ public class Hyperchain
         return modified;
 	}
 	/* (non-Javadoc)
+	 * @see org.xmlrobot.time.Time#iterator()
+	 */
+	@Override
+	public Iterator<Mass<Integer,Character>> iterator() {
+		Mass<Integer,Character> future;
+		return (future = getFuture()) != null ? future.iterator() : null;
+	}
+	/* (non-Javadoc)
 	 * @see org.xmlrobot.hyperspace.Abstraction#serviceChanged(org.osgi.framework.ServiceEvent)
 	 */
 	@Override
@@ -349,36 +357,24 @@ public class Hyperchain
 			Hyperentry pair = (Hyperentry) child;
 			// commute command
 			if (event.getType() == ServiceEvent.REGISTERED) {
-				// create child
-				Hyperunit unit = instance(Hyperunit.class, Hyperline.class, 
-						pair.getKey(), pair.getValue(), getPlasma());
-				// push child
-				unit.push(Command.SUBMIT);
+				// replicate mass
+				getReplicator().putValue(pair.getKey(), pair.getValue());
 			}
 			else if (event.getType() == ServiceEvent.UNREGISTERING) {
-				// release replication
-				getPlasma().release();
+				// release child
+				getReplicator().removeByKey(pair.getKey());
 			}
 		}
 	}
  	// visor implementation
- 	/* (non-Javadoc)
- 	 * @see org.xmlrobot.genesis.Mass#keyVisor()
- 	 */
- 	@Override
- 	public Congregation<Integer> keyVisor() {
- 		Congregation<Integer> keys;
- 		return (keys = keyVisor) == null ? 
- 				(keyVisor = new KeyVisor(plasma)) : keys;
- 	}
  	/* (non-Javadoc)
  	 * @see org.xmlrobot.genesis.Mass#valueVisor()
  	 */
  	@Override
  	public Congregation<Character> valueVisor() {
  		Congregation<Character> values;
- 		return (values = valueVisor) == null ? 
- 				(valueVisor = new ValueVisor(plasma)) : values;
+ 		return (values = visor) == null ? 
+ 				(visor = new Visor(replicator)) : values;
  	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.gravity.Recursion#matrix()
@@ -488,75 +484,8 @@ public class Hyperchain
 	public Integer divide(Integer o) {
 		return !isEmpty() ? ((Hypertext) getChild()).divide(o) : null;
 	}
+	
 	// entity implementation
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.DNA#getOrDefault(java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public Character getOrDefault(Integer key, Character defaultValue) {
-    	return !isEmpty() ? getChild().getValueOrDefault(key, defaultValue) : null;
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.DNA#forEach(java.util.function.BiConsumer)
-	 */
-	@Override
-	public void forEach(BiConsumer<? super Integer, ? super Character> action) {
-    	if(!isEmpty())
-    		getChild().forEachKey(action);
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.DNA#putIfAbsent(java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public Character putIfAbsent(Integer key, Character value) {
-		return !isEmpty() ? getChild().putValueIfAbsent(key, value) : null;
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.DNA#remove(java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public boolean remove(Integer key, Character value) {
-    	return !isEmpty() ? getChild().removeByKey(key, value) : null;
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.DNA#replace(java.lang.Object, java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public boolean replace(Integer key, Character oldValue, Character newValue) {
-		return !isEmpty() ? getChild().replaceValue(key, oldValue, newValue) : null;
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.DNA#replace(java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public Character replace(Integer key, Character value) {
-		return !isEmpty() ? getChild().replaceValue(key, value) : null;
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.DNA#replaceAll(java.util.function.BiFunction)
-	 */
-	@Override
-	public void replaceAll(BiFunction<? super Integer, ? super Character, ? extends Character> function) {
-    	if(!isEmpty())
-    		getChild().replaceAllValues(function);
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.Atlas#get(java.lang.Object)
-	 */
-	@Override
-	public Character get(Integer key) {
-    	return !isEmpty() ? getChild().getValue(key) : null;
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.genesis.Atlas#putAll(org.xmlrobot.genesis.Atlas)
-	 */
-	@Override
-	public void putAll(
-			Atlas<? extends Integer, ? extends Character, ? extends Mass<Integer, Character>> m) {
-
-		for(Mass<Integer,Character> integer : m)
-			put(integer.getKey(), integer.getValue());
-	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.Atlas#entrySet()
 	 */
@@ -564,6 +493,71 @@ public class Hyperchain
 	public Congregation<Mass<Integer,Character>> entrySet() {
 
 		return getChild();
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.DNA#getOrDefault(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public Character getOrDefault(Integer key, Character defaultValue) {
+    	return getValueOrDefault(key, defaultValue);
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.DNA#forEach(java.util.function.BiConsumer)
+	 */
+	@Override
+	public void forEach(BiConsumer<? super Integer, ? super Character> action) {
+    	forEachKey(action);
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.DNA#putIfAbsent(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public Character putIfAbsent(Integer key, Character value) {
+		return putValueIfAbsent(key, value);
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.DNA#remove(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public boolean remove(Integer key, Character value) {
+    	return removeByKey(key, value);
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.DNA#replace(java.lang.Object, java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public boolean replace(Integer key, Character oldValue, Character newValue) {
+		return replaceValue(key, oldValue, newValue);
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.DNA#replace(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public Character replace(Integer key, Character value) {
+		return replaceValue(key, value);
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.DNA#replaceAll(java.util.function.BiFunction)
+	 */
+	@Override
+	public void replaceAll(BiFunction<? super Integer, ? super Character, ? extends Character> function) {
+    	replaceAllValues(function);
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.Atlas#get(java.lang.Object)
+	 */
+	@Override
+	public Character get(Integer key) {
+    	return getValue(key);
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.genesis.Atlas#putAll(org.xmlrobot.genesis.Atlas)
+	 */
+	@Override
+	public void putAll(
+			Atlas<? extends Integer, ? extends Character, ? extends Mass<Integer, Character>> m) {
+		for(Mass<Integer,Character> integer : m)
+			put(integer.getKey(), integer.getValue());
 	}
 	
 	// space implementation
@@ -578,27 +572,11 @@ public class Hyperchain
 	}
 	/*
 	 * (non-Javadoc)
-	 * @see org.xmlrobot.space.Contraction#putKey(java.lang.Object,java.lang.Object)
-	 */
-	@Override
-	public Integer putKey(Character value, Integer key) {
-		return !isEmpty() ? getChild().putKey(value, key) : null;
-	}
-	/*
-	 * (non-Javadoc)
 	 * @see org.xmlrobot.space.Contraction#putValueIfAbsent(java.lang.Object,java.lang.Object)
 	 */
 	@Override
 	public Character putValueIfAbsent(Integer key, Character value) {
-		return !isEmpty() ? getChild().putValueIfAbsent(key, value) : null;
-	}
-	/*
-	 * (non-Javadoc)
-	 * @see org.xmlrobot.space.Contraction#putKeyIfAbsent(java.lang.Object,java.lang.Object)
-	 */
-	@Override
-	public Integer putKeyIfAbsent(Character value, Integer key) {
-		return !isEmpty() ? getChild().putKeyIfAbsent(value, key) : null;
+		return !isEmpty() ? getChild().putValueIfAbsent(key, value) : put(key, value);
 	}
 	/*
 	 * (non-Javadoc)
@@ -611,28 +589,11 @@ public class Hyperchain
 	}
 	/*
 	 * (non-Javadoc)
-	 * @see org.xmlrobot.space.Contraction#putAllKeys(org.xmlrobot.genesis.Mass)
-	 */
-	@Override
-	public void putAllKeys(Mass<? extends Character, ? extends Integer> m) {
-		if (!isEmpty())
-			super.putAllKeys(m);
-	}
-	/*
-	 * (non-Javadoc)
 	 * @see org.xmlrobot.space.Compression#call(java.lang.Object)
 	 */
 	@Override
 	public Mass<Integer, Character> call(Integer key) {
 		return !isEmpty() ? getChild().call(key) : null;
-	}
-	/*
-	 * (non-Javadoc)
-	 * @see org.xmlrobot.space.Compression#callReversed(java.lang.Object)
-	 */
-	@Override
-	public Mass<Character, Integer> callReversed(Character value) {
-		return !isEmpty() ? getChild().callReversed(value) : null;
 	}
 	/*
 	 * (non-Javadoc)
@@ -644,27 +605,11 @@ public class Hyperchain
 	}
 	/*
 	 * (non-Javadoc)
-	 * @see org.xmlrobot.space.Compression#getKey(java.lang.Object)
-	 */
-	@Override
-	public Integer getKey(Character value) {
-		return !isEmpty() ? getChild().getKey(value) : null;
-	}
-	/*
-	 * (non-Javadoc)
 	 * @see org.xmlrobot.space.Compression#getValueOrDefault(java.lang.Object,java.lang.Object)
 	 */
 	@Override
 	public Character getValueOrDefault(Integer key, Character defaultValue) {
 		return !isEmpty() ? getChild().getValueOrDefault(key, defaultValue)	: null;
-	}
-	/*
-	 * (non-Javadoc)
-	 * @see org.xmlrobot.space.Compression#getKeyOrDefault(java.lang.Object,java.lang.Object)
-	 */
-	@Override
-	public Integer getKeyOrDefault(Character value, Integer defaultKey) {
-		return !isEmpty() ? getChild().getKeyOrDefault(value, defaultKey) : null;
 	}
 	/*
 	 * (non-Javadoc)
@@ -676,27 +621,11 @@ public class Hyperchain
 	}
 	/*
 	 * (non-Javadoc)
-	 * @see org.xmlrobot.space.Attraction#containsValue(java.lang.Object)
-	 */
-	@Override
-	public boolean containsValue(Character value) {
-		return !isEmpty() ? getChild().containsValue(value) : null;
-	}
-	/*
-	 * (non-Javadoc)
 	 * @see org.xmlrobot.space.Attraction#collectKeys(org.xmlrobot.genesis.Congregation)
 	 */
 	@Override
 	public Congregation<Integer> collectKeys(Congregation<Integer> keys) {
 		return !isEmpty() ? getChild().collectKeys(keys) : null;
-	}
-	/*
-	 * (non-Javadoc)
-	 * @see org.xmlrobot.space.Attraction#collectValues(org.xmlrobot.genesis.Congregation)
-	 */
-	@Override
-	public Congregation<Character> collectValues(Congregation<Character> values) {
-		return !isEmpty() ? getChild().collectValues(values) : null;
 	}
 	/*
 	 * (non-Javadoc)
@@ -709,28 +638,11 @@ public class Hyperchain
 	}
 	/*
 	 * (non-Javadoc)
-	 * @see org.xmlrobot.space.Attraction#forEachValue(java.util.function.BiConsumer)
-	 */
-	@Override
-	public void forEachValue(BiConsumer<? super Character, ? super Integer> action) {
-		if (!isEmpty())
-			super.forEachValue(action);
-	}
-	/*
-	 * (non-Javadoc)
 	 * @see org.xmlrobot.space.Repulsion#replaceValue(java.lang.Object, java.lang.Object, java.lang.Object)
 	 */
 	@Override
 	public boolean replaceValue(Integer key, Character oldValue, Character newValue) {
 		return !isEmpty() ? getChild().replaceValue(key, oldValue, newValue) : null;
-	}
-	/*
-	 * (non-Javadoc)
-	 * @see org.xmlrobot.space.Repulsion#replaceKey(java.lang.Object, java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public boolean replaceKey(Character value, Integer oldKey, Integer newKey) {
-		return !isEmpty() ? getChild().replaceKey(value, oldKey, newKey) : null;
 	}
 	/*
 	 * (non-Javadoc)
@@ -743,30 +655,12 @@ public class Hyperchain
 			super.replaceAllValues(function);
 	}
 	/*
-	 * (non-Javadoc)
-	 * @see org.xmlrobot.space.Repulsion#replaceAllKeys(java.util.function.BiFunction)
-	 */
-	@Override
-	public void replaceAllKeys(
-			BiFunction<? super Character, ? super Integer, ? extends Integer> function) {
-		if (!isEmpty())
-			super.replaceAllKeys(function);
-	}
-	/*
 	 * (non-Javadoc) 
 	 * @see org.xmlrobot.space.Repulsion#replaceValue(java.lang.Object, java.lang.Object)
 	 */
 	@Override
 	public Character replaceValue(Integer key, Character value) {
 		return !isEmpty() ? getChild().replaceValue(key, value) : null;
-	}
-	/*
-	 * (non-Javadoc)
-	 * @see org.xmlrobot.space.Repulsion#replaceKey(java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public Integer replaceKey(Character value, Integer key) {
-		return !isEmpty() ? getChild().replaceKey(value, key) : null;
 	}
 	/*
 	 * (non-Javadoc)
@@ -779,31 +673,12 @@ public class Hyperchain
 	}
 	/*
 	 * (non-Javadoc)
-	 * @see org.xmlrobot.space.Expansion#computeInvertedIfAbsent(java.lang.Object, java.util.function.Function)
-	 */
-	@Override
-	public Integer computeInvertedIfAbsent(Character key,
-			Function<? super Character, ? extends Integer> mappingFunction) {
-		return !isEmpty() ? getChild().computeInvertedIfAbsent(key,
-				mappingFunction) : null;
-	}
-	/*
-	 * (non-Javadoc)
 	 * @see org.xmlrobot.space.Expansion#compute(java.lang.Object, java.util.function.BiFunction)
 	 */
 	@Override
 	public Character compute(Integer key, 
 			BiFunction<? super Integer, ? super Character, ? extends Character> remappingFunction) {
 		return !isEmpty() ? getChild().compute(key, remappingFunction) : null;
-	}
-	/*
-	 * (non-Javadoc)
-	 * @see org.xmlrobot.space.Expansion#computeInverted(java.lang.Object, java.util.function.BiFunction)
-	 */
-	@Override
-	public Integer computeInverted(Character value,	
-			BiFunction<? super Character, ? super Integer, ? extends Integer> remappingFunction) {
-		return !isEmpty() ? getChild().computeInverted(value, remappingFunction) : null;
 	}
 	/*
 	 * (non-Javadoc)
@@ -816,30 +691,12 @@ public class Hyperchain
 	}
 	/*
 	 * (non-Javadoc)
-	 * @see org.xmlrobot.space.Expansion#computeInvertedIfPresent(java.lang.Object, java.util.function.BiFunction)
-	 */
-	@Override
-	public Integer computeInvertedIfPresent(Character key, 
-			BiFunction<? super Character, ? super Integer, ? extends Integer> remappingFunction) {
-		return !isEmpty() ? getChild().computeInvertedIfPresent(key, remappingFunction) : null;
-	}
-	/*
-	 * (non-Javadoc)
 	 * @see org.xmlrobot.space.Dilatation#merge(java.lang.Object, java.lang.Object, java.util.function.BiFunction)
 	 */
 	@Override
 	public Character merge(Integer key,	Character value, 
 			BiFunction<? super Character, ? super Character, ? extends Character> remappingFunction) {
 		return !isEmpty() ? getChild().merge(key, value, remappingFunction) : null;
-	}
-	/*
-	 * (non-Javadoc)
-	 * @see org.xmlrobot.space.Dilatation#mergeInverted(java.lang.Object, java.lang.Object, java.util.function.BiFunction)
-	 */
-	@Override
-	public Integer mergeInverted(Character value, Integer key,
-			BiFunction<? super Integer, ? super Integer, ? extends Integer> remappingFunction) {
-		return !isEmpty() ? getChild().mergeInverted(value, key, remappingFunction) : null;
 	}
 	/*
 	 * (non-Javadoc)
@@ -851,26 +708,10 @@ public class Hyperchain
 	}
 	/*
 	 * (non-Javadoc)
-	 * @see org.xmlrobot.space.Dilatation#removeByValue(java.lang.Object)
-	 */
-	@Override
-	public Mass<Character, Integer> removeByValue(Character value) {
-		return !isEmpty() ? getChild().removeByValue(value) : null;
-	}
-	/*
-	 * (non-Javadoc)
 	 * @see org.xmlrobot.space.Dilatation#removeByKey(java.lang.Object, java.lang.Object)
 	 */
 	@Override
 	public boolean removeByKey(Integer key, Character value) {
 		return !isEmpty() ? getChild().removeByKey(key, value) : null;
-	}
-	/*
-	 * (non-Javadoc)
-	 * @see org.xmlrobot.space.Dilatation#removeByValue(java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public boolean removeByValue(Character value, Integer key) {
-		return !isEmpty() ? getChild().removeByValue(value, key) : null;
 	}
 }

@@ -414,14 +414,14 @@ public interface Congregation<T>
 	void polarize(T parent, T child);
 
 	/**
-	 * Liberates process from the inheritance cycle.
-	 * @return the released entity.
+	 * Liberates the top parent from the inheritance cycle.
+	 * @return the current parent of inheritance.
 	 */
 	T release();
 	
 	/**
 	 * Releases the last child of the inheritance.
-	 * @return the polled child.
+	 * @return the new parent of inheritance.
 	 */
 	T releaseChild();
 	

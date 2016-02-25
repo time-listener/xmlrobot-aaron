@@ -5,7 +5,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.xmlrobot.dna.antimatter.Hyperintron;
 import org.xmlrobot.genesis.Mass;
-import org.xmlrobot.positron.Antineutron;
+import org.xmlrobot.positron.Positron;
 import org.xmlrobot.subspace.Hyperchain;
 import org.xmlrobot.subspace.Hypercube;
 
@@ -17,7 +17,7 @@ import org.xmlrobot.subspace.Hypercube;
  */
 @XmlRootElement
 public class Intron 
-	extends Antineutron<Hyperchain,Hypercube>{
+	extends Positron<Hyperchain,Hypercube>{
 
 	/**
 	 * -2718890842282738451L

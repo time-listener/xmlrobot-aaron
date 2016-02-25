@@ -68,8 +68,8 @@ public class Organism
 	 */
 	@Override
 	@XmlElement(type=Atom.class)
-	public Mass<Cell,Operon> getPlasma() {
-		return super.getPlasma();
+	public Mass<Cell,Operon> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -130,12 +130,23 @@ public class Organism
 		super.mass(sender, event);
 		
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Operon) {
+				// begin listening time
+				event.start(getContext());
+			}
+			break;
+		case INTERRUPTED:
 		case TRANSFER:
-			if(event.getSource() instanceof Nucleoplasm) {
+			if(event.getSource() instanceof Operon) {
+				// finish listening time
+				event.stop(getContext());
+			}
+			else if(event.getSource() instanceof Nucleoplasm) {
 				// cast source
 				Nucleoplasm entity = (Nucleoplasm) event.getSource();
-				// free
-				entity.remove();
+				// transfer contents
+				getValue().put(entity.getValue(), entity.getKey());
 			}
 			break;
 		default:

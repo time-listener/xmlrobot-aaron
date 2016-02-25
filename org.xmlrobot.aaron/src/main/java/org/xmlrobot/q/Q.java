@@ -109,13 +109,13 @@ public class Q
 		
 		switch (event.getCommand()) {
 		case GENESIS:
-			if(event.getSource() instanceof Aaron) {
+			if(event.getSource() instanceof Robot) {
 				// cast new instance source
-				Aaron entity = (Aaron) event.getSource();
+				Robot entity = (Robot) event.getSource();
 				// stem listens robot masses
-				entity.addMassListener(get());
+				entity.addMassListener(this);
 				// root listens aaron masses
-				entity.get().addMassListener(this);
+				entity.get().addMassListener(get());
 				// start new instance
 				entity.start(getContext());
 			}

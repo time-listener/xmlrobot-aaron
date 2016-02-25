@@ -7,7 +7,7 @@ import org.xmlrobot.dna.Ribosoma;
 import org.xmlrobot.dna.Tetraploid;
 import org.xmlrobot.dna.matter.Ovum;
 import org.xmlrobot.genesis.Mass;
-import org.xmlrobot.positron.Antineutron;
+import org.xmlrobot.positron.Positron;
 
 /**
  * Sperma implementation class.
@@ -17,7 +17,7 @@ import org.xmlrobot.positron.Antineutron;
  */
 @XmlRootElement
 public class Sperma 
-	extends Antineutron<Ribosoma,Tetraploid> {
+	extends Positron<Ribosoma,Tetraploid> {
 
 	/**
 	 * -8435276692988791855L

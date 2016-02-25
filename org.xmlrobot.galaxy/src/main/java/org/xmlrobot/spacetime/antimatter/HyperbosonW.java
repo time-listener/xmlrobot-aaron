@@ -4,7 +4,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.xmlrobot.genesis.Mass;
-import org.xmlrobot.positron.Antineutron;
+import org.xmlrobot.positron.Positron;
 import org.xmlrobot.spacetime.AlphaCentauri;
 import org.xmlrobot.spacetime.Sun;
 import org.xmlrobot.spacetime.matter.BosonW;
@@ -17,7 +17,7 @@ import org.xmlrobot.spacetime.matter.BosonW;
  */
 @XmlRootElement
 public class HyperbosonW 
-	extends Antineutron<Sun,AlphaCentauri> {
+	extends Positron<Sun,AlphaCentauri> {
 
 	/**
 	 * 1745339382778302728L

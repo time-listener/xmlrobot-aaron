@@ -68,8 +68,8 @@ public class Cytoplasm
 	 */
 	@Override
 	@XmlElement(type=Sperma.class)
-	public Mass<Ribosoma,Tetraploid> getPlasma() {
-		return super.getPlasma();
+	public Mass<Ribosoma,Tetraploid> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -131,12 +131,23 @@ public class Cytoplasm
 		super.mass(sender, event);
 		
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Tetraploid) {
+				// start new life
+				event.start(getContext());
+			}
+			break;
+		case INTERRUPTED:
 		case TRANSFER:
-			if(event.getSource() instanceof Groove) { 
+			if(event.getSource() instanceof Tetraploid) {
+				// stop old life
+				event.stop(getContext());
+			}
+			else if(event.getSource() instanceof Groove) { 
 				// cast source
 				Groove pair = (Groove) event.getSource();
-				// see you next life
-				pair.remove();
+				// transfer
+				getValue().put(pair.getValue(), pair.getKey());
 			}
 			break;
 		default:
@@ -152,7 +163,7 @@ public class Cytoplasm
 		if (!message.compareAndSet(RUNNER, null, Thread.currentThread())) {
 			// because is already running
 			return;
-		} 
+		}
 		else {
 			// life starts here
 			super.run();

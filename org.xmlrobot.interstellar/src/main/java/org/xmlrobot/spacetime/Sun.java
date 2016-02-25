@@ -72,8 +72,8 @@ public class Sun
 	 */
 	@Override
 	@XmlElement(type=Hyperphoton.class)
-	public Mass<Jupiter,Saturn> getPlasma() {
-		return super.getPlasma();
+	public Mass<Jupiter,Saturn> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -98,6 +98,14 @@ public class Sun
 		super.mass(sender, event);
 		// commute command
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Jupiter) {
+				// cast source
+				Jupiter entity = (Jupiter) event.getSource();
+				// push planet into hyperspace
+				put(entity, (Saturn) entity.get());
+			}
+			break;
 		case ORDER:
 			if(event.getSource() instanceof Vega) {
 				// declare stem
@@ -134,20 +142,21 @@ public class Sun
 			break;
 		case PUSH:
 			if(event.getSource() instanceof Jupiter) {
-				// cast source
-				Jupiter key = (Jupiter) event.getSource();
-				// send pulse to child's value
-				getValue().pulse(this, new Collision(key));
+				// check emptiness
+				if(!isEmpty()) {
+					// cast source
+					Jupiter key = (Jupiter) event.getSource();
+					// send pulse to child's value
+					getValue().pulse(this, new Collision(key));
+				}
 			}
 			else if(event.getSource() instanceof Vega) {
-				// cast source
-				Vega pair = (Vega) event.getSource();
-				// declare child
-				Mass<Jupiter,Saturn> child;
 				// call child
-				if((child = getChild()) != null) {
+				if(!isEmpty()) {
+					// cast source
+					Vega pair = (Vega) event.getSource();
 					// gravity
-					child.pulse(this, new Attraction(pair));
+					getChild().pulse(this, new Attraction(pair));
 				}
 			}
 			break;
@@ -186,11 +195,15 @@ public class Sun
 			}
 			break;
 		case TRANSFER:
-			if(event.getSource() instanceof Vega) {
+			if(event.getSource() instanceof Mars) {
 				// cast source
-				Vega entity = (Vega) event.getSource();
-				// transfer message contents
-				put(entity.getValue(), entity.getKey());
+				Mars pair = (Mars) event.getSource();
+				// free from inheritance
+				pair.remove();
+			}
+			else if(event.getSource() instanceof Vega) {
+				// end life
+				event.stop(getContext());
 			}
 			break;
 		default:
@@ -220,32 +233,16 @@ public class Sun
 		// assign and check
 		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
 				child instanceof Pegasi : false) {
-			// declare plasma
-			Mass<Jupiter,Saturn> plasma;
 			// cast source
 			Pegasi pair = (Pegasi) child;
 			// commute command
 			if(event.getType() == ServiceEvent.REGISTERED) {
-				// assign and check it's contained
-				if((plasma = getPlasma()) != null ?
-						!plasma.isEmpty() ?
-								!plasma.containsKey(pair.getKey())
-								: true
-						: false) {
-					// replicate mass
-					plasma.putValue(pair.getKey(), pair.getValue());
-				}
+				// replicate mass
+				getReplicator().putValue(pair.getKey(), pair.getValue());
 			}
 			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// check if empty and chained
-				if((plasma = getPlasma()) != null ? 
-						!plasma.isEmpty() ? 
-								plasma.containsValue(pair.getValue()) 
-								: false
-						: false) {
-					// release child
-					plasma.removeByKey(pair.getKey());
-				}
+				// release child
+				getReplicator().removeByKey(pair.getKey());
 			}
 		}
 	}

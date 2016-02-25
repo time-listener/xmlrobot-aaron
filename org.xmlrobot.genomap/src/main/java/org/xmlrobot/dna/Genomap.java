@@ -18,6 +18,7 @@ import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Child;
 import org.xmlrobot.subspace.Hyperchain;
 import org.xmlrobot.subspace.Hypercube;
+import org.xmlrobot.subspace.Hyperentry;
 import org.xmlrobot.subspace.event.Instant;
 import org.xmlrobot.util.Command;
 import org.xmlrobot.util.Parity;
@@ -76,8 +77,8 @@ public class Genomap
 	 */
 	@Override
 	@XmlElement(type=Hyperexon.class)
-	public Mass<Hypercube,Hyperchain> getPlasma() {
-		return super.getPlasma();
+	public Mass<Hypercube,Hyperchain> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -103,6 +104,14 @@ public class Genomap
 		super.mass(sender, event);
 		// commute command
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Hypercube) {
+				// cast source
+				Hypercube entity = (Hypercube) event.getSource();
+				// create pair
+				put(entity, (Hyperchain) entity.get());
+			}
+			break;
 		case ORDER:
 			if(event.getSource() instanceof Gamete) {
 				// declare stem
@@ -139,16 +148,19 @@ public class Genomap
 			break;
 		case PUSH:
 			if(event.getSource() instanceof Hypercube) {
-				// cast source
-				Hypercube key = (Hypercube) event.getSource();
-				// send pulse to child's value
-				getValue().pulse(this, new Instant(key));
-			}
-			else if(event.getSource() instanceof Gamete) {
-				// cast source
-				Gamete pair = (Gamete) event.getSource();
 				// assign and check
 				if(!isEmpty()) {
+					// cast source
+					Hypercube key = (Hypercube) event.getSource();
+					// send pulse to child's value
+					getValue().pulse(this, new Instant(key));
+				}
+			}
+			else if(event.getSource() instanceof Gamete) {
+				// assign and check
+				if(!isEmpty()) {
+					// cast source
+					Gamete pair = (Gamete) event.getSource();
 					// send message to the future
 					getChild().pulse(this, new Transmission(pair));
 				}
@@ -189,11 +201,15 @@ public class Genomap
 			}
 			break;
 		case TRANSFER:
-			if(event.getSource() instanceof Gamete) {
+			if(event.getSource() instanceof Hyperentry) {
 				// cast source
-				Gamete entity = (Gamete) event.getSource();
-				// transfer message contents
-				put(entity.getValue(), entity.getKey());
+				Hyperentry pair = (Hyperentry) event.getSource();
+				// get free
+				pair.remove();
+			}
+			else if (event.getSource() instanceof Gamete) {
+				// rip
+				event.stop(getContext());
 			}
 			break;
 		default:
@@ -223,32 +239,16 @@ public class Genomap
 		// assign and check
 		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
 				child instanceof Gene : false) {
-			// declare plasma
-			Mass<Hypercube,Hyperchain> plasma;
 			// cast source
 			Gene pair = (Gene) child;
 			// commute command
 			if(event.getType() == ServiceEvent.REGISTERED) {
-				// assign and check it's contained
-				if((plasma = getPlasma()) != null ?
-						!plasma.isEmpty() ?
-								!plasma.containsKey(pair.getKey())
-								: true
-						: false) {
-					// replicate mass
-					plasma.putValue(pair.getKey(), pair.getValue());
-				}
+				// replicate mass
+				getReplicator().putValue(pair.getKey(), pair.getValue());
 			}
 			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// check if empty and chained
-				if((plasma = getPlasma()) != null ? 
-						!plasma.isEmpty() ? 
-								plasma.containsValue(pair.getValue()) 
-								: false
-						: false) {
-					// release child
-					plasma.removeByKey(pair.getKey());
-				}
+				// release child
+				getReplicator().removeByKey(pair.getKey());
 			}
 		}
 	}

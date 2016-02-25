@@ -16,6 +16,7 @@ import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.TimeListener;
 import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Child;
+import org.xmlrobot.spacetime.Capricornus;
 import org.xmlrobot.spacetime.Columbia;
 import org.xmlrobot.spacetime.Fornax;
 import org.xmlrobot.spacetime.event.Expansion;
@@ -72,8 +73,8 @@ public class Minkowski
 	 */
 	@Override
 	@XmlElement(type=Quark.class)
-	public Mass<Columbia,Fornax> getPlasma() {
-		return super.getPlasma();
+	public Mass<Columbia,Fornax> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -98,6 +99,14 @@ public class Minkowski
 		super.mass(sender, event);
 		
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Columbia) {
+				// cast child
+				Columbia entity = (Columbia) event.getSource();
+				// push supercluster into hyperspace
+				put(entity, (Fornax) entity.get());
+			}
+			break;
 		case ORDER:
 			if(event.getSource() instanceof Cluster) {
 				// declare stem
@@ -134,20 +143,21 @@ public class Minkowski
 			break;
 		case PUSH:
 			if(event.getSource() instanceof Columbia) {
-				// cast source
-				Columbia key = (Columbia) event.getSource();
-				// send pulse to child's value
-				getValue().pulse(this, new Expansion(key));
+				// check emptiness
+				if(!isEmpty()) {
+					// cast source
+					Columbia key = (Columbia) event.getSource();
+					// send pulse to child's value
+					getValue().pulse(this, new Expansion(key));	
+				}
 			}
 			else if(event.getSource() instanceof Cluster) {
-				// cast source
-				Cluster pair = (Cluster) event.getSource();
-				// declare child
-				Mass<Columbia,Fornax> child;
 				// call child
-				if((child = getChild()) != null) {
+				if(!isEmpty()) {
+					// cast source
+					Cluster pair = (Cluster) event.getSource();
 					// emit mass to the future
-					child.pulse(this, new Dilatation(pair));
+					getChild().pulse(this, new Dilatation(pair));
 				}
 			}
 			break;
@@ -186,11 +196,15 @@ public class Minkowski
 			}
 			break;
 		case TRANSFER:
-			if(event.getSource() instanceof Cluster) {
+			if(event.getSource() instanceof Capricornus) {
 				// cast source
-				Cluster entity = (Cluster) event.getSource();
-				// transfer message contents
-				put(entity.getValue(), entity.getKey());
+				Capricornus pair = (Capricornus) event.getSource();
+				// make pair free
+				pair.remove();
+			}
+			else if(event.getSource() instanceof Cluster) {
+				// the funeral of cluster
+				event.stop(getContext());
 			}
 			break;
 		default:
@@ -220,32 +234,16 @@ public class Minkowski
 		// assign and check
 		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
 				child instanceof Galaxy : false) {
-			// declare plasma
-			Mass<Columbia,Fornax> plasma;
 			// cast source
 			Galaxy pair = (Galaxy) child;
 			// commute command
 			if(event.getType() == ServiceEvent.REGISTERED) {
-				// assign and check it's contained
-				if((plasma = getPlasma()) != null ?
-						!plasma.isEmpty() ?
-								!plasma.containsKey(pair.getKey())
-								: true
-						: false) {
-					// replicate mass
-					plasma.putValue(pair.getKey(), pair.getValue());
-				}
+				// replicate mass
+				getReplicator().putValue(pair.getKey(), pair.getValue());
 			}
 			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// check if empty and chained
-				if((plasma = getPlasma()) != null ? 
-						!plasma.isEmpty() ? 
-								plasma.containsValue(pair.getValue()) 
-								: false
-						: false) {
-					// release child
-					plasma.removeByKey(pair.getKey());
-				}
+				// release child
+				getReplicator().removeByKey(pair.getKey());
 			}
 		}
 	}

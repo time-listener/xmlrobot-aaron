@@ -68,8 +68,8 @@ public class Capricornus
 	 */
 	@Override
 	@XmlElement(type=Hyperhiggs.class)
-	public Mass<MilkyWay,Andromeda> getPlasma() {
-		return super.getPlasma();
+	public Mass<MilkyWay,Andromeda> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -136,12 +136,23 @@ public class Capricornus
 		super.mass(sender, event);
 		
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Andromeda) {
+				// submit galaxy into hyperspace
+				event.start(getContext());
+			}
+			break;
+		case INTERRUPTED:
 		case TRANSFER:
-			if(event.getSource() instanceof Virgo) {
+			if(event.getSource() instanceof Andromeda) {
+				// submit galaxy into hyperspace
+				event.stop(getContext());
+			}
+			else if(event.getSource() instanceof Virgo) {
 				// cast source
 				Virgo pair = (Virgo) event.getSource();
-				// free from inheritance
-				pair.remove();
+				// transfer cluster contents
+				getValue().put(pair.getValue(), pair.getKey());
 			}
 			break;
 		default:

@@ -72,8 +72,8 @@ public class Ribosoma
 	 */
 	@Override
 	@XmlElement(type=Hyperdna.class)
-	public Mass<Cromosoma,Diploid> getPlasma() {
-		return super.getPlasma();
+	public Mass<Cromosoma,Diploid> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -99,6 +99,14 @@ public class Ribosoma
 		super.mass(sender, event);
 		// commute order
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Cromosoma) {
+				// cast source
+				Cromosoma entity = (Cromosoma) event.getSource();
+				// push
+				put(entity, (Diploid) entity.get());
+			}
+			break;
 		case ORDER:
 			if(event.getSource() instanceof Plasmid) {
 				// declare stem
@@ -135,20 +143,21 @@ public class Ribosoma
 			break;
 		case PUSH:
 			if(event.getSource() instanceof Cromosoma) {
-				// cast source
-				Cromosoma key = (Cromosoma) event.getSource();
-				// send pulse to child's value
-				getValue().pulse(this, new Transfix(key));
+				// check emptiness
+				if(!isEmpty()) {
+					// cast source
+					Cromosoma key = (Cromosoma) event.getSource();
+					// send pulse to child's value
+					getValue().pulse(this, new Transfix(key));	
+				}
 			}
 			else if(event.getSource() instanceof Plasmid) {
-				// cast source
-				Plasmid pair = (Plasmid) event.getSource();
-				// declare child
-				Mass<Cromosoma,Diploid> child;
-				// assign and check
-				if((child = getChild()) != null) {
+				// check emptiness
+				if(!isEmpty()) {
+					// cast source
+					Plasmid pair = (Plasmid) event.getSource();
 					// start mitosis
-					child.pulse(this, new Mitosis(pair));
+					getChild().pulse(this, new Mitosis(pair));
 				}
 			}
 			break;
@@ -187,11 +196,15 @@ public class Ribosoma
 			}
 			break;
 		case TRANSFER:
-			if(event.getSource() instanceof Plasmid) {
+			if(event.getSource() instanceof BasePair) {
 				// cast source
-				Plasmid entity = (Plasmid) event.getSource();
-				// transfer message contents
-				put(entity.getValue(), entity.getKey());
+				BasePair pair = (BasePair) event.getSource();
+				// free from inheritance
+				pair.remove();
+			}
+			else if(event.getSource() instanceof Plasmid) {
+				// bye
+				event.stop(getContext());
 			}
 			break;
 		default:
@@ -221,32 +234,16 @@ public class Ribosoma
 		// assign and check
 		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
 				child instanceof Groove : false) {
-			// declare plasma
-			Mass<Cromosoma,Diploid> plasma;
 			// cast source
 			Groove pair = (Groove) child;
 			// commute command
 			if(event.getType() == ServiceEvent.REGISTERED) {
-				// assign and check it's contained
-				if((plasma = getPlasma()) != null ?
-						!plasma.isEmpty() ?
-								!plasma.containsKey(pair.getKey())
-								: true
-						: false) {
-					// replicate mass
-					plasma.putValue(pair.getKey(), pair.getValue());
-				}
+				// replicate mass
+				getReplicator().putValue(pair.getKey(), pair.getValue());
 			}
 			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// check if empty and chained
-				if((plasma = getPlasma()) != null ? 
-						!plasma.isEmpty() ? 
-								plasma.containsValue(pair.getValue()) 
-								: false
-						: false) {
-					// release child
-					plasma.removeByKey(pair.getKey());
-				}
+				// release child
+				getReplicator().removeByKey(pair.getKey());
 			}
 		}
 	}

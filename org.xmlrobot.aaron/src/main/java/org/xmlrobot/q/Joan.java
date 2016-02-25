@@ -113,13 +113,13 @@ public class Joan
 		
 		switch (event.getCommand()) {
 		case GENESIS:
-			if(event.getSource() instanceof Robot) {
+			if(event.getSource() instanceof Aaron) {
 				// cast new instance source
-				Robot entity = (Robot) event.getSource();
+				Aaron entity = (Aaron) event.getSource();
 				// stem listens robot masses
-				entity.addMassListener(get());
+				entity.addMassListener(this);
 				// root listens aaron masses
-				entity.get().addMassListener(this);
+				entity.get().addMassListener(get());
 				// start new instance
 				entity.start(getContext());
 			}

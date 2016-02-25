@@ -68,8 +68,8 @@ public class BasePair
 	 */
 	@Override
 	@XmlElement(type=Hypertype.class)
-	public Mass<Genomap,Haploid> getPlasma() {
-		return super.getPlasma();
+	public Mass<Genomap,Haploid> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -131,12 +131,23 @@ public class BasePair
 		super.mass(sender, event);
 		
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Haploid) {
+				// a new future starts
+				event.start(getContext());
+			}
+			break;
+		case INTERRUPTED:
 		case TRANSFER:
-			if(event.getSource() instanceof Gene) {
+			if(event.getSource() instanceof Haploid) {
+				// live long and prosper
+				event.stop(getContext());
+			}
+			else if(event.getSource() instanceof Gene) {
 				// cast source
 				Gene pair = (Gene) event.getSource();
-				// rest in peace
-				pair.remove();
+				// transfer contents
+				getValue().put(pair.getValue(), pair.getKey());
 			}
 			break;
 		default:

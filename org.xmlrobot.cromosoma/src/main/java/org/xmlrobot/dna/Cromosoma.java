@@ -70,8 +70,8 @@ public class Cromosoma
 	 */
 	@Override
 	@XmlElement(type=Hyperphenotype.class)
-	public Mass<Genomap,Haploid> getPlasma() {
-		return super.getPlasma();
+	public Mass<Genomap,Haploid> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -97,6 +97,14 @@ public class Cromosoma
 		super.mass(sender, event);
 		// commute order
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Genomap) {
+				// cast source
+				Genomap entity = (Genomap) event.getSource();
+				// eat
+				put(entity, (Haploid) entity.get());
+			}
+			break;
 		case ORDER:
 			if(event.getSource() instanceof Allele) {
 				// declare stem
@@ -133,20 +141,21 @@ public class Cromosoma
 			break;
 		case PUSH:
 			if(event.getSource() instanceof Genomap) {
-				// cast source
-				Genomap key = (Genomap) event.getSource();
-				// send pulse to child's value
-				getValue().pulse(this, new Synapsis(key));
+				// check emptiness
+				if(!isEmpty()) {
+					// cast source
+					Genomap key = (Genomap) event.getSource();
+					// send pulse to child's value
+					getValue().pulse(this, new Synapsis(key));	
+				}
 			}
 			else if(event.getSource() instanceof Allele) {
-				// cast source
-				Allele pair = (Allele) event.getSource();
-				// declare child
-				Mass<Genomap,Haploid> child;
 				// assign and check
-				if((child = getChild()) != null) {
+				if(!isEmpty()) {
+					// cast source
+					Allele pair = (Allele) event.getSource();
 					// send message to the future
-					child.pulse(this, new Translocation(pair));
+					getChild().pulse(this, new Translocation(pair));
 				}
 			}
 			break;
@@ -185,13 +194,15 @@ public class Cromosoma
 			}
 			break;
 		case TRANSFER:
-			if(event.getSource() instanceof Allele) {
+			if(event.getSource() instanceof Gamete) {
 				// cast source
-				Allele entity = (Allele) event.getSource();
-				// transfer message contents
-				put(entity.getValue(), entity.getKey());
+				Gamete pair = (Gamete) event.getSource();
+				// free from inheritance
+				pair.remove();
+			}
+			else if(event.getSource() instanceof Allele) {
 				// rip
-				entity.stop(getContext());
+				event.stop(getContext());
 			}
 			break;
 		default:
@@ -221,32 +232,16 @@ public class Cromosoma
 		// assign and check
 		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
 				child instanceof BasePair : false) {
-			// declare plasma
-			Mass<Genomap,Haploid> plasma;
 			// cast source
 			BasePair pair = (BasePair) child;
 			// commute command
 			if (event.getType() == ServiceEvent.REGISTERED) {
-				// assign and check it's contained
-				if((plasma = getPlasma()) != null ?
-						!plasma.isEmpty() ?
-								!plasma.containsValue(pair.getValue())
-								: true
-						: false) {
-					// replicate mass
-					plasma.putKey(pair.getValue(), pair.getKey());
-				}
+				// replicate mass
+				getReplicator().putKey(pair.getValue(), pair.getKey());
 			}
 			else if (event.getType() == ServiceEvent.UNREGISTERING) {
-				// check if empty and chained
-				if((plasma = getPlasma()) != null ? 
-						!plasma.isEmpty() ? 
-								plasma.containsKey(pair.getKey()) 
-								: false
-						: false) {
-					// release child
-					plasma.removeByValue(pair.getValue());
-				}
+				// release child
+				getReplicator().removeByValue(pair.getValue());
 			}
 		}
 	}

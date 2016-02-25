@@ -13,6 +13,7 @@ import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.TimeListener;
 import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Child;
+import org.xmlrobot.nature.Being;
 import org.xmlrobot.nature.Biosphere;
 import org.xmlrobot.nature.Ecosystem;
 import org.xmlrobot.nature.event.Homogenization;
@@ -72,8 +73,8 @@ public class Jupiter
 	 */
 	@Override
 	@XmlElement(type=Hypergas.class)
-	public Mass<Ecosystem,Biosphere> getPlasma() {
-		return super.getPlasma();
+	public Mass<Ecosystem,Biosphere> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -100,6 +101,14 @@ public class Jupiter
 		super.mass(sender, event);
 
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Ecosystem) {
+				// cast source
+				Ecosystem entity = (Ecosystem) event.getSource();
+				// create key-value pair
+				put(entity, (Biosphere) entity.get());
+			}
+			break;
 		case ORDER:
 			if(event.getSource() instanceof Earth) {
 				// declare stem
@@ -136,20 +145,21 @@ public class Jupiter
 			break;
 		case PUSH:
 			if(event.getSource() instanceof Ecosystem) {
-				// cast source
-				Ecosystem key = (Ecosystem) event.getSource();
-				// send pulse to child's value
-				getValue().pulse(this, new Homogenization(key));
+				// check emptiness
+				if(!isEmpty()) {
+					// cast source
+					Ecosystem key = (Ecosystem) event.getSource();
+					// send pulse to child's value
+					getValue().pulse(this, new Homogenization(key));
+				}
 			}
 			else if(event.getSource() instanceof Earth) {
-				// cast source
-				Earth earth = (Earth) event.getSource();
-				// declare child
-				Mass<Ecosystem,Biosphere> child;
-				// call child
-				if((child = getChild()) != null) {
+				// check emptiness
+				if(!isEmpty()) {
+					// cast source
+					Earth earth = (Earth) event.getSource();
 					// send him a little asteroid
-					child.pulse(this, new Impact(earth));
+					getChild().pulse(this, new Impact(earth));
 				}
 			}
 			break;
@@ -188,11 +198,15 @@ public class Jupiter
 			}
 			break;
 		case TRANSFER:
-			if(event.getSource() instanceof Earth) {
+			if(event.getSource() instanceof Being) {
 				// cast source
-				Earth entity = (Earth) event.getSource();
-				// transfer message contents
-				put(entity.getValue(), entity.getKey());
+				Being pair = (Being) event.getSource();
+				// free from inheritance
+				pair.remove();
+			}
+			else if(event.getSource() instanceof Earth) {
+				// the funeral
+				event.stop(getContext());
 			}
 			break;
 		default:
@@ -222,32 +236,16 @@ public class Jupiter
 		// assign and check
 		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
 				child instanceof Mars : false) {
-			// declare plasma
-			Mass<Ecosystem,Biosphere> plasma;
 			// cast source
 			Mars pair = (Mars) child;
 			// commute command
 			if (event.getType() == ServiceEvent.REGISTERED) {
-				// assign and check it's contained
-				if((plasma = getPlasma()) != null ?
-						!plasma.isEmpty() ?
-								!plasma.containsValue(pair.getValue())
-								: true
-						: false) {
-					// replicate mass
-					plasma.putKey(pair.getValue(), pair.getKey());
-				}
+				// replicate mass
+				getReplicator().putKey(pair.getValue(), pair.getKey());
 			}
 			else if (event.getType() == ServiceEvent.UNREGISTERING) {
-				// check if empty and chained
-				if((plasma = getPlasma()) != null ? 
-						!plasma.isEmpty() ? 
-								plasma.containsKey(pair.getKey()) 
-								: false
-						: false) {
-					// release child
-					plasma.removeByValue(pair.getValue());
-				}
+				// release child
+				getReplicator().removeByValue(pair.getValue());
 			}
 		}
 	}

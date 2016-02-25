@@ -7,7 +7,7 @@ import org.xmlrobot.dna.Genomap;
 import org.xmlrobot.dna.Haploid;
 import org.xmlrobot.dna.antimatter.Hypertype;
 import org.xmlrobot.genesis.Mass;
-import org.xmlrobot.positron.Antineutron;
+import org.xmlrobot.positron.Positron;
 
 /**
  * Karyotype implementation class.
@@ -17,7 +17,7 @@ import org.xmlrobot.positron.Antineutron;
  */
 @XmlRootElement
 public class Karyotype 
-	extends Antineutron<Haploid,Genomap> {
+	extends Positron<Haploid,Genomap> {
 
 	/**
 	 * 4103982669151647889L
@@ -28,6 +28,7 @@ public class Karyotype
 	 * @see org.xmlrobot.hyperspace.Abstraction#getName()
 	 */
 	@Override
+	@XmlElement
 	public String getName() {
 		return getKey().getName();
 	}

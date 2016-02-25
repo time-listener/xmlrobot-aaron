@@ -10,7 +10,7 @@ import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceReference;
 import org.xmlrobot.genesis.Hypertext;
 import org.xmlrobot.genesis.Mass;
-import org.xmlrobot.genesis.Replicator;
+import org.xmlrobot.genesis.Plasma;
 import org.xmlrobot.genesis.TimeListener;
 import org.xmlrobot.horizon.EventHorizon;
 import org.xmlrobot.space.Space;
@@ -38,7 +38,7 @@ import org.xmlrobot.util.Parity;
 @XmlTransient
 public abstract class Hyperinteger
 	extends Space<Integer,Character> 
-		implements Replicator<Integer,Character>, 
+		implements Plasma<Integer,Character>, 
 			Hypertext {
 
 	/**
@@ -46,14 +46,14 @@ public abstract class Hyperinteger
 	 */
 	private static final long serialVersionUID = 3747383271792133254L;
 	
-	transient volatile Mass<Integer,Character> plasma;
+	transient volatile Mass<Integer,Character> replicator;
 	
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.Replicator#getPlasma()
 	 */
 	@Override
-	public Mass<Integer,Character> getPlasma() {
-		return plasma;
+	public Mass<Integer,Character> getReplicator() {
+		return replicator;
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.time.Time#getName()
@@ -81,7 +81,7 @@ public abstract class Hyperinteger
 			Class<? extends Hyperinteger> type) {
 		super(type, Parity.XX);
 		// instance mass
-		plasma = instance(matter, antimatter);
+		replicator = instance(matter, antimatter);
 	}
 
 	/**
@@ -100,7 +100,7 @@ public abstract class Hyperinteger
 		// call constructor
 		super(type, key, value, Parity.XX);
 		// instance mass
-		plasma = instance(matter, antimatter, key, value);
+		replicator = instance(matter, antimatter, key, value);
 	}
 	/**
 	 * {@link Hyperinteger} class constructor.
@@ -118,7 +118,7 @@ public abstract class Hyperinteger
 			Integer key, Character value, Hyperinteger parent) {
 		super(type, key, value, parent);
 		// instance mass
-		plasma = instance(matter, antimatter, key, value, parent.getPlasma());
+		replicator = instance(matter, antimatter, key, value, parent.getReplicator());
 	}
 	/**
 	 * {@link Hyperinteger} class constructor.
@@ -179,11 +179,11 @@ public abstract class Hyperinteger
 			// commute command
 			if (event.getType() == ServiceEvent.REGISTERED) {
 
-				plasma.push(Command.SUBMIT);
+				replicator.push(Command.SUBMIT);
 			} 
 			else if (event.getType() == ServiceEvent.UNREGISTERING) {
 				// release replication
-				plasma.push(Command.RELEASE);
+				replicator.push(Command.RELEASE);
 			}
 		}
 	}
@@ -213,13 +213,13 @@ public abstract class Hyperinteger
 		// cast source
 		Hyperstring stem = (Hyperstring) value;
 		// set child's plasma
-		stem.plasma = plasma.get();
+		stem.replicator = replicator.get();
 		// my plasma is listened by my root's plasma
-		stem.plasma.setStem(plasma.getRoot());
-		stem.plasma.setRoot(plasma.getStem());
+		stem.replicator.setStem(replicator.getRoot());
+		stem.replicator.setRoot(replicator.getStem());
 		// listen plasma masses
-		stem.plasma.addMassListener(this);
-		plasma.addMassListener(stem);
+		stem.replicator.addMassListener(this);
+		replicator.addMassListener(stem);
 	}
 
 	// matrix implementation
@@ -356,7 +356,7 @@ public abstract class Hyperinteger
      */
     public String concat(String str) {
         // concatenate string
-        str = str.concat(getKey().toString());
+        str = str.concat(getValue().toString());
         // return string or call recursion
         return !isEmpty() ? ((Hypertext) getChild()).concat(str) : str;
     }
@@ -366,7 +366,7 @@ public abstract class Hyperinteger
 	@Override
 	public StringBuilder concat(StringBuilder o) {
 		// do concatenation
-		o.append(getKey());
+		o.append(getValue());
         // return builder or call recursion
 		return !isEmpty() ? ((Hypertext) getChild()).concat(o) : o ;
 	}
@@ -395,7 +395,7 @@ public abstract class Hyperinteger
 	public StringBuilder substring(StringBuilder builder, int beginIndex,
 			int endIndex) {
 		if (beginIndex <= 0) {
-            builder.append(getKey());
+            builder.append(getValue());
         }
 		if (endIndex == 0) {
 			return builder;

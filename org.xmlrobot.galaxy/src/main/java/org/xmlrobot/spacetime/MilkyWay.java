@@ -72,8 +72,8 @@ public class MilkyWay
 	 */
 	@Override
 	@XmlElement(type=HyperbosonZ.class)
-	public Mass<Sun,AlphaCentauri> getPlasma() {
-		return super.getPlasma();
+	public Mass<Sun,AlphaCentauri> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -97,6 +97,14 @@ public class MilkyWay
 	public void mass(MassListener sender, Tachyon<?,?> event) {
 		super.mass(sender, event);
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Sun) {
+				// cast star
+				Sun entity = (Sun) event.getSource();
+				// push star
+				put(entity, (AlphaCentauri) entity.get());
+			}
+			break;
 		case ORDER:
 			if(event.getSource() instanceof Hydra) {
 				// declare stem
@@ -133,20 +141,21 @@ public class MilkyWay
 			break;
 		case PUSH:
 			if(event.getSource() instanceof Sun) {
-				// cast source
-				Sun key = (Sun) event.getSource();
-				// send pulse to child's value
-				getValue().pulse(this, new Repulsion(key));
+				// check emptiness
+				if(!isEmpty()) {
+					// cast source
+					Sun key = (Sun) event.getSource();
+					// send pulse to child's value
+					getValue().pulse(this, new Repulsion(key));	
+				}
 			}
 			else if(event.getSource() instanceof Hydra) {
-				// cast source
-				Hydra pair = (Hydra) event.getSource();
-				// declare child
-				Mass<Sun, AlphaCentauri> child;
 				// call child
-				if((child = getChild()) != null) {
+				if(!isEmpty()) {
+					// cast source
+					Hydra pair = (Hydra) event.getSource();
 					// antigravity
-					child.pulse(this, new Revolution(pair));
+					getChild().pulse(this, new Revolution(pair));
 				}
 			}
 			break;
@@ -184,12 +193,17 @@ public class MilkyWay
 				}
 			}
 			break;
+		case INTERRUPTED:
 		case TRANSFER:
-			if(event.getSource() instanceof Hydra) {
+			if(event.getSource() instanceof Pegasi) {
 				// cast source
-				Hydra entity = (Hydra) event.getSource();
-				// transfer message contents
-				put(entity.getValue(), entity.getKey());
+				Pegasi pair = (Pegasi) event.getSource();
+				// free from inheritance
+				pair.remove();
+			}
+			else if(event.getSource() instanceof Hydra) {
+				// finish galaxy
+				event.stop(getContext());
 			}
 			break;
 		default:
@@ -219,32 +233,16 @@ public class MilkyWay
 		// assign and check
 		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
 				child instanceof Virgo : false) {
-			// declare plasma
-			Mass<Sun,AlphaCentauri> plasma;
 			// cast source
 			Virgo pair = (Virgo) child;
 			// commute command
 			if(event.getType() == ServiceEvent.REGISTERED) {
-				// assign and check it's contained
-				if((plasma = getPlasma()) != null ?
-						!plasma.isEmpty() ?
-								!plasma.containsValue(pair.getValue())
-								: true
-						: false) {
-					// replicate mass
-					plasma.putKey(pair.getValue(), pair.getKey());
-				}
+				// replicate mass
+				getReplicator().putKey(pair.getValue(), pair.getKey());
 			}
 			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// check if empty and chained
-				if((plasma = getPlasma()) != null ? 
-						!plasma.isEmpty() ? 
-								plasma.containsKey(pair.getKey()) 
-								: false
-						: false) {
-					// release child
-					plasma.removeByValue(pair.getValue());
-				}
+				// release child
+				getReplicator().removeByValue(pair.getValue());
 			}
 		}
 	}

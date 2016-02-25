@@ -68,8 +68,8 @@ public class Perseus
 	 */
 	@Override
 	@XmlElement(type=Higgs.class)
-	public Mass<Andromeda,MilkyWay> getPlasma() {
-		return super.getPlasma();
+	public Mass<Andromeda,MilkyWay> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -136,12 +136,23 @@ public class Perseus
 		
 		super.mass(sender, event);
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof MilkyWay) {
+				// submit galaxy into hyperspace
+				event.start(getContext());
+			}
+			break;
+		case INTERRUPTED:
 		case TRANSFER:
-			if(event.getSource() instanceof Hydra) {
+			if(event.getSource() instanceof MilkyWay) {
+				// release galaxy from hyperspace
+				event.stop(getContext());
+			}
+			else if(event.getSource() instanceof Hydra) {
 				// cast source
 				Hydra pair = (Hydra) event.getSource();
-				// free from inheritance
-				pair.remove();
+				// transfer galaxy contents
+				getValue().put(pair.getValue(), pair.getKey());
 			}
 			break;
 		default:

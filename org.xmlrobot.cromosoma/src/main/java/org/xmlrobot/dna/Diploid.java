@@ -72,8 +72,8 @@ public class Diploid
 	 */
 	@Override
 	@XmlElement(type=Phenotype.class)
-	public Mass<Haploid,Genomap> getPlasma() {
-		return super.getPlasma();
+	public Mass<Haploid,Genomap> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -99,6 +99,14 @@ public class Diploid
 		super.mass(sender, event);
 		// commute command
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Haploid) {
+				// cast source
+				Haploid entity = (Haploid) event.getSource();
+				// eat
+				put(entity, (Genomap) entity.get());
+			}
+			break;
 		case ORDER:
 			if(event.getSource() instanceof BasePair) {
 				// declare stem
@@ -135,20 +143,21 @@ public class Diploid
 			break;
 		case PUSH:
 			if(event.getSource() instanceof Haploid) {
-				// cast source
-				Haploid key = (Haploid) event.getSource();
-				// send pulse to child's value
-				getValue().pulse(this, new Transmission(key));
+				// check emptiness
+				if(!isEmpty()) {
+					// cast source
+					Haploid key = (Haploid) event.getSource();
+					// send pulse to child's value
+					getValue().pulse(this, new Transmission(key));	
+				}
 			}
 			else if(event.getSource() instanceof BasePair) {
-				// cast source
-				BasePair pair = (BasePair) event.getSource();
-				// declare child
-				Mass<Haploid,Genomap> child;
-				// assign and check
-				if((child = getChild()) != null) {
+				// check emptiness
+				if(!isEmpty()) {
+					// cast source
+					BasePair pair = (BasePair) event.getSource();
 					// send message to the future
-					child.pulse(this, new Transfix(pair));
+					getChild().pulse(this, new Transfix(pair));
 				}
 			}
 			break;
@@ -187,11 +196,15 @@ public class Diploid
 			}
 			break;
 		case TRANSFER:
-			if(event.getSource() instanceof BasePair) {
+			if(event.getSource() instanceof Gene) {
 				// cast source
-				BasePair entity = (BasePair) event.getSource();
-				// transfer message contents
-				put(entity.getValue(), entity.getKey());
+				Gene pair = (Gene) event.getSource();
+				// rest in peace
+				pair.remove();
+			}
+			else if(event.getSource() instanceof BasePair) {
+				// see you next life
+				event.stop(getContext());
 			}
 			break;
 		default:
@@ -221,32 +234,16 @@ public class Diploid
 		// assign and check
 		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
 				child instanceof Allele : false) {
-			// declare plasma
-			Mass<Haploid,Genomap> plasma;
 			// cast source
 			Allele pair = (Allele) child;
 			// commute command
 			if (event.getType() == ServiceEvent.REGISTERED) {
-				// assign and check it's contained
-				if((plasma = getPlasma()) != null ?
-						!plasma.isEmpty() ?
-								!plasma.containsKey(pair.getKey())
-								: true
-						: false) {
-					// replicate mass
-					plasma.putValue(pair.getKey(), pair.getValue());
-				}
+				// replicate mass
+				getReplicator().putValue(pair.getKey(), pair.getValue());
 			} 
 			else if (event.getType() == ServiceEvent.UNREGISTERING) {
-				// check if empty and chained
-				if((plasma = getPlasma()) != null ? 
-						!plasma.isEmpty() ? 
-								plasma.containsValue(pair.getValue()) 
-								: false
-						: false) {
-					// release child
-					plasma.removeByKey(pair.getKey());
-				}
+				// release child
+				getReplicator().removeByKey(pair.getKey());
 			}
 		}
 	}

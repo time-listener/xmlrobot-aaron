@@ -67,8 +67,8 @@ public class Hydra
 	 */
 	@Override
 	@XmlElement(type=BosonW.class)
-	public Mass<AlphaCentauri,Sun> getPlasma() {
-		return super.getPlasma();
+	public Mass<AlphaCentauri,Sun> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -129,12 +129,23 @@ public class Hydra
 		super.mass(sender, event);
 		
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Sun) {
+				// start new star
+				event.start(getContext());
+			}
+			break;
+		case INTERRUPTED:
 		case TRANSFER:
-			if(event.getSource() instanceof Vega) {
+			if(event.getSource() instanceof Sun) {
+				// stop old star
+				event.stop(getContext());
+			}
+			else if(event.getSource() instanceof Vega) {
 				// cast source
 				Vega pair = (Vega) event.getSource();
-				// free from inheritance
-				pair.remove();
+				// transfer star contents
+				getValue().put(pair.getValue(), pair.getKey());
 			}
 			break;
 		default:

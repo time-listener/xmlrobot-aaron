@@ -1,10 +1,10 @@
 package org.xmlrobot.genomap;
 
-import org.xmlrobot.dna.Gamete;
 import org.xmlrobot.dna.Genomap;
 import org.xmlrobot.dna.Haploid;
 import org.xmlrobot.subspace.Hyperchain;
 import org.xmlrobot.subspace.Hypercube;
+import org.xmlrobot.subspace.event.Instant;
 
 public class Test {
 
@@ -18,7 +18,7 @@ public class Test {
 	public static void main(String[] args) {
 
 		String[] message = new String[] {
-				"H", "A", "N", "O", "C" };
+				"A", "B", "C", "D", "E" };
 		// instance hypercube
 		Hypercube cube = new Hypercube(Hyperchain.class);
 		// for each word in original message
@@ -29,11 +29,11 @@ public class Test {
 				Character key = new Character(letter);
 				Integer value = new Integer((int) letter);
 				// store key-value pair
-				cube.putValue(key, value);
+				cube.put(key, value);
 			}
 		}
 		String[] message2 = new String[] {
-				"H", "O", "L", "A", "A" };
+				"Z", "Y", "X", "W", "V" };
 		// instance hypercube
 		Hyperchain chain = new Hyperchain(Hypercube.class);
 		// for each word in original message
@@ -44,15 +44,18 @@ public class Test {
 				Character value = new Character(letter);
 				Integer key = new Integer((int) letter);
 				// store key-value pair
-				chain.putValue(key, value);
+				chain.put(key, value);
 			}
 		}
 		Genomap map = new Genomap(Haploid.class);
 		map.putValue(cube, (Hyperchain) cube.get());
 		map.putValue((Hypercube) chain.get(), chain);
-
-		Gamete child = (Gamete) map.getChild().getChild().get();
 		
-		System.out.print(child.getPlasma().getStem());
+		chain.pulse(map, new Instant(cube));
+
+//		cube.pulse(map, new Flop(chain));
+//		chain.reproduceTo(cube);
+		
+//		System.out.print(chain.get().output());
 	}
 }

@@ -72,8 +72,8 @@ public class BigBong
 	 */
 	@Override
 	@XmlElement(type=Meson.class)
-	public Mass<Minkowski,Spacetime> getPlasma() {
-		return super.getPlasma();
+	public Mass<Minkowski,Spacetime> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -135,12 +135,23 @@ public class BigBong
 		super.mass(sender, event);
 
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Spacetime) {
+				// start spacetime
+				event.start(getContext());
+			}
+			break;
+		case INTERRUPTED:
 		case TRANSFER:
+			if(event.getSource() instanceof Spacetime) {
+				// stop spacetime
+				event.stop(getContext());
+			}
 			if(event.getSource() instanceof Galaxy) {
 				// cast source
 				Galaxy pair = (Galaxy) event.getSource();
-				// free from inheritance
-				pair.remove();
+				// transfer galaxy
+				getValue().put(pair.getValue(), pair.getKey());
 			}
 			break;
 		default:
@@ -173,11 +184,11 @@ public class BigBong
 			// commute command
 			if(event.getType() == ServiceEvent.REGISTERED) {
 				// replicate mass
-				getPlasma().putKey(pair.getValue(), pair.getKey());
+				getReplicator().putKey(pair.getValue(), pair.getKey());
 			}
 			else if(event.getType() == ServiceEvent.UNREGISTERING) {
 				// release replication
-				getPlasma().removeByValue(pair.getValue());
+				getReplicator().removeByValue(pair.getValue());
 			}
 		}
 	}

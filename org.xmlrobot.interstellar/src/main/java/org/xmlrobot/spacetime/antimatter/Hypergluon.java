@@ -4,7 +4,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.xmlrobot.genesis.Mass;
-import org.xmlrobot.positron.Antineutron;
+import org.xmlrobot.positron.Positron;
 import org.xmlrobot.spacetime.Jupiter;
 import org.xmlrobot.spacetime.Saturn;
 import org.xmlrobot.spacetime.matter.Gluon;
@@ -17,7 +17,7 @@ import org.xmlrobot.spacetime.matter.Gluon;
  */
 @XmlRootElement
 public class Hypergluon 
-	extends Antineutron<Jupiter,Saturn> {
+	extends Positron<Jupiter,Saturn> {
 
 	/**
 	 * -5441851407783395899L

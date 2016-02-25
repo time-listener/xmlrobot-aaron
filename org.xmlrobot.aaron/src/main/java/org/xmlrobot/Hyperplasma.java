@@ -3,19 +3,15 @@ package org.xmlrobot;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceReference;
 import org.xmlrobot.antimatter.Hyperneuron;
 import org.xmlrobot.core.BigBong;
 import org.xmlrobot.core.Subspace;
 import org.xmlrobot.core.Universe;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
-import org.xmlrobot.genesis.TimeListener;
 import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Parent;
 import org.xmlrobot.matter.Hyperxml;
-import org.xmlrobot.util.Command;
 import org.xmlrobot.util.Parity;
 
 /**
@@ -64,12 +60,12 @@ public class Hyperplasma
 		return super.setValue(value);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.driver.ScrewDriver#getReplicator()
+	 * @see org.xmlrobot.inheritance.Parent#getPlasma()
 	 */
 	@Override
 	@XmlElement(type=Hyperxml.class)
-	public Mass<Subspace,Universe> getPlasma() {
-		return super.getPlasma();
+	public Mass<Subspace,Universe> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -130,44 +126,26 @@ public class Hyperplasma
 		super.mass(sender, event);
 		// do something
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Universe) {
+				// start new universe
+				event.start(getContext());
+			}
+			break;
 		case TRANSFER:
-			if (event.getSource() instanceof BigBong) {
+			if(event.getSource() instanceof Universe) {
+				// stop old universe
+				event.stop(getContext());
+			}
+			else if (event.getSource() instanceof BigBong) {
 				// cast source
 				BigBong pair = (BigBong) event.getSource();
-				// free from inheritance
-				pair.remove();
+				// transfer message
+				getValue().put(pair.getValue(), pair.getKey());
 			}
 			break;
 		default:
 			break;
-		}
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.hyperspace.Abstraction#serviceChanged(org.osgi.framework.ServiceEvent)
-	 */
-	@Override
-	public void serviceChanged(ServiceEvent event) {
-		// get reference
-		ServiceReference<?> ref = event.getServiceReference();
-		// declare source
-		Object child;
-		// get entity
-		if((child = ref.getProperty(TimeListener.KEY)) != null ? 
-				child instanceof Hyperplasma : false) {
-			// cast source
-			Hyperplasma pair = (Hyperplasma) child;
-
-			if (event.getType() == ServiceEvent.REGISTERED) {
-				// instance xml
-				Hyperxml xml = instance(Hyperxml.class, Hyperneuron.class, 
-						pair.getKey(), pair.getValue(), getPlasma().getRoot());
-				// input to the brain
-				xml.push(Command.SUBMIT);
-			}
-			if (event.getType() == ServiceEvent.UNREGISTERING) {
-				// rest in peace
-				getPlasma().release();
-			}
 		}
 	}
 }

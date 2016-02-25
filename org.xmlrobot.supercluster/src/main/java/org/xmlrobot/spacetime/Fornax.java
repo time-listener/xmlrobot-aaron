@@ -72,8 +72,8 @@ public class Fornax
 	 */
 	@Override
 	@XmlElement(type=Hypermuon.class)
-	public Mass<MilkyWay,Andromeda> getPlasma() {
-		return super.getPlasma();
+	public Mass<MilkyWay,Andromeda> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -98,6 +98,14 @@ public class Fornax
 		super.mass(sender, event);
 		
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof MilkyWay) {
+				// cast source
+				MilkyWay entity = (MilkyWay) event.getSource();
+				// push galaxy into hyperspace
+				put(entity, (Andromeda) entity.get());
+			}
+			break;
 		case ORDER:
 			if(event.getSource() instanceof Perseus) {
 				// declare stem
@@ -134,20 +142,21 @@ public class Fornax
 			break;
 		case PUSH:
 			if(event.getSource() instanceof MilkyWay) {
-				// cast source
-				MilkyWay key = (MilkyWay) event.getSource();
-				// send pulse to child's value
-				getValue().pulse(this, new Rotation(key));
+				// check emptiness
+				if(!isEmpty()) {
+					// cast source
+					MilkyWay key = (MilkyWay) event.getSource();
+					// send pulse to child's value
+					getValue().pulse(this, new Rotation(key));	
+				}
 			}
 			else if(event.getSource() instanceof Perseus) {
-				// cast source
-				Perseus pair = (Perseus) event.getSource();
-				// declare child
-				Mass<MilkyWay, Andromeda> child;
-				// call
-				if((child = getChild()) != null) {
+				// check emptiness
+				if(!isEmpty()) {
+					// cast source
+					Perseus pair = (Perseus) event.getSource();
 					// send pulse to the future
-					child.pulse(this, new Expansion(pair));
+					getChild().pulse(this, new Expansion(pair));
 				}
 			}
 			break;
@@ -186,11 +195,15 @@ public class Fornax
 			}
 			break;
 		case TRANSFER:
-			if(event.getSource() instanceof Perseus) {
+			if(event.getSource() instanceof Hydra) {
 				// cast source
-				Perseus pair = (Perseus) event.getSource();
-				// transfer message contents
-				put(pair.getValue(), pair.getKey());
+				Hydra pair = (Hydra) event.getSource();
+				// set galaxy free from inheritance
+				pair.remove();
+			}
+			if(event.getSource() instanceof Perseus) {
+				// end supercluster
+				event.stop(getContext());
 			}
 			break;
 		default:
@@ -217,32 +230,16 @@ public class Fornax
 		// assign and check
 		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
 				child instanceof Capricornus : false) {
-			// declare plasma
-			Mass<MilkyWay,Andromeda> plasma;
 			// cast source
 			Capricornus pair = (Capricornus) child;
 			// commute command
 			if(event.getType() == ServiceEvent.REGISTERED) {
-				// assign and check it's contained
-				if((plasma = getPlasma()) != null ?
-						!plasma.isEmpty() ?
-								!plasma.containsKey(pair.getKey())
-								: true
-						: false) {
-					// replicate mass
-					plasma.putValue(pair.getKey(), pair.getValue());
-				}
+				// replicate mass
+				getReplicator().putValue(pair.getKey(), pair.getValue());
 			}
 			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// check if empty and chained
-				if((plasma = getPlasma()) != null ? 
-						!plasma.isEmpty() ? 
-								plasma.containsValue(pair.getValue()) 
-								: false
-						: false) {
-					// release child
-					plasma.removeByKey(pair.getKey());
-				}
+				// release child
+				getReplicator().removeByKey(pair.getKey());
 			}
 		}
 	}

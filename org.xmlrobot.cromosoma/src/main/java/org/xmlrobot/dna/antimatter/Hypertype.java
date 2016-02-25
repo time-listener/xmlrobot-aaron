@@ -7,7 +7,7 @@ import org.xmlrobot.dna.Genomap;
 import org.xmlrobot.dna.Haploid;
 import org.xmlrobot.dna.matter.Karyotype;
 import org.xmlrobot.genesis.Mass;
-import org.xmlrobot.positron.Antineutron;
+import org.xmlrobot.positron.Positron;
 
 /**
  * Hypertype implementation class.
@@ -17,7 +17,7 @@ import org.xmlrobot.positron.Antineutron;
  */
 @XmlRootElement
 public class Hypertype 
-	extends Antineutron<Genomap,Haploid> {
+	extends Positron<Genomap,Haploid> {
 
 	/**
 	 * 6091215784939139007L
@@ -113,7 +113,7 @@ public class Hypertype
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Positron#compare(org.xmlrobot.genesis.Mass, org.xmlrobot.genesis.Mass)
+	 * @see org.xmlrobot.time.Time#compare(org.xmlrobot.genesis.TimeListener, org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public int compare(Mass<Genomap,Haploid> o1, Mass<Genomap,Haploid> o2) {

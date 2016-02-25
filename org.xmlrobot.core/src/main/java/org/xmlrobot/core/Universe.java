@@ -72,8 +72,8 @@ public class Universe
 	 */
 	@Override
 	@XmlElement(type=Hyperbaryon.class)
-	public Mass<Spacetime,Minkowski> getPlasma() {
-		return super.getPlasma();
+	public Mass<Spacetime,Minkowski> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -99,6 +99,14 @@ public class Universe
 		super.mass(sender, event);
 		// commute command
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Spacetime) {
+				// cast source
+				Spacetime entity = (Spacetime) event.getSource();
+				// push spacetime into hyperspace
+				put(entity, (Minkowski) entity.get());
+			}
+			break;
 		case ORDER:
 			if(event.getSource() instanceof BigBong) {
 				// declare future
@@ -135,16 +143,19 @@ public class Universe
 			break;
 		case PUSH:
 			if(event.getSource() instanceof Spacetime) {
-				// cast source
-				Spacetime key = (Spacetime) event.getSource();
-				// send pulse to child's value
-				getValue().pulse(this, new Dilatation(key));
+				// check emptiness
+				if(!isEmpty()) {
+					// cast source
+					Spacetime key = (Spacetime) event.getSource();
+					// send pulse to child's value
+					getValue().pulse(this, new Dilatation(key));
+				}
 			}
 			else if (event.getSource() instanceof BigBong) {
-				// cast source
-				BigBong pair = (BigBong) event.getSource();
 				// call child
 				if(!isEmpty()) {
+					// cast source
+					BigBong pair = (BigBong) event.getSource();
 					// push gravity
 					getChild().pulse(this, new Gravity(pair));
 				}
@@ -184,12 +195,17 @@ public class Universe
 				}
 			}
 			break;
+		case INTERRUPTED:
 		case TRANSFER:
-			if(event.getSource() instanceof BigBong) {
+			if(event.getSource() instanceof Galaxy) {
 				// cast source
-				BigBong pair = (BigBong) event.getSource();
-				// transfer message
-				put(pair.getValue(), pair.getKey());
+				Galaxy pair = (Galaxy) event.getSource();
+				// free from inheritance
+				pair.remove();
+			}
+			else if(event.getSource() instanceof BigBong) {
+				// the big end
+				event.stop(getContext());
 			}
 			break;
 
@@ -220,32 +236,16 @@ public class Universe
 		// assign and check
 		if((child = ref.getProperty(TimeListener.KEY)) != null ? 
 				child instanceof BigBang : false) {
-			// declare source
-			Mass<Spacetime,Minkowski> plasma;
 			// cast source
 			BigBang pair = (BigBang) child;
 			// commute command
 			if(event.getType() == ServiceEvent.REGISTERED) {
-				// assign and check it's contained
-				if((plasma = getPlasma()) != null ?
-						!plasma.isEmpty() ?
-								!plasma.containsKey(pair.getKey())
-								: true
-						: false) {
-					// replicate mass
-					plasma.putValue(pair.getKey(), pair.getValue());
-				}
+				// replicate mass
+				getReplicator().putValue(pair.getKey(), pair.getValue());
 			}
 			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// check if empty and chained
-				if((plasma = getPlasma()) != null ? 
-						!plasma.isEmpty() ? 
-								plasma.containsValue(pair.getValue()) 
-								: false
-						: false) {
-					// release child
-					plasma.removeByKey(pair.getKey());
-				}
+				// release child
+				getReplicator().removeByKey(pair.getKey());
 			}
 		}
 	}

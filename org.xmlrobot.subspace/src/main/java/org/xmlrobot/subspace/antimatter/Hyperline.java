@@ -4,7 +4,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.xmlrobot.genesis.Mass;
-import org.xmlrobot.positron.Antineutron;
+import org.xmlrobot.positron.Positron;
 import org.xmlrobot.subspace.matter.Hyperunit;
 
 /**
@@ -15,7 +15,7 @@ import org.xmlrobot.subspace.matter.Hyperunit;
  */
 @XmlRootElement
 public class Hyperline 
-	extends Antineutron<Character,Integer> {
+	extends Positron<Character,Integer> {
 
 	/**
 	 * -2316162769120745075L

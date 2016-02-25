@@ -82,12 +82,12 @@ public interface MassListener
 	/**
 	 * The parity.
 	 */
-	public static final String PARITY = "time-listener.parity";
+	public static final String PARITY = "mass-listener.parity";
 	
 	/**
 	 * The dna.
 	 */
-	public static final String DNA = "time-listener.dna";
+	public static final String DNA = "mass-listener.dna";
 	
 	/**
 	 * The inheritance mass.

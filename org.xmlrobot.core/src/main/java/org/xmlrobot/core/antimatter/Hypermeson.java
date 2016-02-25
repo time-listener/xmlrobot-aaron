@@ -10,7 +10,7 @@ import org.xmlrobot.core.Minkowski;
 import org.xmlrobot.core.Spacetime;
 import org.xmlrobot.core.matter.Meson;
 import org.xmlrobot.genesis.Mass;
-import org.xmlrobot.positron.Antineutron;
+import org.xmlrobot.positron.Positron;
 
 /**
  * Hypermeson implementation class.
@@ -20,13 +20,21 @@ import org.xmlrobot.positron.Antineutron;
  */
 @XmlRootElement
 public class Hypermeson
-	extends Antineutron<Spacetime,Minkowski> {
+	extends Positron<Spacetime,Minkowski> {
 
 	/**
 	 * 7790598228248897555L
 	 */
 	private static final long serialVersionUID = 7790598228248897555L;
 
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.hyperspace.Abstraction#getName()
+	 */
+	@Override
+	@XmlElement
+	public String getName() {
+		return getKey().getName();
+	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Space#getKey()
 	 */
@@ -109,17 +117,10 @@ public class Hypermeson
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Positron#compare(org.xmlrobot.genesis.Mass, org.xmlrobot.genesis.Mass)
+	 * @see org.xmlrobot.time.Time#compare(org.xmlrobot.genesis.TimeListener, org.xmlrobot.genesis.TimeListener)
 	 */
 	@Override
 	public int compare(Mass<Spacetime,Minkowski> o1, Mass<Spacetime,Minkowski> o2) {
 		return o1.getValue().compareTo(o2.getKey());
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.positron.Antineutron#name()
-	 */
-	@Override
-	public String getName() {
-		return getKey().getName();
 	}
 }

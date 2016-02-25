@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceReference;
 import org.xmlrobot.genesis.Hypertext;
-import org.xmlrobot.genesis.Replicator;
+import org.xmlrobot.genesis.Plasma;
 import org.xmlrobot.genesis.TimeListener;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.horizon.EventHorizon;
@@ -40,7 +40,7 @@ import org.xmlrobot.util.Parity;
 @XmlTransient
 public abstract class Hyperstring
 	extends Space<Character,Integer>
-		implements Replicator<Character,Integer>,
+		implements Plasma<Character,Integer>,
 			Hypertext {
 
 	/**
@@ -51,15 +51,15 @@ public abstract class Hyperstring
 	/**
 	 * The mass implementation
 	 */
-	transient volatile Mass<Character,Integer> plasma;
+	transient volatile Mass<Character,Integer> replicator;
 
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.Replicator#getPlasma()
 	 */
 	@Override
-	public Mass<Character,Integer> getPlasma() {
+	public Mass<Character,Integer> getReplicator() {
 		// return implemented mass
-		return plasma;
+		return replicator;
 	}
 	
 	/**
@@ -80,7 +80,7 @@ public abstract class Hyperstring
 			Class<? extends Hyperstring> type) {
 		super(type, Parity.XY);
 		// instance mass
-		plasma = instance(matter, antimatter);
+		replicator = instance(matter, antimatter);
 	}
 	/**
 	 * {@link Hyperstring} class constructor.
@@ -97,7 +97,7 @@ public abstract class Hyperstring
 			Character key, Integer value) {
 		super(type, key, value, Parity.XY);
 		// instance mass
-		plasma = instance(matter, antimatter, key, value);
+		replicator = instance(matter, antimatter, key, value);
 	}
 	/**
 	 * {@link Hyperstring} class constructor.
@@ -116,7 +116,7 @@ public abstract class Hyperstring
 			Hyperstring parent) {
 		super(type, key, value, parent);
 		// instance mass
-		plasma = instance(matter, antimatter, key, value, parent.getPlasma());
+		replicator = instance(matter, antimatter, key, value, parent.getReplicator());
 	}
 	/**
 	 * {@link Hyperstring} class constructor.
@@ -171,7 +171,7 @@ public abstract class Hyperstring
 		
 		try {
 			Hyperstring string = (Hyperstring) super.clone();
-			string.plasma = instance(plasma.getType(), plasma.getAntitype());
+			string.replicator = instance(replicator.getType(), replicator.getAntitype());
 			return string;
 		}
 		catch(ClassCastException | Abort exception) {
@@ -229,11 +229,11 @@ public abstract class Hyperstring
 			// commute command
 			if (event.getType() == ServiceEvent.REGISTERED) {
 
-				plasma.push(Command.SUBMIT);
+				replicator.push(Command.SUBMIT);
 			} 
 			else if (event.getType() == ServiceEvent.UNREGISTERING) {
 				// release replication
-				plasma.push(Command.RELEASE);
+				replicator.push(Command.RELEASE);
 			}
 		}
 	}
@@ -263,13 +263,13 @@ public abstract class Hyperstring
 		// cast source
 		Hyperinteger stem = (Hyperinteger) value;
 		// set stem's plasma
-		stem.plasma = plasma.get();
+		stem.replicator = replicator.get();
 		// my plasma is listened by my root's plasma
-		stem.plasma.setStem(plasma.getRoot());
-		stem.plasma.setRoot(plasma.getStem());
+		stem.replicator.setStem(replicator.getRoot());
+		stem.replicator.setRoot(replicator.getStem());
 		// listen plasma masses
-		stem.plasma.addMassListener(this);
-		plasma.addMassListener(stem);
+		stem.replicator.addMassListener(this);
+		replicator.addMassListener(stem);
 	}
 
 	/* (non-Javadoc)

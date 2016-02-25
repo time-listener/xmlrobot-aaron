@@ -3,19 +3,15 @@ package org.xmlrobot;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceReference;
 import org.xmlrobot.antimatter.Hyperneuron;
 import org.xmlrobot.core.BigBang;
 import org.xmlrobot.core.Subspace;
 import org.xmlrobot.core.Universe;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
-import org.xmlrobot.genesis.TimeListener;
 import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Parent;
 import org.xmlrobot.matter.Hyperxml;
-import org.xmlrobot.util.Command;
 import org.xmlrobot.util.Parity;
 
 /**
@@ -67,8 +63,8 @@ public class Hypertoroid
 	 */
 	@Override
 	@XmlElement(type=Hyperneuron.class)
-	public Mass<Universe,Subspace> getPlasma() {
-		return super.getPlasma();
+	public Mass<Universe,Subspace> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -127,39 +123,27 @@ public class Hypertoroid
 		super.mass(sender, event);
 		// do something
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Subspace) {
+				// start new subspace
+				event.start(getContext());
+			}
+			break;
+		case INTERRUPTED:
 		case TRANSFER:
-			if (event.getSource() instanceof BigBang) {
+			if(event.getSource() instanceof Subspace) {
+				// stop old subspace
+				event.stop(getContext());
+			}
+			else if (event.getSource() instanceof BigBang) {
 				// cast source
 				BigBang pair = (BigBang) event.getSource();
-				// free from inheritance
-				pair.remove();
+				// transfer life contents
+				getValue().put(pair.getValue(), pair.getKey());
 			}
 			break;
 		default:
 			break;
-		}
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.hyperspace.Abstraction#serviceChanged(org.osgi.framework.ServiceEvent)
-	 */
-	@Override
-	public void serviceChanged(ServiceEvent event) {
-		// get reference
-		ServiceReference<?> ref = event.getServiceReference();
-		// declare source
-		Object source;
-		// get entity
-		if((source = ref.getProperty(TimeListener.KEY)) != null ? 
-				source instanceof Hypertoroid : false) {
-			// cast source
-			Hypertoroid child = (Hypertoroid) source;
-
-			if (event.getType() == ServiceEvent.REGISTERED) {
-			}
-			if (event.getType() == ServiceEvent.UNREGISTERING) {
-				// rest in peace
-				getPlasma().release();
-			}
 		}
 	}
 }

@@ -7,7 +7,7 @@ import org.xmlrobot.dna.Cromosoma;
 import org.xmlrobot.dna.Diploid;
 import org.xmlrobot.dna.matter.Rna;
 import org.xmlrobot.genesis.Mass;
-import org.xmlrobot.positron.Antineutron;
+import org.xmlrobot.positron.Positron;
 
 /**
  * Hyperrna implementation class.
@@ -17,7 +17,7 @@ import org.xmlrobot.positron.Antineutron;
  */
 @XmlRootElement
 public class Hyperrna 
-	extends Antineutron<Cromosoma,Diploid> {
+	extends Positron<Cromosoma,Diploid> {
 
 	/**
 	 * 6167402039482648711L

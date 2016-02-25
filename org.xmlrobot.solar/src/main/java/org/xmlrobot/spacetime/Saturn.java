@@ -15,6 +15,7 @@ import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Child;
 import org.xmlrobot.nature.Biosphere;
 import org.xmlrobot.nature.Ecosystem;
+import org.xmlrobot.nature.Organism;
 import org.xmlrobot.nature.event.Dispersion;
 import org.xmlrobot.spacetime.antimatter.Hypergas;
 import org.xmlrobot.spacetime.event.Collision;
@@ -72,8 +73,8 @@ public class Saturn
 	 */
 	@Override
 	@XmlElement(type=Gas.class)
-	public Mass<Biosphere,Ecosystem> getPlasma() {
-		return super.getPlasma();
+	public Mass<Biosphere,Ecosystem> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -100,6 +101,14 @@ public class Saturn
 		super.mass(sender, event);
 		
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Biosphere) {
+				// cast source
+				Biosphere entity = (Biosphere) event.getSource();
+				// insert entity
+				put(entity, (Ecosystem) entity.get());
+			}
+			break;
 		case ORDER:
 			if(event.getSource() instanceof Mars) {
 				// declare stem
@@ -136,20 +145,21 @@ public class Saturn
 			break;
 		case PUSH:
 			if(event.getSource() instanceof Biosphere) {
-				// cast source
-				Biosphere key = (Biosphere) event.getSource();
-				// send pulse to child's value
-				getValue().pulse(this, new Dispersion(key));
+				// check emptiness
+				if(!isEmpty()) {
+					// cast source
+					Biosphere key = (Biosphere) event.getSource();
+					// send pulse to child's value
+					getValue().pulse(this, new Dispersion(key));
+				}
 			}
 			else if(event.getSource() instanceof Mars) {
-				// cast source
-				Mars earth = (Mars) event.getSource();
-				// declare child
-				Mass<Biosphere,Ecosystem> child;
 				// call child
-				if((child = getChild()) != null) {
+				if(!isEmpty()) {
+					// cast source
+					Mars earth = (Mars) event.getSource();
 					// send him a little asteroid
-					child.pulse(this, new Collision(earth));
+					getChild().pulse(this, new Collision(earth));
 				}
 			}
 			break;
@@ -188,11 +198,15 @@ public class Saturn
 			}
 			break;
 		case TRANSFER:
-			if(event.getSource() instanceof Mars) {
+			if(event.getSource() instanceof Organism) {
 				// cast source
-				Mars entity = (Mars) event.getSource();
-				// transfer message contents
-				put(entity.getValue(), entity.getKey());
+				Organism pair = (Organism) event.getSource();
+				// set pair free
+				pair.remove();
+			}
+			else if(event.getSource() instanceof Mars) {
+				// rip
+				event.stop(getContext());
 			}
 			break;
 		default:
@@ -222,32 +236,16 @@ public class Saturn
 		// assign and check
 		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
 				child instanceof Earth : false) {
-			// declare plasma
-			Mass<Biosphere,Ecosystem> plasma;
 			// cast source
 			Earth pair = (Earth) child;
 			// commute command
 			if (event.getType() == ServiceEvent.REGISTERED) {
-				// assign and check it's contained
-				if((plasma = getPlasma()) != null ?
-						!plasma.isEmpty() ?
-								!plasma.containsKey(pair.getKey())
-								: true
-						: false) {
-					// replicate mass
-					plasma.putValue(pair.getKey(), pair.getValue());
-				}
+				// replicate mass
+				getReplicator().putValue(pair.getKey(), pair.getValue());
 			}
 			else if (event.getType() == ServiceEvent.UNREGISTERING) {
-				// check if empty and chained
-				if((plasma = getPlasma()) != null ? 
-						!plasma.isEmpty() ? 
-								plasma.containsValue(pair.getValue()) 
-								: false
-						: false) {
-					// release child
-					plasma.removeByKey(pair.getKey());
-				}
+				// release child
+				getReplicator().removeByKey(pair.getKey());
 			}
 		}
 	}

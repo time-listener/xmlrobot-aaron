@@ -12,10 +12,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceReference;
 import org.xmlrobot.antimatter.Hyperbrain;
-import org.xmlrobot.antimatter.Hyperneuron;
+import org.xmlrobot.core.BigBong;
 import org.xmlrobot.core.Subspace;
 import org.xmlrobot.core.Universe;
 import org.xmlrobot.core.event.Antigravity;
+import org.xmlrobot.event.Hyperfission;
 import org.xmlrobot.event.Hyperfusion;
 import org.xmlrobot.genesis.Atlas;
 import org.xmlrobot.genesis.Congregation;
@@ -26,7 +27,6 @@ import org.xmlrobot.genesis.TimeListener;
 import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Parent;
 import org.xmlrobot.matter.Hypermind;
-import org.xmlrobot.matter.Hyperxml;
 import org.xmlrobot.util.Command;
 import org.xmlrobot.util.Parity;
 
@@ -90,8 +90,8 @@ public final class Aaron
 	 */
 	@Override
 	@XmlElement(type=Hyperbrain.class)
-	public Entity<Universe,Subspace> getPlasma() {
-		return (Entity<Universe,Subspace>) super.getPlasma();
+	public Entity<Universe,Subspace> getReplicator() {
+		return (Entity<Universe,Subspace>) super.getReplicator();
 	}
 	
 	/**
@@ -139,7 +139,7 @@ public final class Aaron
 	 */
 	@Override
 	public int compareTo(Mass<Subspace,Universe> o) {
-
+		// call stem to compare
 		return get().compare(get().getChild(), o.getChild());
 	}
 	/* (non-Javadoc)
@@ -147,8 +147,12 @@ public final class Aaron
 	 */
 	@Override
 	public int reproduceTo(Mass<Subspace,Universe> o) {
-
-		return matrix().reproduce(o.get().getChild(), get().getChild());
+		// call hypergenesis computation
+		int cmp = get().matrix().reproduce(o.getChild(), getChild());
+		// submit generated output into the hyperspace
+		push(new Hyperfission(get().output()));
+		// turn back hypergenesis computation result
+		return cmp;
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Takion)
@@ -159,6 +163,14 @@ public final class Aaron
 		super.mass(sender, event);
 		
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Universe) {
+				// cast source
+				Universe entity = (Universe) event.getSource();
+				// push universe into hyperspace
+				put(entity, (Subspace) entity.get());
+			}
+			break;
 		case ORDER:
 			if(event.getSource() instanceof Hyperplasma) {
 				// declare future
@@ -195,16 +207,19 @@ public final class Aaron
 			break;
 		case PUSH:
 			if(event.getSource() instanceof Universe) {
-				// cast source
-				Universe dna = (Universe) event.getSource();
-				// send pulse to the future
-				getValue().pulse(this, new Antigravity(dna));
-			}
-			else if(event.getSource() instanceof Hyperplasma){
-				// cast source
-				Hyperplasma source = (Hyperplasma) event.getSource();
-				// call
+				// check emptiness
 				if(!isEmpty()) {
+					// cast source
+					Universe dna = (Universe) event.getSource();
+					// send pulse to the future
+					getValue().pulse(this, new Antigravity(dna));	
+				}
+			}
+			else if(event.getSource() instanceof Hyperplasma) {
+				// check emptiness
+				if(!isEmpty()) {
+					// cast source
+					Hyperplasma source = (Hyperplasma) event.getSource();
 					// emit pulse
 					getChild().pulse(this, new Hyperfusion(source));
 				}
@@ -245,11 +260,15 @@ public final class Aaron
 			}
 			break;
 		case TRANSFER:
-			if(event.getSource() instanceof Hyperplasma) {
+			if (event.getSource() instanceof BigBong) {
 				// cast source
-				Hyperplasma pair = (Hyperplasma) event.getSource();
-				// transfer message to the future
-				put(pair.getValue(), pair.getKey());
+				BigBong pair = (BigBong) event.getSource();
+				// free from inheritance
+				pair.remove();
+			}
+			else if(event.getSource() instanceof Hyperplasma) {
+				// plasma end
+				event.stop(getContext());
 			}
 			break;
 		default:
@@ -321,17 +340,31 @@ public final class Aaron
 			Hypertoroid child = (Hypertoroid) source;
 			// commute command
 			if(event.getType() == ServiceEvent.REGISTERED) {
-				// instance pair
-				Hyperneuron pair = instance(Hyperneuron.class, Hyperxml.class, 
-						child.getKey(), child.getValue(), getPlasma());
-				// input to the brain
-				pair.push(Command.SUBMIT);
+				// replicate mass
+				getReplicator().putKey(child.getValue(), child.getKey());
 			}
-			if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// rest in peace
-				getPlasma().release();
+			else if(event.getType() == ServiceEvent.UNREGISTERING) {
+				// release child
+				getReplicator().removeByValue(child.getValue());
 			}
 		}
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.space.Space#valueVisor()
+	 */
+	@Override
+	public Congregation<Subspace> valueVisor() {
+ 		Congregation<Subspace> values;
+ 		return (values = visor) == null ? 
+ 				(visor = new Visor(replicator)) : values;
+	}
+	/* (non-Javadoc)
+	 * @see org.xmlrobot.time.Time#iterator()
+	 */
+	@Override
+	public Iterator<Mass<Universe,Subspace>> iterator() {
+		Mass<Universe,Subspace> future;
+		return (future = getFuture()) != null ? future.iterator() : null;
 	}
 	// matrix implementation
  	/* (non-Javadoc)
@@ -389,22 +422,21 @@ public final class Aaron
 	 */
 	@Override
 	public void forEach(BiConsumer<? super Universe, ? super Subspace> action) {
-    	if(!isEmpty())
-    		getChild().forEachKey(action);
+    	forEachKey(action);
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.Atlas#get(java.lang.Object)
 	 */
 	@Override
 	public Subspace get(Universe key) {
-    	return !isEmpty() ? getChild().getValue(key) : null;
+    	return getValue(key);
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.DNA#getOrDefault(java.lang.Object, java.lang.Object)
 	 */
 	@Override
 	public Subspace getOrDefault(Universe key, Subspace defaultValue) {
-    	return !isEmpty() ? getChild().getValueOrDefault(key, defaultValue) : null;
+    	return getValueOrDefault(key, defaultValue);
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.Atlas#putAll(org.xmlrobot.genesis.Atlas)
@@ -419,37 +451,37 @@ public final class Aaron
 	 */
 	@Override
 	public Subspace putIfAbsent(Universe key, Subspace value) {
-		return !isEmpty() ? getChild().putValueIfAbsent(key, value) : null;
+		return putValueIfAbsent(key, value);
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.DNA#remove(java.lang.Object, java.lang.Object)
 	 */
 	@Override
 	public boolean remove(Universe key, Subspace value) {
-    	return !isEmpty() ? getChild().removeByKey(key, value) : null;
+    	return removeByKey(key, value);
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.DNA#replace(java.lang.Object, java.lang.Object)
 	 */
 	@Override
 	public Subspace replace(Universe key, Subspace value) {
-		return !isEmpty() ? getChild().replaceValue(key, value) : null;
+		return replaceValue(key, value);
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.DNA#replace(java.lang.Object, java.lang.Object, java.lang.Object)
 	 */
 	@Override
 	public boolean replace(Universe key, Subspace oldValue, Subspace newValue) {
-		return !isEmpty() ? getChild().replaceValue(key, oldValue, newValue) : null;
+		return replaceValue(key, oldValue, newValue);
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.genesis.DNA#replaceAll(java.util.function.BiFunction)
 	 */
 	@Override
 	public void replaceAll(BiFunction<? super Universe, ? super Subspace, ? extends Subspace> function) {
-    	if(!isEmpty())
-    		getChild().replaceAllValues(function);
+    	replaceAllValues(function);
 	}
+	
 	// space implementation
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Contraction#putValue(java.lang.Object, java.lang.Object)
@@ -459,25 +491,11 @@ public final class Aaron
 		return !isEmpty() ? getChild().putValue(key, value) : put(key, value);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.space.Contraction#putKey(java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public Universe putKey(Subspace value, Universe key) {
-		return !isEmpty() ? getChild().putKey(value, key) : null;
-	}
-	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Contraction#putValueIfAbsent(java.lang.Object, java.lang.Object)
 	 */
 	@Override
 	public Subspace putValueIfAbsent(Universe key, Subspace value) {
 		return !isEmpty() ? getChild().putValueIfAbsent(key, value) : null;
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.space.Contraction#putKeyIfAbsent(java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public Universe putKeyIfAbsent(Subspace value, Universe key) {
-		return !isEmpty() ? getChild().putKeyIfAbsent(value, key) : null;
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Contraction#putAllValues(org.xmlrobot.genesis.Mass)
@@ -488,26 +506,11 @@ public final class Aaron
 			super.putAllValues(m);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.space.Contraction#putAllKeys(org.xmlrobot.genesis.Mass)
-	 */
-	@Override
-	public void putAllKeys(Mass<? extends Subspace, ? extends Universe> m) {
-		if(!isEmpty())
-			super.putAllKeys(m);
-	}
-	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Compression#call(java.lang.Object)
 	 */
 	@Override
 	public Mass<Universe,Subspace> call(Universe key) {
 		return !isEmpty() ? getChild().call(key) : null;
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.space.Compression#callReversed(java.lang.Object)
-	 */
-	@Override
-	public Mass<Subspace, Universe> callReversed(Subspace value) {
-		return !isEmpty() ? getChild().callReversed(value) : null;
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Compression#getValue(java.lang.Object)
@@ -517,25 +520,11 @@ public final class Aaron
 		return !isEmpty() ? getChild().getValue(key) : null;
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.space.Compression#getKey(java.lang.Object)
-	 */
-	@Override
-	public Universe getKey(Subspace value) {
-		return !isEmpty() ? getChild().getKey(value) : null;
-	}
-	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Compression#getValueOrDefault(java.lang.Object, java.lang.Object)
 	 */
 	@Override
 	public Subspace getValueOrDefault(Universe key, Subspace defaultValue) {
 		return !isEmpty() ? getChild().getValueOrDefault(key, defaultValue) : null;
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.space.Compression#getKeyOrDefault(java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public Universe getKeyOrDefault(Subspace value, Universe defaultKey) {
-		return !isEmpty() ? getChild().getKeyOrDefault(value, defaultKey) : null;
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Attraction#containsKey(java.lang.Object)
@@ -545,25 +534,11 @@ public final class Aaron
 		return !isEmpty() ? getChild().containsKey(key) : null;
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.space.Attraction#containsValue(java.lang.Object)
-	 */
-	@Override
-	public boolean containsValue(Subspace value) {
-		return !isEmpty() ? getChild().containsValue(value) : null;
-	}
-	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Attraction#collectKeys(org.xmlrobot.genesis.Congregation)
 	 */
 	@Override
 	public Congregation<Universe> collectKeys(Congregation<Universe> keys) {
 		return !isEmpty() ? getChild().collectKeys(keys) : null;
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.space.Attraction#collectValues(org.xmlrobot.genesis.Congregation)
-	 */
-	@Override
-	public Congregation<Subspace> collectValues(Congregation<Subspace> values) {
-		return !isEmpty() ? getChild().collectValues(values) : null;
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Attraction#forEachKey(java.util.function.BiConsumer)
@@ -574,26 +549,11 @@ public final class Aaron
 			super.forEachKey(action);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.space.Attraction#forEachValue(java.util.function.BiConsumer)
-	 */
-	@Override
-	public void forEachValue(BiConsumer<? super Subspace, ? super Universe> action) {
-		if(!isEmpty())
-			super.forEachValue(action);
-	}
-	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Repulsion#replaceValue(java.lang.Object, java.lang.Object, java.lang.Object)
 	 */
 	@Override
 	public boolean replaceValue(Universe key, Subspace oldValue, Subspace newValue) {
 		return !isEmpty() ? getChild().replaceValue(key, oldValue, newValue) : null;
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.space.Repulsion#replaceKey(java.lang.Object, java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public boolean replaceKey(Subspace value, Universe oldKey, Universe newKey) {
-		return !isEmpty() ? getChild().replaceKey(value, oldKey, newKey) : null;
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Repulsion#replaceAllValues(java.util.function.BiFunction)
@@ -604,26 +564,11 @@ public final class Aaron
 			super.replaceAllValues(function);
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.space.Repulsion#replaceAllKeys(java.util.function.BiFunction)
-	 */
-	@Override
-	public void replaceAllKeys(BiFunction<? super Subspace, ? super Universe, ? extends Universe> function) {
-		if(!isEmpty())
-			super.replaceAllKeys(function);
-	}
-	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Repulsion#replaceValue(java.lang.Object, java.lang.Object)
 	 */
 	@Override
 	public Subspace replaceValue(Universe key, Subspace value) {
 		return !isEmpty() ? getChild().replaceValue(key, value) : null;
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.space.Repulsion#replaceKey(java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public Universe replaceKey(Subspace value, Universe key) {
-		return !isEmpty() ? getChild().replaceKey(value, key) : null;
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Expansion#computeIfAbsent(java.lang.Object, java.util.function.Function)
@@ -634,28 +579,12 @@ public final class Aaron
 		return !isEmpty() ? getChild().computeIfAbsent(key, mappingFunction) : null;
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.space.Expansion#computeInvertedIfAbsent(java.lang.Object, java.util.function.Function)
-	 */
-	@Override
-	public Universe computeInvertedIfAbsent(Subspace key,
-			Function<? super Subspace, ? extends Universe> mappingFunction) {
-		return !isEmpty() ? getChild().computeInvertedIfAbsent(key, mappingFunction) : null;
-	}
-	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Expansion#compute(java.lang.Object, java.util.function.BiFunction)
 	 */
 	@Override
 	public Subspace compute(Universe key,
 			BiFunction<? super Universe, ? super Subspace, ? extends Subspace> remappingFunction) {
 		return !isEmpty() ? getChild().compute(key, remappingFunction) : null;
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.space.Expansion#computeInverted(java.lang.Object, java.util.function.BiFunction)
-	 */
-	@Override
-	public Universe computeInverted(Subspace value,
-			BiFunction<? super Subspace, ? super Universe, ? extends Universe> remappingFunction) {
-		return !isEmpty() ? getChild().computeInverted(value, remappingFunction) : null;
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Expansion#computeIfPresent(java.lang.Object, java.util.function.BiFunction)
@@ -666,28 +595,12 @@ public final class Aaron
 		return !isEmpty() ? getChild().computeIfPresent(key, remappingFunction) : null;
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.space.Expansion#computeInvertedIfPresent(java.lang.Object, java.util.function.BiFunction)
-	 */
-	@Override
-	public Universe computeInvertedIfPresent(Subspace key,
-			BiFunction<? super Subspace, ? super Universe, ? extends Universe> remappingFunction) {
-		return !isEmpty() ? getChild().computeInvertedIfPresent(key, remappingFunction) : null;
-	}
-	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Dilatation#merge(java.lang.Object, java.lang.Object, java.util.function.BiFunction)
 	 */
 	@Override
 	public Subspace merge(Universe key, Subspace value,
 			BiFunction<? super Subspace, ? super Subspace, ? extends Subspace> remappingFunction) {
 		return !isEmpty() ? getChild().merge(key, value, remappingFunction) : null;
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.space.Dilatation#mergeInverted(java.lang.Object, java.lang.Object, java.util.function.BiFunction)
-	 */
-	@Override
-	public Universe mergeInverted(Subspace value, Universe key,
-			BiFunction<? super Universe, ? super Universe, ? extends Universe> remappingFunction) {
-		return !isEmpty() ? getChild().mergeInverted(value, key, remappingFunction) : null;
 	}
 	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Dilatation#removeByKey(java.lang.Object)
@@ -697,24 +610,10 @@ public final class Aaron
 		return !isEmpty() ? getChild().removeByKey(key) : null;
 	}
 	/* (non-Javadoc)
-	 * @see org.xmlrobot.space.Dilatation#removeByValue(java.lang.Object)
-	 */
-	@Override
-	public Mass<Subspace,Universe> removeByValue(Subspace value) {
-		return !isEmpty() ? getChild().removeByValue(value) : null;
-	}
-	/* (non-Javadoc)
 	 * @see org.xmlrobot.space.Dilatation#removeByKey(java.lang.Object, java.lang.Object)
 	 */
 	@Override
 	public boolean removeByKey(Universe key, Subspace value) {
 		return !isEmpty() ? getChild().removeByKey(key, value) : null;
-	}
-	/* (non-Javadoc)
-	 * @see org.xmlrobot.space.Dilatation#removeByValue(java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public boolean removeByValue(Subspace value, Universe key) {
-		return !isEmpty() ? getChild().removeByValue(value, key) : null;
 	}
 }

@@ -68,8 +68,8 @@ public class Gamete
 	 */
 	@Override
 	@XmlElement(type=Intron.class)
-	public Mass<Hyperchain,Hypercube> getPlasma() {
-		return super.getPlasma();
+	public Mass<Hyperchain,Hypercube> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -131,15 +131,26 @@ public class Gamete
 	 * @see org.xmlrobot.hyperspace.Recurrence#mass(org.xmlrobot.genesis.MassListener, org.xmlrobot.horizon.Takion)
 	 */
 	@Override
-	public void mass(MassListener sender, Tachyon<?, ?> event) {
+	public void mass(MassListener sender, Tachyon<?,?> event) {
 		super.mass(sender, event);
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Hypercube) {
+				// listen time
+				event.start(getContext());
+			}
+			break;
+		case INTERRUPTED:
 		case TRANSFER:
+			if(event.getSource() instanceof Hypercube) {
+				// stop listening
+				event.stop(getContext());
+			}
 			if(event.getSource() instanceof Hyperentry) {
 				// cast source
-				Hyperentry gear = (Hyperentry) event.getSource();
-				// get free
-				gear.remove();
+				Hyperentry pair = (Hyperentry) event.getSource();
+				// transfer contents to the future
+				getValue().put(pair.getValue(), pair.getKey());
 			}
 			break;
 		default:

@@ -68,8 +68,8 @@ public class Allele
 	 */
 	@Override
 	@XmlElement(type=Karyotype.class)
-	public Mass<Haploid,Genomap> getPlasma() {
-		return super.getPlasma();
+	public Mass<Haploid,Genomap> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -129,12 +129,23 @@ public class Allele
 		super.mass(sender, event);
 		// commute event's command
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Genomap) {
+				// a new past starts
+				event.start(getContext());
+			}
+			break;
+		case INTERRUPTED:
 		case TRANSFER:
-			if(event.getSource() instanceof Gamete) {
+			if(event.getSource() instanceof Genomap) {
+				// a new past starts
+				event.stop(getContext());
+			}
+			else if(event.getSource() instanceof Gamete) {
 				// cast source
 				Gamete pair = (Gamete) event.getSource();
-				// free from inheritance
-				pair.remove();
+				// send message to the future 
+				getValue().put(pair.getValue(), pair.getKey());
 			}
 			break;
 		default:

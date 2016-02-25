@@ -9,7 +9,7 @@ import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.MassListener;
 import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.matter.Hyperxml;
-import org.xmlrobot.positron.Antineutron;
+import org.xmlrobot.positron.Positron;
 import org.xmlrobot.util.Parity;
 
 /**
@@ -20,7 +20,7 @@ import org.xmlrobot.util.Parity;
  */
 @XmlRootElement
 public class Hyperneuron 
-	extends Antineutron<Universe,Subspace> {
+	extends Positron<Universe,Subspace> {
 
 	/**
 	 * -4548799042014185239L

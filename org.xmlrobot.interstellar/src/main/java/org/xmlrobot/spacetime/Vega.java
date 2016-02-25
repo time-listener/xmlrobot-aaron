@@ -68,8 +68,8 @@ public class Vega
 	 */
 	@Override
 	@XmlElement(type=Gluon.class)
-	public Mass<Saturn,Jupiter> getPlasma() {
-		return super.getPlasma();
+	public Mass<Saturn,Jupiter> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -130,12 +130,23 @@ public class Vega
 		super.mass(sender, event);
 
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Jupiter) {
+				// start new planet
+				event.start(getContext());
+			}
+			break;
+		case INTERRUPTED:
 		case TRANSFER:
-			if (event.getSource() instanceof Earth) {
+			if(event.getSource() instanceof Jupiter) {
+				// stop old planet
+				event.stop(getContext());
+			}
+			else if (event.getSource() instanceof Earth) {
 				// cast source
 				Earth pair = (Earth) event.getSource();
-				// free from inheritance
-				pair.remove();
+				// transfer time-traveler message
+				getValue().put(pair.getValue(), pair.getKey());
 			}
 			break;
 		default:

@@ -18,6 +18,7 @@ import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Child;
 import org.xmlrobot.subspace.Hyperchain;
 import org.xmlrobot.subspace.Hypercube;
+import org.xmlrobot.subspace.Hyperpair;
 import org.xmlrobot.subspace.event.Flop;
 import org.xmlrobot.util.Command;
 import org.xmlrobot.util.Parity;
@@ -72,9 +73,9 @@ public class Haploid
 	 */
 	@Override
 	@XmlElement(type=Exon.class)
-	public Mass<Hyperchain,Hypercube> getPlasma() {
+	public Mass<Hyperchain,Hypercube> getReplicator() {
 
-		return super.getPlasma();
+		return super.getReplicator();
 	}
 	/**
 	 * {@link Haploid} default class constructor.
@@ -99,6 +100,14 @@ public class Haploid
 		super.mass(sender, event);
 		// commute entity's command
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Hyperchain) {
+				// cast source
+				Hyperchain entity = (Hyperchain) event.getSource();
+				// submit to inheritance
+				put(entity, (Hypercube) entity.get());
+			}
+			break;
 		case ORDER:
 			if(event.getSource() instanceof Gene) {
 				// declare stem
@@ -135,24 +144,21 @@ public class Haploid
 			break;
 		case PUSH:
 			if(event.getSource() instanceof Hyperchain) {
-				// cast source
-				Hyperchain key = (Hyperchain) event.getSource();
-				Hypercube value;
 				// assign and check
-				if((value = getValue()) != null) {
+				if(!isEmpty()) {
+					// cast source
+					Hyperchain key = (Hyperchain) event.getSource();
 					// pulse to the future
-					value.pulse(this, new Flop(key));	
+					getValue().pulse(this, new Flop(key));	
 				}
 			}
 			else if(event.getSource() instanceof Gene) {
-				// cast source
-				Gene pair = (Gene) event.getSource();
-				// declare child
-				Mass<Hyperchain,Hypercube> child;
 				// assign and check
-				if((child = getChild()) != null) {
+				if(!isEmpty()) {
+					// cast source
+					Gene pair = (Gene) event.getSource();
 					// send message to the future
-					child.pulse(this, new Synapsis(pair));
+					getChild().pulse(this, new Synapsis(pair));
 				}
 			}
 			break;
@@ -190,13 +196,18 @@ public class Haploid
 				}
 			}
 			break;
+		case INTERRUPTED:
 		case TRANSFER:
-			if(event.getSource() instanceof Gene) {
+			if (event.getSource() instanceof Hyperpair) {
 				// cast source
-				Gene entity = (Gene) event.getSource();
-				// transfer message contents
-				put(entity.getValue(), entity.getKey());
+				Hyperpair pair = (Hyperpair) event.getSource();
+				// remove from hyperspace
+				pair.remove();
 			}
+			else if(event.getSource() instanceof Gene) {
+				// rip
+				event.stop(getContext());
+			} 
 			break;
 		default:
 			break;
@@ -225,32 +236,16 @@ public class Haploid
 		// assign and check
 		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
 				child instanceof Gamete : false) {
-			// declare plasma
-			Mass<Hyperchain,Hypercube> plasma;
 			// cast source
 			Gamete pair = (Gamete) child;
 			// commute command
 			if(event.getType() == ServiceEvent.REGISTERED) {
-				// assign and check it's contained
-				if((plasma = getPlasma()) != null ?
-						!plasma.isEmpty() ?
-								!plasma.containsValue(pair.getValue())
-								: true
-						: false) {
-					// replicate mass
-					plasma.putKey(pair.getValue(), pair.getKey());
-				}
+				// replicate mass
+				getReplicator().putKey(pair.getValue(), pair.getKey());
 			}
 			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// check if empty and chained
-				if((plasma = getPlasma()) != null ? 
-						!plasma.isEmpty() ? 
-								plasma.containsKey(pair.getKey()) 
-								: false
-						: false) {
-					// release child
-					plasma.removeByValue(pair.getValue());
-				}
+				// release child
+				getReplicator().removeByValue(pair.getValue());
 			}
 		}
 	}

@@ -7,7 +7,7 @@ import org.xmlrobot.dna.Cell;
 import org.xmlrobot.dna.Operon;
 import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.nature.matter.Atom;
-import org.xmlrobot.positron.Antineutron;
+import org.xmlrobot.positron.Positron;
 
 /**
  * Hyperatom implementation class.
@@ -17,7 +17,7 @@ import org.xmlrobot.positron.Antineutron;
  */
 @XmlRootElement
 public class Hyperatom 
-	extends Antineutron<Operon,Cell> {
+	extends Positron<Operon,Cell> {
 
 	/**
 	 * 4058808614266793154L

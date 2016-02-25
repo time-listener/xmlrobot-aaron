@@ -68,8 +68,8 @@ public class Galaxy
 	 */
 	@Override
 	@XmlElement(type=Lepton.class)
-	public Mass<Columbia,Fornax> getPlasma() {
-		return super.getPlasma();
+	public Mass<Columbia,Fornax> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -130,12 +130,23 @@ public class Galaxy
 		super.mass(sender, event);
 		
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Fornax) {
+				// start supercluster
+				event.start(getContext());
+			}
+			break;
+		case INTERRUPTED:
 		case TRANSFER:
-			if(event.getSource() instanceof Perseus) {
+			if(event.getSource() instanceof Fornax) {
+				// stop supercluster
+				event.stop(getContext());
+			}
+			else if(event.getSource() instanceof Perseus) {
 				// cast source
 				Perseus pair = (Perseus) event.getSource();
 				// rip
-				pair.remove();
+				getValue().put(pair.getValue(), pair.getKey());
 			}
 			break;
 		default:

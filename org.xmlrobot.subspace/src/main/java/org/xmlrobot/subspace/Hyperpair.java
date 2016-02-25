@@ -70,8 +70,8 @@ public class Hyperpair
 	 */
 	@Override
 	@XmlElement
-	public Hyperline getPlasma() {
-		return (Hyperline) super.getPlasma();
+	public Hyperline getReplicator() {
+		return (Hyperline) super.getReplicator();
 	}
 	
 	/**

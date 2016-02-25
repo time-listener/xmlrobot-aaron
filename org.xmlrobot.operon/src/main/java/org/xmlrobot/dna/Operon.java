@@ -72,8 +72,8 @@ public class Operon
 	 */
 	@Override
 	@XmlElement(type=Adam.class)
-	public Mass<Ribosoma,Tetraploid> getPlasma() {
-		return super.getPlasma();
+	public Mass<Ribosoma,Tetraploid> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -98,6 +98,14 @@ public class Operon
 		super.mass(sender, event);
 		// operate
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Ribosoma) {
+				// cast source
+				Ribosoma entity = (Ribosoma) event.getSource(); 
+				// inject
+				put(entity, (Tetraploid) entity.get());
+			}
+			break;
 		case ORDER:
 			if(event.getSource() instanceof Nucleoplasm) {
 				// declare stem
@@ -134,20 +142,21 @@ public class Operon
 			break;
 		case PUSH:
 			if(event.getSource() instanceof Ribosoma) {
-				// cast source
-				Ribosoma key = (Ribosoma) event.getSource();
-				// send pulse to child's value
-				getValue().pulse(this, new Meiosis(key));
+				// check emptiness
+				if(!isEmpty()) {
+					// cast source
+					Ribosoma key = (Ribosoma) event.getSource();
+					// send pulse to child's value
+					getValue().pulse(this, new Meiosis(key));	
+				}
 			}
 			else if(event.getSource() instanceof Nucleoplasm) {
-				// cast source
-				Nucleoplasm pair = (Nucleoplasm) event.getSource();
-				// declare child
-				Mass<Ribosoma,Tetraploid> child;
-				// assign and check
-				if((child = getChild()) != null) {
+				// check emptiness
+				if(!isEmpty()) {
+					// cast source
+					Nucleoplasm pair = (Nucleoplasm) event.getSource();
 					// reproduce yourselves!
-					child.pulse(this, new Reproduction(pair));
+					getChild().pulse(this, new Reproduction(pair));
 				}
 			}
 			break;
@@ -186,11 +195,15 @@ public class Operon
 			}
 			break;
 		case TRANSFER:
-			if(event.getSource() instanceof Nucleoplasm) {
+			if(event.getSource() instanceof Plasmid) {
 				// cast source
-				Nucleoplasm entity = (Nucleoplasm) event.getSource();
-				// transfer message contents
-				put(entity.getValue(), entity.getKey());
+				Plasmid pair = (Plasmid) event.getSource();
+				// free from inheritance
+				pair.remove();
+			}
+			else if(event.getSource() instanceof Nucleoplasm) {
+				// stop
+				event.stop(getContext());
 			}
 			break;
 		default:
@@ -220,32 +233,16 @@ public class Operon
 		// assign and check
 		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
 				child instanceof Cytoplasm : false) {
-			// declare plasma
-			Mass<Ribosoma,Tetraploid> plasma;
 			// cast source
 			Cytoplasm pair = (Cytoplasm) child;
 			// commute command
-			if(event.getType() == ServiceEvent.REGISTERED) {
-				// assign and check it's contained
-				if((plasma = getPlasma()) != null ?
-						!plasma.isEmpty() ?
-								!plasma.containsValue(pair.getValue())
-								: true
-						: false) {
-					// replicate mass
-					plasma.putKey(pair.getValue(), pair.getKey());
-				}
+			if (event.getType() == ServiceEvent.REGISTERED) {
+				// replicate mass
+				getReplicator().putKey(pair.getValue(), pair.getKey());
 			}
-			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// check if empty and chained
-				if((plasma = getPlasma()) != null ? 
-						!plasma.isEmpty() ? 
-								plasma.containsKey(pair.getKey()) 
-								: false
-						: false) {
-					// release child
-					plasma.removeByValue(pair.getValue());
-				}
+			else if (event.getType() == ServiceEvent.UNREGISTERING) {
+				// release child
+				getReplicator().removeByValue(pair.getValue());
 			}
 		}
 	}

@@ -68,8 +68,8 @@ public class Mars
 	 */
 	@Override
 	@XmlElement(type=Hypermetal.class)
-	public Mass<Ecosystem,Biosphere> getPlasma() {
-		return super.getPlasma();
+	public Mass<Ecosystem,Biosphere> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -130,12 +130,23 @@ public class Mars
 	
 		super.mass(sender, event);
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Biosphere) {
+				// begin new organism platform
+				event.start(getContext());
+			}
+			break;
+		case INTERRUPTED:
 		case TRANSFER:
-			if(event.getSource() instanceof Being) {
+			if(event.getSource() instanceof Biosphere) {
+				// finish old organism platform
+				event.stop(getContext());
+			}
+			else if(event.getSource() instanceof Being) {
 				// cast source
 				Being pair = (Being) event.getSource();
-				// free from inheritance
-				pair.remove();
+				// keep message alive
+				getValue().put(pair.getValue(), pair.getKey());
 			}
 			break;
 		default:

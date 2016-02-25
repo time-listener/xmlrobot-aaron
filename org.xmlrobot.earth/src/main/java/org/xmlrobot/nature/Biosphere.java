@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceReference;
 import org.xmlrobot.dna.Cell;
+import org.xmlrobot.dna.Cytoplasm;
 import org.xmlrobot.dna.Operon;
 import org.xmlrobot.dna.event.Reproduction;
 import org.xmlrobot.genesis.MassListener;
@@ -16,10 +17,8 @@ import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.TimeListener;
 import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Child;
-import org.xmlrobot.nature.antimatter.Hyperatom;
 import org.xmlrobot.nature.antimatter.Hyperelement;
 import org.xmlrobot.nature.event.Homogenization;
-import org.xmlrobot.nature.matter.Atom;
 import org.xmlrobot.nature.matter.Element;
 import org.xmlrobot.util.Command;
 import org.xmlrobot.util.Parity;
@@ -74,8 +73,8 @@ public class Biosphere
 	 */
 	@Override
 	@XmlElement(type=Element.class)
-	public Mass<Cell,Operon> getPlasma() {
-		return super.getPlasma();
+	public Mass<Cell,Operon> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -100,6 +99,14 @@ public class Biosphere
 		super.mass(sender, event);
 
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Cell) {
+				// cast animal
+				Cell entity = (Cell) event.getSource();
+				// natural order injection
+				put(entity, (Operon) entity.get());
+			}
+			break;
 		case ORDER:
 			if(event.getSource() instanceof Being) {
 				// declare stem
@@ -136,20 +143,21 @@ public class Biosphere
 			break;
 		case PUSH:
 			if(event.getSource() instanceof Cell) {
-				// cast source
-				Cell key = (Cell) event.getSource();
-				// send pulse to child's value
-				getValue().pulse(this, new Reproduction(key));
+				// check emptiness
+				if(!isEmpty()) {
+					// cast source
+					Cell key = (Cell) event.getSource();
+					// send pulse to child's value
+					getValue().pulse(this, new Reproduction(key));					
+				}
 			}
 			else if(event.getSource() instanceof Being) {
-				// cast source
-				Being pair = (Being) event.getSource();
-				// declare child
-				Mass<Cell,Operon> child;
-				// assign and check
-				if((child = getChild()) != null) {
+				// check emptiness
+				if(!isEmpty()) {
+					// cast source
+					Being pair = (Being) event.getSource();
 					// be careful
-					child.pulse(this, new Homogenization(pair));
+					getChild().pulse(this, new Homogenization(pair));
 				}
 			}
 			break;
@@ -188,11 +196,15 @@ public class Biosphere
 			}
 			break;
 		case TRANSFER:
-			if(event.getSource() instanceof Being) {
-				// cast source
-				Being entity = (Being) event.getSource();
-				// transfer message contents
-				put(entity.getValue(), entity.getKey());
+			if(event.getSource() instanceof Cytoplasm) {
+				// cast
+				Cytoplasm pair = (Cytoplasm) event.getSource();
+				// free
+				pair.remove();
+			}
+			else if(event.getSource() instanceof Being) {
+				// stop
+				event.stop(getContext());
 			}
 			break;
 		default:
@@ -225,16 +237,13 @@ public class Biosphere
 			// cast source
 			Organism pair = (Organism) child;
 			// commute command
-			if(event.getType() == ServiceEvent.REGISTERED) {
-				// create child
-				Atom atom = instance(Atom.class, Hyperatom.class, 
-						pair.getKey(), pair.getValue(), getPlasma());
-				// push child
-				atom.push(Command.ORDER);
+			if (event.getType() == ServiceEvent.REGISTERED) {
+				// replicate mass
+				getReplicator().putKey(pair.getValue(), pair.getKey());
 			}
-			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// release replication
-				getPlasma().release();
+			else if (event.getType() == ServiceEvent.UNREGISTERING) {
+				// release child
+				getReplicator().removeByValue(pair.getValue());
 			}
 		}
 	}

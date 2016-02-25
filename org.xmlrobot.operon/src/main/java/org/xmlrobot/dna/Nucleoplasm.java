@@ -68,8 +68,8 @@ public class Nucleoplasm
 	 */
 	@Override
 	@XmlElement(type=Ovum.class)
-	public Mass<Tetraploid,Ribosoma> getPlasma() {
-		return super.getPlasma();
+	public Mass<Tetraploid,Ribosoma> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -131,12 +131,23 @@ public class Nucleoplasm
 		super.mass(sender, event);
 
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Ribosoma) {
+				// start all times
+				event.start(getContext());
+			}
+			break;
+		case INTERRUPTED:
 		case TRANSFER: 
-			if(event.getSource() instanceof Plasmid) {
+			if(event.getSource() instanceof Ribosoma) {
+				// stop all times
+				event.stop(getContext());
+			}
+			else if(event.getSource() instanceof Plasmid) {
 				// cast source
 				Plasmid pair = (Plasmid) event.getSource();
-				// free from inheritance
-				pair.remove();
+				// reincarnate message
+				getValue().put(pair.getValue(), pair.getKey());
 			}
 			break;
 		default:
@@ -160,5 +171,4 @@ public class Nucleoplasm
 			push(Command.TRANSFER);
 		}
 	}
-
 }

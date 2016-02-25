@@ -72,8 +72,8 @@ public class AlphaCentauri
 	 */
 	@Override
 	@XmlElement(type=Photon.class)
-	public Mass<Saturn,Jupiter> getPlasma() {
-		return super.getPlasma();
+	public Mass<Saturn,Jupiter> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -98,6 +98,14 @@ public class AlphaCentauri
 		super.mass(sender, event);
 		// commute command
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Saturn) {
+				// cast source
+				Saturn entity = (Saturn) event.getSource();
+				// inject planet into hyperspace
+				put(entity, (Jupiter) entity.get());
+			}
+			break;
 		case ORDER:
 			if(event.getSource() instanceof Pegasi) {
 				// declare stem
@@ -186,11 +194,15 @@ public class AlphaCentauri
 			}
 			break;
 		case TRANSFER:
-			if(event.getSource() instanceof Pegasi) {
+			if (event.getSource() instanceof Earth) {
 				// cast source
-				Pegasi entity = (Pegasi) event.getSource();
-				// transfer message contents
-				put(entity.getValue(), entity.getKey());
+				Earth pair = (Earth) event.getSource();
+				// free from inheritance
+				pair.remove();
+			}
+			else if(event.getSource() instanceof Pegasi) {
+				// finish life
+				event.stop(getContext());
 			}
 			break;
 		default:
@@ -218,34 +230,18 @@ public class AlphaCentauri
 		// declare child
 		Object child;
 		// assign and check
-		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
+		if ((child = ref.getProperty(TimeListener.KEY)) != null ?
 				child instanceof Vega : false) {
-			// declare plasma
-			Mass<Saturn, Jupiter> plasma;
 			// cast source
 			Vega pair = (Vega) child;
 			// commute command
 			if(event.getType() == ServiceEvent.REGISTERED) {
-				// assign and check it's contained
-				if((plasma = getPlasma()) != null ?
-						!plasma.isEmpty() ?
-								!plasma.containsValue(pair.getValue())
-								: true
-						: false) {
-					// replicate mass
-					plasma.putKey(pair.getValue(), pair.getKey());
-				}
+				// replicate mass
+				getReplicator().putKey(pair.getValue(), pair.getKey());
 			}
 			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// check if empty and chained
-				if((plasma = getPlasma()) != null ? 
-						!plasma.isEmpty() ? 
-								plasma.containsKey(pair.getKey()) 
-								: false
-						: false) {
-					// release child
-					plasma.removeByValue(pair.getValue());
-				}
+				// release child
+				getReplicator().removeByValue(pair.getValue());
 			}
 		}
 	}

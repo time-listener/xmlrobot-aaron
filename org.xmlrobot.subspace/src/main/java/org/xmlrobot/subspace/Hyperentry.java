@@ -55,7 +55,7 @@ public class Hyperentry
 	 */
 	@Override
 	public Character setValue(Character value) {
-		getPlasma().setValue(value);
+		getReplicator().setValue(value);
 		return super.setValue(value);
 	}
 	/* (non-Javadoc)
@@ -63,8 +63,8 @@ public class Hyperentry
 	 */
 	@Override
 	@XmlElement(type=Hyperunit.class)
-	public Mass<Integer,Character> getPlasma() {
-		return super.getPlasma();
+	public Mass<Integer,Character> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**

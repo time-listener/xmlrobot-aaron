@@ -5,7 +5,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.xmlrobot.core.antimatter.Hyperlepton;
 import org.xmlrobot.genesis.Mass;
-import org.xmlrobot.positron.Antineutron;
+import org.xmlrobot.positron.Positron;
 import org.xmlrobot.spacetime.Columbia;
 import org.xmlrobot.spacetime.Fornax;
 
@@ -17,7 +17,7 @@ import org.xmlrobot.spacetime.Fornax;
  */
 @XmlRootElement
 public class Lepton
-	extends Antineutron<Columbia,Fornax> {
+	extends Positron<Columbia,Fornax> {
 
 	/**
 	 * -6065172273899408059L

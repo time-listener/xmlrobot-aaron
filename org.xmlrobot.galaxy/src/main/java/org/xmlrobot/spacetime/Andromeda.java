@@ -72,8 +72,8 @@ public class Andromeda
 	 */
 	@Override
 	@XmlElement(type=BosonZ.class)
-	public Mass<AlphaCentauri,Sun> getPlasma() {
-		return super.getPlasma();
+	public Mass<AlphaCentauri,Sun> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -97,6 +97,14 @@ public class Andromeda
 	public void mass(MassListener sender, Tachyon<?,?> event) {
 		super.mass(sender, event);
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof AlphaCentauri) {
+				// cast source
+				AlphaCentauri entity = (AlphaCentauri) event.getSource();
+				// inject star
+				put(entity, (Sun) entity.get());
+			}
+			break;
 		case ORDER:
 			if(event.getSource() instanceof Virgo) {
 				// declare stem
@@ -133,20 +141,21 @@ public class Andromeda
 			break;
 		case PUSH:
 			if(event.getSource() instanceof AlphaCentauri) {
-				// cast source
-				AlphaCentauri key = (AlphaCentauri) event.getSource();
-				// send pulse to child's value
-				getValue().pulse(this, new Attraction(key));
+				// check emptiness
+				if(!isEmpty()) {
+					// cast source
+					AlphaCentauri key = (AlphaCentauri) event.getSource();
+					// send pulse to child's value
+					getValue().pulse(this, new Attraction(key));	
+				}
 			}
 			else if(event.getSource() instanceof Virgo) {
-				// cast source
-				Virgo pair = (Virgo) event.getSource();
-				// declare child
-				Mass<AlphaCentauri,Sun> child;
-				// call child
-				if((child = getChild()) != null) {
+				// check emptiness
+				if(!isEmpty()) {
+					// cast source
+					Virgo pair = (Virgo) event.getSource();
 					// gravity
-					child.pulse(this, new Rotation(pair));
+					getChild().pulse(this, new Rotation(pair));
 				}
 			}
 			break;
@@ -184,12 +193,17 @@ public class Andromeda
 				}
 			}
 			break;
+		case INTERRUPTED:
 		case TRANSFER:
-			if(event.getSource() instanceof Virgo) {
+			if(event.getSource() instanceof Vega) {
 				// cast source
-				Virgo entity = (Virgo) event.getSource();
-				// transfer message contents
-				put(entity.getValue(), entity.getKey());
+				Vega pair = (Vega) event.getSource();
+				// free from inheritance
+				pair.remove();
+			}
+			else if(event.getSource() instanceof Virgo) {
+				// ending
+				event.stop(getContext());
 			}
 			break;
 		default:
@@ -219,32 +233,16 @@ public class Andromeda
 		// assign and check
 		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
 				child instanceof Hydra : false) {
-			// declare plasma
-			Mass<AlphaCentauri,Sun> plasma;
 			// cast source
 			Hydra pair = (Hydra) child;
 			// commute command
 			if(event.getType() == ServiceEvent.REGISTERED) {
-				// assign and check it's contained
-				if((plasma = getPlasma()) != null ?
-						!plasma.isEmpty() ?
-								!plasma.containsKey(pair.getKey())
-								: true
-						: false) {
-					// replicate mass
-					plasma.putValue(pair.getKey(), pair.getValue());
-				}
+				// replicate mass
+				getReplicator().putValue(pair.getKey(), pair.getValue());
 			}
 			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// check if empty and chained
-				if((plasma = getPlasma()) != null ? 
-						!plasma.isEmpty() ? 
-								plasma.containsValue(pair.getValue()) 
-								: false
-						: false) {
-					// release child
-					plasma.removeByKey(pair.getKey());
-				}
+				// release child
+				getReplicator().removeByKey(pair.getKey());
 			}
 		}
 	}

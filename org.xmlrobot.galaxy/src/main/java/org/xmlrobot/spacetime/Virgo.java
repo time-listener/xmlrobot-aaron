@@ -68,8 +68,8 @@ public class Virgo
 	 */
 	@Override
 	@XmlElement(type=HyperbosonW.class)
-	public Mass<Sun,AlphaCentauri> getPlasma() {
-		return super.getPlasma();
+	public Mass<Sun,AlphaCentauri> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -130,13 +130,23 @@ public class Virgo
 		super.mass(sender, event);
 
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof AlphaCentauri) {
+				// begin new star
+				event.start(getContext());
+			}
+			break;
+		case INTERRUPTED:
 		case TRANSFER:
-			
-			if(event.getSource() instanceof Pegasi) {
+			if(event.getSource() instanceof AlphaCentauri) {
+				// finish ancient star
+				event.stop(getContext());
+			}
+			else if(event.getSource() instanceof Pegasi) {
 				// cast source
 				Pegasi pair = (Pegasi) event.getSource();
-				// free from inheritance
-				pair.remove();
+				// transfer child
+				getValue().put(pair.getValue(), pair.getKey());
 			}
 			break;
 		default:

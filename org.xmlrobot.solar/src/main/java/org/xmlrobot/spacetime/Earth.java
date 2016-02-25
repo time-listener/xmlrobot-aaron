@@ -68,8 +68,8 @@ public class Earth
 	 */
 	@Override
 	@XmlElement(type=Metal.class)
-	public Mass<Biosphere,Ecosystem> getPlasma() {
-		return super.getPlasma();
+	public Mass<Biosphere,Ecosystem> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -130,12 +130,23 @@ public class Earth
 		super.mass(sender, event);
 		
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Ecosystem) {
+				// start new being environment
+				event.start(getContext());
+			}
+			break;
+		case INTERRUPTED:
 		case TRANSFER:
-			 if(event.getSource() instanceof Organism) {
+			if(event.getSource() instanceof Ecosystem) {
+				// stop old being environment
+				event.start(getContext());
+			}
+			else if(event.getSource() instanceof Organism) {
 				// cast source
 				Organism pair = (Organism) event.getSource();
-				// set pair free
-				pair.remove();
+				// transfer hypermass
+				getValue().put(pair.getValue(), pair.getKey());
 			} 
 			break;
 		default:

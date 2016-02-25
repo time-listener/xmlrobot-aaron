@@ -68,8 +68,8 @@ public class Cluster
 	 */
 	@Override
 	@XmlElement(type=Hyperlepton.class)
-	public Mass<Fornax,Columbia> getPlasma() {
-		return super.getPlasma();
+	public Mass<Fornax,Columbia> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -131,12 +131,23 @@ public class Cluster
 		super.mass(sender, event);
 		
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Columbia) {
+				// start supergalaxy
+				event.start(getContext());
+			}
+			break;
+		case INTERRUPTED:
 		case TRANSFER:
-			if(event.getSource() instanceof Capricornus) {
+			if(event.getSource() instanceof Columbia) {
+				// stop supergalaxy
+				event.stop(getContext());
+			}
+			else if(event.getSource() instanceof Capricornus) {
 				// cast source
 				Capricornus pair = (Capricornus) event.getSource();
-				// make pair free
-				pair.remove();
+				// supercluster reincarnation
+				getValue().put(pair.getValue(), pair.getKey());
 			}
 			break;
 		default:

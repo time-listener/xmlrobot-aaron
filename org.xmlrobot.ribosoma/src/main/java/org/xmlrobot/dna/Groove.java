@@ -68,8 +68,8 @@ public class Groove
 	 */
 	@Override
 	@XmlElement(type=Hyperrna.class)
-	public Mass<Cromosoma,Diploid> getPlasma() {
-		return super.getPlasma();
+	public Mass<Cromosoma,Diploid> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -130,12 +130,23 @@ public class Groove
 		super.mass(sender, event);
 		
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Diploid) {
+				// work
+				event.start(getContext());
+			}
+			break;
+		case INTERRUPTED:
 		case TRANSFER:
+			if(event.getSource() instanceof Diploid) {
+				// rip
+				event.stop(getContext());
+			}
 			if(event.getSource() instanceof BasePair) {
 				// cast source
 				BasePair pair = (BasePair) event.getSource();
-				// free from inheritance
-				pair.remove();
+				// transfer message through time
+				getValue().put(pair.getValue(), pair.getKey());
 			}
 			break;
 		default:

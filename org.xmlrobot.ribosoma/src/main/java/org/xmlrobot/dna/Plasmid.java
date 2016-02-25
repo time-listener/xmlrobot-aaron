@@ -68,8 +68,8 @@ public class Plasmid
 	 */
 	@Override
 	@XmlElement(type=Rna.class)
-	public Mass<Diploid,Cromosoma> getPlasma() {
-		return super.getPlasma();
+	public Mass<Diploid,Cromosoma> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -130,12 +130,23 @@ public class Plasmid
 		super.mass(sender, event);
 		
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Cromosoma) {
+				// process
+				event.start(getContext());
+			}
+			break;
+		case INTERRUPTED:
 		case TRANSFER:
-			if(event.getSource() instanceof Allele) {
-				// cast
+			if(event.getSource() instanceof Cromosoma) {
+				// free
+				event.stop(getContext());
+			}
+			else if(event.getSource() instanceof Allele) {
+				// cast source
 				Allele pair = (Allele) event.getSource();
-				// rip
-				pair.remove();
+				// transfer message across the future
+				getValue().put(pair.getValue(), pair.getKey());
 			}
 			break;
 		default:

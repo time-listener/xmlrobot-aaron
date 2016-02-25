@@ -72,8 +72,8 @@ public class Cell
 	 */
 	@Override
 	@XmlElement(type=Eva.class)
-	public Mass<Tetraploid,Ribosoma> getPlasma() {
-		return super.getPlasma();
+	public Mass<Tetraploid,Ribosoma> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -98,6 +98,14 @@ public class Cell
 		super.mass(sender, event);
 		// commute command
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Tetraploid) {
+				// cast source
+				Tetraploid entity = (Tetraploid) event.getSource();
+				// push
+				put(entity, (Ribosoma) entity.get());
+			}
+			break;
 		case ORDER:
 			if(event.getSource() instanceof Cytoplasm) {
 				// declare stem
@@ -134,20 +142,21 @@ public class Cell
 			break;
 		case PUSH:
 			if(event.getSource() instanceof Tetraploid) {
-				// cast source
-				Tetraploid key = (Tetraploid) event.getSource();
-				// send pulse to child's value
-				getValue().pulse(this, new Mitosis(key));
+				// check emptiness
+				if(!isEmpty()) {
+					// cast source
+					Tetraploid key = (Tetraploid) event.getSource();
+					// send pulse to child's value
+					getValue().pulse(this, new Mitosis(key));	
+				}
 			}
 			else if(event.getSource() instanceof Cytoplasm) {
-				// cast source
-				Cytoplasm pair = (Cytoplasm) event.getSource();
-				// declare child
-				Mass<Tetraploid,Ribosoma> child;
-				// assign and check
-				if((child = getChild()) != null) {
+				// check emptiness
+				if(!isEmpty()) {
+					// cast source
+					Cytoplasm pair = (Cytoplasm) event.getSource();
 					// procreate, now
-					child.pulse(this, new Procreation(pair));
+					getChild().pulse(this, new Procreation(pair));	
 				}
 			}
 			break;
@@ -186,11 +195,15 @@ public class Cell
 			}
 			break;
 		case TRANSFER:
-			if(event.getSource() instanceof Cytoplasm) {
+			 if(event.getSource() instanceof Groove) { 
 				// cast source
-				Cytoplasm entity = (Cytoplasm) event.getSource();
-				// transfer message contents
-				put(entity.getValue(), entity.getKey());
+				Groove pair = (Groove) event.getSource();
+				// free
+				pair.remove();
+			}
+			if(event.getSource() instanceof Cytoplasm) {
+				// retire nexus
+				event.stop(getContext());
 			}
 			break;
 		default:
@@ -220,32 +233,16 @@ public class Cell
 		// assign and check
 		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
 				child instanceof Nucleoplasm : false) {
-			// declare plasma
-			Mass<Tetraploid,Ribosoma> plasma;
 			// cast source
 			Nucleoplasm pair = (Nucleoplasm) child;
 			// commute command
 			if(event.getType() == ServiceEvent.REGISTERED) {
-				// assign and check it's contained
-				if((plasma = getPlasma()) != null ?
-						!plasma.isEmpty() ?
-								!plasma.containsKey(pair.getKey())
-								: true
-						: false) {
-					// replicate mass
-					plasma.putValue(pair.getKey(), pair.getValue());
-				}
+				// replicate mass
+				getReplicator().putValue(pair.getKey(), pair.getValue());
 			}
 			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// check if empty and chained
-				if((plasma = getPlasma()) != null ? 
-						!plasma.isEmpty() ? 
-								plasma.containsValue(pair.getValue()) 
-								: false
-						: false) {
-					// release child
-					plasma.removeByKey(pair.getKey());
-				}
+				// release child
+				getReplicator().removeByKey(pair.getKey());
 			}
 		}
 	}

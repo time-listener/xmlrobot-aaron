@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceReference;
 import org.xmlrobot.dna.Cell;
+import org.xmlrobot.dna.Nucleoplasm;
 import org.xmlrobot.dna.Operon;
 import org.xmlrobot.dna.event.Procreation;
 import org.xmlrobot.genesis.MassListener;
@@ -16,10 +17,8 @@ import org.xmlrobot.genesis.Mass;
 import org.xmlrobot.genesis.TimeListener;
 import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Child;
-import org.xmlrobot.nature.antimatter.Hyperatom;
 import org.xmlrobot.nature.antimatter.Hyperelement;
 import org.xmlrobot.nature.event.Dispersion;
-import org.xmlrobot.nature.matter.Atom;
 import org.xmlrobot.nature.matter.Element;
 import org.xmlrobot.util.Command;
 import org.xmlrobot.util.Parity;
@@ -74,8 +73,8 @@ public class Ecosystem
 	 */
 	@Override
 	@XmlElement(type=Hyperelement.class)
-	public Mass<Operon,Cell> getPlasma() {
-		return super.getPlasma();
+	public Mass<Operon,Cell> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -100,6 +99,14 @@ public class Ecosystem
 		super.mass(sender, event);
 
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Operon) {
+				// cast machine
+				Operon entity = (Operon) event.getSource();
+				// submit machine deep inside inheritance
+				put(entity, (Cell) entity.get());
+			}
+			break;
 		case ORDER:
 			if(event.getSource() instanceof Organism) {
 				// declare stem
@@ -136,16 +143,19 @@ public class Ecosystem
 			break;
 		case PUSH:
 			if(event.getSource() instanceof Operon) {
-				// cast source
-				Operon key = (Operon) event.getSource();
-				// send pulse to child's value
-				getValue().pulse(this, new Procreation(key));
+				// check emptiness
+				if(!isEmpty()){
+					// cast source
+					Operon key = (Operon) event.getSource();
+					// send pulse to child's value
+					getValue().pulse(this, new Procreation(key));	
+				}
 			}
 			else if(event.getSource() instanceof Organism) {
-				// cast source
-				Organism pair = (Organism) event.getSource();
 				// assign and check
 				if(!isEmpty()) {
+					// cast source
+					Organism pair = (Organism) event.getSource();
 					// dispersion across the known universe
 					getChild().pulse(this, new Dispersion(pair));
 				}
@@ -186,11 +196,15 @@ public class Ecosystem
 			}
 			break;
 		case TRANSFER:
-			if(event.getSource() instanceof Organism) {
+			if(event.getSource() instanceof Nucleoplasm) {
 				// cast source
-				Organism entity = (Organism) event.getSource();
-				// transfer message contents
-				put(entity.getValue(), entity.getKey());
+				Nucleoplasm entity = (Nucleoplasm) event.getSource();
+				// free
+				entity.remove();
+			}
+			else if(event.getSource() instanceof Organism) {
+				// finish
+				event.stop(getContext());
 			}
 			break;
 		default:
@@ -224,15 +238,12 @@ public class Ecosystem
 			Being pair = (Being) child;
 			// commute command
 			if(event.getType() == ServiceEvent.REGISTERED) {
-				// create child
-				Hyperatom atom = instance(Hyperatom.class, Atom.class, 
-						pair.getKey(), pair.getValue(), getPlasma());
-				// push child
-				atom.push(Command.ORDER);
+				// replicate mass
+				getReplicator().putValue(pair.getKey(), pair.getValue());
 			}
 			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// release replication
-				getPlasma().release();
+				// release child
+				getReplicator().removeByKey(pair.getKey());
 			}
 		}
 	}

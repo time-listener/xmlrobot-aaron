@@ -68,8 +68,8 @@ public class Being
 	 */
 	@Override
 	@XmlElement(type=Hyperatom.class)
-	public Mass<Operon,Cell> getPlasma() {
-		return super.getPlasma();
+	public Mass<Operon,Cell> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -131,12 +131,23 @@ public class Being
 		super.mass(sender, event);
 		
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Cell) {
+				// start listening time
+				event.start(getContext());
+			}
+			break;
+		case INTERRUPTED:
 		case TRANSFER:
-			if(event.getSource() instanceof Cytoplasm) {
-				// cast
+			if(event.getSource() instanceof Cell) {
+				// stop listening time
+				event.start(getContext());
+			}
+			else if(event.getSource() instanceof Cytoplasm) {
+				// cast source
 				Cytoplasm pair = (Cytoplasm) event.getSource();
-				// free
-				pair.remove();
+				// transfer contents
+				getValue().put(pair.getValue(), pair.getKey());
 			}
 			break;
 		default:

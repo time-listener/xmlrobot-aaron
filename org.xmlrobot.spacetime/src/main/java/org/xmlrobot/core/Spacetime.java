@@ -18,6 +18,8 @@ import org.xmlrobot.horizon.Tachyon;
 import org.xmlrobot.inheritance.Child;
 import org.xmlrobot.spacetime.Columbia;
 import org.xmlrobot.spacetime.Fornax;
+import org.xmlrobot.spacetime.Hydra;
+import org.xmlrobot.spacetime.Perseus;
 import org.xmlrobot.spacetime.event.Compression;
 import org.xmlrobot.util.Command;
 import org.xmlrobot.util.Parity;
@@ -72,8 +74,8 @@ public class Spacetime
 	 */
 	@Override
 	@XmlElement(type=Hyperquark.class)
-	public Mass<Fornax,Columbia> getPlasma() {
-		return super.getPlasma();
+	public Mass<Fornax,Columbia> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -99,6 +101,14 @@ public class Spacetime
 		super.mass(sender, event);
 		// commute command
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Fornax) {
+				// cast child
+				Fornax entity = (Fornax) event.getSource();
+				// push supercluster into hyperspace
+				put(entity, (Columbia) entity.get());
+			}
+			break;
 		case ORDER:
 			if(event.getSource() instanceof Galaxy) {
 				// declare stem
@@ -135,16 +145,19 @@ public class Spacetime
 			break;
 		case PUSH:
 			if(event.getSource() instanceof Fornax) {
-				// cast source
-				Fornax dna = (Fornax) event.getSource();
-				// send pulse to child's value
-				getValue().pulse(this, new Compression(dna));
+				// check emptiness
+				if(!isEmpty()) {
+					// cast source
+					Fornax dna = (Fornax) event.getSource();
+					// send pulse to child's value
+					getValue().pulse(this, new Compression(dna));	
+				}
 			}
 			else if(event.getSource() instanceof Galaxy) {
-				// cast source
-				Galaxy pair = (Galaxy) event.getSource();
-				// call child
+				// check emptiness
 				if(!isEmpty()) {
+					// cast source
+					Galaxy pair = (Galaxy) event.getSource();
 					// emit mass to the future
 					getChild().pulse(this, new Contraction(pair));
 				}
@@ -185,11 +198,15 @@ public class Spacetime
 			}
 			break;
 		case TRANSFER:
-			if(event.getSource() instanceof Galaxy) {
+			if(event.getSource() instanceof Perseus) {
 				// cast source
-				Galaxy pair = (Galaxy) event.getSource();
-				// transfer message contents
-				put(pair.getValue(), pair.getKey());
+				Perseus pair = (Perseus) event.getSource();
+				// rip
+				pair.remove();
+			}
+			else if(event.getSource() instanceof Galaxy) {
+				// stop galaxy
+				event.stop(getContext());
 			}
 			break;
 		default:
@@ -219,32 +236,16 @@ public class Spacetime
 		// assign and check
 		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
 				child instanceof Cluster : false) {
-			// declare plasma
-			Mass<Fornax,Columbia> plasma;
 			// cast source
 			Cluster pair = (Cluster) child;
 			// commute command
 			if(event.getType() == ServiceEvent.REGISTERED) {
-				// assign and check it's contained
-				if((plasma = getPlasma()) != null ?
-						!plasma.isEmpty() ?
-								!plasma.containsValue(pair.getValue())
-								: true
-						: false) {
-					// replicate mass
-					plasma.putKey(pair.getValue(), pair.getKey());
-				}
+				// replicate mass
+				getReplicator().putKey(pair.getValue(), pair.getKey());
 			}
 			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// check if empty and chained
-				if((plasma = getPlasma()) != null ? 
-						!plasma.isEmpty() ? 
-								plasma.containsKey(pair.getKey()) 
-								: false
-						: false) {
-					// release child
-					plasma.removeByValue(pair.getValue());
-				}
+				// release child
+				getReplicator().removeByValue(pair.getValue());
 			}
 		}
 	}

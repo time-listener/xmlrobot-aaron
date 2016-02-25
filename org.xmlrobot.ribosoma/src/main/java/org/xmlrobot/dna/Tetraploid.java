@@ -72,8 +72,8 @@ public class Tetraploid
 	 */
 	@Override
 	@XmlElement(type=Dna.class)
-	public Mass<Diploid,Cromosoma> getPlasma() {
-		return super.getPlasma();
+	public Mass<Diploid,Cromosoma> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -98,6 +98,14 @@ public class Tetraploid
 		super.mass(sender, event);
 		// commute command
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Diploid) {
+				// cast source
+				Diploid entity = (Diploid) event.getSource();
+				// push
+				put(entity, (Cromosoma) entity.get());
+			}
+			break;
 		case ORDER:
 			if(event.getSource() instanceof Groove) {
 				// declare stem
@@ -134,20 +142,21 @@ public class Tetraploid
 			break;
 		case PUSH:
 			if(event.getSource() instanceof Diploid) {
-				// cast source
-				Diploid key = (Diploid) event.getSource();
-				// send pulse to child's value
-				getValue().pulse(this, new Translocation(key));
+				// check emptiness
+				if(!isEmpty()) {
+					// cast source
+					Diploid key = (Diploid) event.getSource();
+					// send pulse to child's value
+					getValue().pulse(this, new Translocation(key));	
+				}
 			}
 			else if(event.getSource() instanceof Groove) {
-				// cast source
-				Groove pair = (Groove) event.getSource();
-				// declare child
-				Mass<Diploid,Cromosoma> child;
-				// assign and check
-				if((child = getChild()) != null) {
+				// check emptiness
+				if(!isEmpty()) {
+					// cast source
+					Groove pair = (Groove) event.getSource();
 					// start mitosis
-					child.pulse(this, new Meiosis(pair));
+					getChild().pulse(this, new Meiosis(pair));
 				}
 			}
 			break;
@@ -186,11 +195,15 @@ public class Tetraploid
 			}
 			break;
 		case TRANSFER:
-			if(event.getSource() instanceof Groove) {
-				// cast source
-				Groove entity = (Groove) event.getSource();
-				// transfer message contents
-				put(entity.getValue(), entity.getKey());
+			if(event.getSource() instanceof Allele) {
+				// cast
+				Allele pair = (Allele) event.getSource();
+				// rip
+				pair.remove();
+			}
+			else if(event.getSource() instanceof Groove) {
+				// bye
+				event.stop(getContext());
 			}
 			break;
 		default:
@@ -220,32 +233,16 @@ public class Tetraploid
 		// assign and check
 		if ((child = ref.getProperty(TimeListener.KEY)) != null ? 
 				child instanceof Plasmid : false) {
-			// declare plasma
-			Mass<Diploid,Cromosoma> plasma;
 			// cast source
 			Plasmid pair = (Plasmid) child;
 			// commute command
 			if(event.getType() == ServiceEvent.REGISTERED) {
-				// assign and check it's contained
-				if((plasma = getPlasma()) != null ?
-						!plasma.isEmpty() ?
-								!plasma.containsValue(pair.getValue())
-								: true
-						: false) {
-					// replicate mass
-					plasma.putKey(pair.getValue(), pair.getKey());
-				}
+				// replicate mass
+				getReplicator().putKey(pair.getValue(), pair.getKey());
 			}
 			else if(event.getType() == ServiceEvent.UNREGISTERING) {
-				// check if empty and chained
-				if((plasma = getPlasma()) != null ? 
-						!plasma.isEmpty() ? 
-								plasma.containsKey(pair.getKey())
-								: false
-						: false) {
-					// release child
-					plasma.removeByValue(pair.getValue());
-				}
+				// release child
+				getReplicator().removeByValue(pair.getValue());
 			}
 		}
 	}

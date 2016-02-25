@@ -68,8 +68,8 @@ public class Pegasi
 	 */
 	@Override
 	@XmlElement(type=Hypergluon.class)
-	public Mass<Jupiter,Saturn> getPlasma() {
-		return super.getPlasma();
+	public Mass<Jupiter,Saturn> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -130,12 +130,23 @@ public class Pegasi
 		super.mass(sender, event);
 		
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Saturn) {
+				// begin new planet
+				event.start(getContext());
+			}
+			break;
+		case INTERRUPTED:
 		case TRANSFER:
-			if(event.getSource() instanceof Mars) {
+			if(event.getSource() instanceof Saturn) {
+				// end old planet
+				event.stop(getContext());
+			}
+			else if(event.getSource() instanceof Mars) {
 				// cast source
 				Mars pair = (Mars) event.getSource();
-				// free from inheritance
-				pair.remove();
+				// transfer time-traveler message
+				getValue().put(pair.getValue(), pair.getKey());
 			}
 			break;
 		default:

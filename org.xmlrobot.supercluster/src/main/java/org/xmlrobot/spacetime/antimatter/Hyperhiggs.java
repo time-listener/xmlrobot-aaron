@@ -4,7 +4,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.xmlrobot.genesis.Mass;
-import org.xmlrobot.positron.Antineutron;
+import org.xmlrobot.positron.Positron;
 import org.xmlrobot.spacetime.Andromeda;
 import org.xmlrobot.spacetime.MilkyWay;
 import org.xmlrobot.spacetime.matter.Higgs;
@@ -17,7 +17,7 @@ import org.xmlrobot.spacetime.matter.Higgs;
  */
 @XmlRootElement
 public class Hyperhiggs 
-	extends Antineutron<MilkyWay,Andromeda> {
+	extends Positron<MilkyWay,Andromeda> {
 
 	/**
 	 * -7362327731493805890L

@@ -65,8 +65,8 @@ public class Gene
 	 */
 	@Override
 	@XmlElement(type=Hyperintron.class)
-	public Mass<Hypercube,Hyperchain> getPlasma() {
-		return super.getPlasma();
+	public Mass<Hypercube,Hyperchain> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -129,12 +129,23 @@ public class Gene
 		super.mass(sender, event);
 		
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Hyperchain) {
+				// feel time
+				event.start(getContext());
+			}
+			break;
+		case INTERRUPTED:
 		case TRANSFER:
-			if(event.getSource() instanceof Hyperpair) {
+			if(event.getSource() instanceof Hyperchain) {
+				// feel time
+				event.stop(getContext());
+			}
+			else if(event.getSource() instanceof Hyperpair) {
 				// cast source
 				Hyperpair pair = (Hyperpair) event.getSource();
-				// remove from hyperspace
-				pair.remove();
+				// transfer contents to the future
+				getValue().put(pair.getValue(), pair.getKey());
 			}
 			break;
 		default:

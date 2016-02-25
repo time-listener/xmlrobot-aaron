@@ -71,8 +71,8 @@ public class BigBang
 	 */
 	@Override
 	@XmlElement(type=Hypermeson.class)
-	public Mass<Spacetime,Minkowski> getPlasma() {
-		return super.getPlasma();
+	public Mass<Spacetime,Minkowski> getReplicator() {
+		return super.getReplicator();
 	}
 	
 	/**
@@ -134,12 +134,22 @@ public class BigBang
 		super.mass(sender, event);
 
 		switch (event.getCommand()) {
+		case GENESIS:
+			if(event.getSource() instanceof Minkowski) {
+				// start minkowski cone
+				event.start(getContext());
+			}
+		case INTERRUPTED:
 		case TRANSFER:
+			if(event.getSource() instanceof Minkowski) {
+				// stop minkowski cone
+				event.stop(getContext());
+			}
 			if (event.getSource() instanceof Cluster) {
 				// cast source
 				Cluster pair = (Cluster) event.getSource();
-				// free from inheritance
-				pair.remove();
+				// transfer cluster contents
+				getValue().put(pair.getValue(), pair.getKey());
 			}
 			break;
 		default:
@@ -173,11 +183,11 @@ public class BigBang
 			// commute command
 			if(event.getType() == ServiceEvent.REGISTERED) {
 				// replicate mass
-				getPlasma().putValue(pair.getKey(), pair.getValue());
+				getReplicator().putValue(pair.getKey(), pair.getValue());
 			}
 			else if(event.getType() == ServiceEvent.UNREGISTERING) {
 				// release replication
-				getPlasma().removeByKey(pair.getKey());
+				getReplicator().removeByKey(pair.getKey());
 			}
 		}
 	}
